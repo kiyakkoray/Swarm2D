@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{466195D8-09E4-475F-B45F-730839F477DF}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Swarm2D.Game</RootNamespace>
+    <AssemblyName>Swarm2D.Game</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\Binary\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\Binary\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Components\Character.cs" />
+    <Compile Include="Components\CharacterCamera.cs" />
+    <Compile Include="Components\CharacterController.cs" />
+    <Compile Include="Components\Dungeon.cs" />
+    <Compile Include="Components\NPC.cs" />
+    <Compile Include="Components\ObjectRotater.cs" />
+    <Compile Include="Components\RigidBodySynchronizer.cs" />
+    <Compile Include="Components\Testbed.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SceneExtensions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Swarm2D.Engine.Core\Swarm2D.Engine.Core.csproj">
+      <Project>{00E94D79-DD7A-4DD9-85F8-AD2BFE20C42B}</Project>
+      <Name>Swarm2D.Engine.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Engine.View\Swarm2D.Engine.View.csproj">
+      <Project>{83245878-19B2-4889-B168-64EE10A74448}</Project>
+      <Name>Swarm2D.Engine.View</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Engine.Logic\Swarm2D.Engine.Logic.csproj">
+      <Project>{D4BE5483-B175-42AF-BC61-11F69B7FF33A}</Project>
+      <Name>Swarm2D.Engine.Logic</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Library\Swarm2D.Library.csproj">
+      <Project>{6C71FC43-48A5-49E5-A551-DD2613C6E6AB}</Project>
+      <Name>Swarm2D.Library</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Network.TCPDriver\Swarm2D.Network.TCPDriver.csproj">
+      <Project>{6597A877-2990-448C-B055-B445A9063041}</Project>
+      <Name>Swarm2D.Network.TCPDriver</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
