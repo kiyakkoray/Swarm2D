@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{983382CB-3A10-4C21-97DD-C388555C643A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Swarm2D.Online</RootNamespace>
+    <AssemblyName>Swarm2D.Online</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\Binary\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\Binary\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="FarmServer\FarmServerController.cs" />
+    <Compile Include="GameSchedulerServer\GameScheduler.cs" />
+    <Compile Include="GameSchedulerServer\GameSchedulerServerController.cs" />
+    <Compile Include="GameSchedulerServer\PlayerGameSchedulerData.cs" />
+    <Compile Include="LobbyServer\LobbyServerController.cs" />
+    <Compile Include="LobbyServer\PlayerLobbyData.cs" />
+    <Compile Include="LobbyServer\PlayerPeer.cs" />
+    <Compile Include="MainServer\MainServerController.cs" />
+    <Compile Include="Parameters.cs" />
+    <Compile Include="PlayerAccountServer\PlayerAccountData.cs" />
+    <Compile Include="PlayerAccountServer\PlayerAccountServerController.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Swarm2D.Cluster\Swarm2D.Cluster.csproj">
+      <Project>{980C25BC-E870-440A-95E8-A37CBC812B9D}</Project>
+      <Name>Swarm2D.Cluster</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Engine.Core\Swarm2D.Engine.Core.csproj">
+      <Project>{00E94D79-DD7A-4DD9-85F8-AD2BFE20C42B}</Project>
+      <Name>Swarm2D.Engine.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Engine.Logic\Swarm2D.Engine.Logic.csproj">
+      <Project>{D4BE5483-B175-42AF-BC61-11F69B7FF33A}</Project>
+      <Name>Swarm2D.Engine.Logic</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Library\Swarm2D.Library.csproj">
+      <Project>{6C71FC43-48A5-49E5-A551-DD2613C6E6AB}</Project>
+      <Name>Swarm2D.Library</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Network\Swarm2D.Network.csproj">
+      <Project>{5B906AF9-46F8-4179-AF2C-C93B631D41A8}</Project>
+      <Name>Swarm2D.Network</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Online.GameClient\Swarm2D.Online.GameClient.csproj">
+      <Project>{9819CFFD-CE83-4856-A91E-0EEE307684F6}</Project>
+      <Name>Swarm2D.Online.GameClient</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
