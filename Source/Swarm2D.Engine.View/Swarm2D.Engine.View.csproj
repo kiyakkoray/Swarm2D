@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{83245878-19B2-4889-B168-64EE10A74448}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Swarm2D.Engine.View</RootNamespace>
+    <AssemblyName>Swarm2D.Engine.View</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\Binary\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\Binary\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Components\Camera.cs" />
+    <Compile Include="Components\DebugRenderer.cs" />
+    <Compile Include="Components\Renderer.cs" />
+    <Compile Include="Components\SceneRenderer.cs" />
+    <Compile Include="Components\SpriteRenderer.cs" />
+    <Compile Include="EngineComponents\GameRenderer.cs" />
+    <Compile Include="EngineComponents\GameUI.cs" />
+    <Compile Include="EngineComponents\IOSystem.cs" />
+    <Compile Include="GameInput.cs" />
+    <Compile Include="GameScreen.cs" />
+    <Compile Include="Graphics\Commands\CommandBeginFrame.cs" />
+    <Compile Include="Graphics\Commands\CommandCreateAndLoadTexture.cs" />
+    <Compile Include="Graphics\Commands\CommandCustomLogic.cs" />
+    <Compile Include="Graphics\Commands\CommandDrawArrays.cs" />
+    <Compile Include="Graphics\Commands\CommandDrawBufferedDebugObjects.cs" />
+    <Compile Include="Graphics\Commands\CommandDrawDebugCircle.cs" />
+    <Compile Include="Graphics\Commands\CommandDrawDebugLine.cs" />
+    <Compile Include="Graphics\Commands\CommandDrawDebugPoint.cs" />
+    <Compile Include="Graphics\Commands\CommandDrawDebugPolygon.cs" />
+    <Compile Include="Graphics\Commands\CommandDrawDebugQuad.cs" />
+    <Compile Include="Graphics\Commands\CommandDrawMesh.cs" />
+    <Compile Include="Graphics\Commands\CommandDrawSprite.cs" />
+    <Compile Include="Graphics\Commands\CommandDrawTextureOnScreen.cs" />
+    <Compile Include="Graphics\Commands\CommandExecuteBufferedCommands.cs" />
+    <Compile Include="Graphics\Commands\CommandInitializeGraphicsContext.cs" />
+    <Compile Include="Graphics\Commands\CommandPopScissor.cs" />
+    <Compile Include="Graphics\Commands\CommandPushScissor.cs" />
+    <Compile Include="Graphics\Commands\CommandResetDebugRender.cs" />
+    <Compile Include="Graphics\Commands\CommandResetMatrices.cs" />
+    <Compile Include="Graphics\Commands\CommandSetProjectionMatrix.cs" />
+    <Compile Include="Graphics\Commands\CommandSetViewMatrix.cs" />
+    <Compile Include="Graphics\Commands\CommandSetWorldMatrix.cs" />
+    <Compile Include="Graphics\Commands\CommandSwapBuffers.cs" />
+    <Compile Include="Graphics\DebugRender.cs" />
+    <Compile Include="Graphics\Font.cs" />
+    <Compile Include="Graphics\Graphics.cs" />
+    <Compile Include="Graphics\Graphics2D.cs" />
+    <Compile Include="Graphics\GraphicsCommand.cs" />
+    <Compile Include="Graphics\Mesh.cs" />
+    <Compile Include="Graphics\Sprite.cs" />
+    <Compile Include="Graphics\SpriteData.cs" />
+    <Compile Include="Graphics\TextMesh.cs" />
+    <Compile Include="Graphics\Texture.cs" />
+    <Compile Include="GUI\UIWidget.cs" />
+    <Compile Include="GUI\FastGUI.cs" />
+    <Compile Include="GUI\MouseEventArgs.cs" />
+    <Compile Include="GUI\PositionParameters\AnchorToCenter.cs" />
+    <Compile Include="GUI\PositionParameters\AnchorToSide.cs" />
+    <Compile Include="GUI\PositionParameters\FitTo.cs" />
+    <Compile Include="GUI\PositionParameters\FitToDomain.cs" />
+    <Compile Include="GUI\PositionParameters\SetHeight.cs" />
+    <Compile Include="GUI\PositionParameters\SetWidth.cs" />
+    <Compile Include="GUI\PositionParameters\StayInOwner.cs" />
+    <Compile Include="GUI\UIButton.cs" />
+    <Compile Include="GUI\UIComboBox.cs" />
+    <Compile Include="GUI\UIContextMenu.cs" />
+    <Compile Include="GUI\UIController.cs" />
+    <Compile Include="GUI\UIEditBox.cs" />
+    <Compile Include="GUI\UIFrame.cs" />
+    <Compile Include="GUI\UILabel.cs" />
+    <Compile Include="GUI\UIListBox.cs" />
+    <Compile Include="GUI\UIManager.cs" />
+    <Compile Include="GUI\UIPositionParameter.cs" />
+    <Compile Include="GUI\UIRegion.cs" />
+    <Compile Include="GUI\UIRegionDomain.cs" />
+    <Compile Include="GUI\UIScrollViewer.cs" />
+    <Compile Include="GUI\UISkin.cs" />
+    <Compile Include="GUI\UISpriteBox.cs" />
+    <Compile Include="GUI\UISpriteButton.cs" />
+    <Compile Include="GUI\UITextureBox.cs" />
+    <Compile Include="GUI\UITreeView.cs" />
+    <Compile Include="InputData.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Framework\Framework.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Swarm2D.Engine.Core\Swarm2D.Engine.Core.csproj">
+      <Project>{00E94D79-DD7A-4DD9-85F8-AD2BFE20C42B}</Project>
+      <Name>Swarm2D.Engine.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Engine.Logic\Swarm2D.Engine.Logic.csproj">
+      <Project>{D4BE5483-B175-42AF-BC61-11F69B7FF33A}</Project>
+      <Name>Swarm2D.Engine.Logic</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Library\Swarm2D.Library.csproj">
+      <Project>{6C71FC43-48A5-49E5-A551-DD2613C6E6AB}</Project>
+      <Name>Swarm2D.Library</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
