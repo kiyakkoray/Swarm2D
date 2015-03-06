@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{D4BE5483-B175-42AF-BC61-11F69B7FF33A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Swarm2D.Engine.Logic</RootNamespace>
+    <AssemblyName>Swarm2D.Engine.Logic</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\Binary\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\Binary\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Coroutine\WaitCoroutineTask.cs" />
+    <Compile Include="Game\Physics\BoxShapeFilter.cs" />
+    <Compile Include="Game\Physics\CircleShapeFilter.cs" />
+    <Compile Include="Game\Physics\ResourceShapeFilter.cs" />
+    <Compile Include="Game\Physics\PhysicsWorldGrid.cs" />
+    <Compile Include="Game\Physics\PhysicsWorldGridCell.cs" />
+    <Compile Include="Game\Physics\ShapeFilter.cs" />
+    <Compile Include="Multiplayer\CoroutineHelper.cs" />
+    <Compile Include="Multiplayer\NetworkReference.cs" />
+    <Compile Include="Multiplayer\NetworkView.cs" />
+    <Compile Include="Game\PhysicsWorld.cs" />
+    <Compile Include="Game\PhysicsObject.cs" />
+    <Compile Include="Game\SceneController.cs" />
+    <Compile Include="Game\SceneEntityComponent.cs" />
+    <Compile Include="Game\SceneManager.cs" />
+    <Compile Include="Coroutine\Coroutine.cs" />
+    <Compile Include="Coroutine\CoroutineManager.cs" />
+    <Compile Include="Coroutine\CoroutineTask.cs" />
+    <Compile Include="Coroutine\NetworkEntityMessageTask.cs" />
+    <Compile Include="DataSynchronizer.cs" />
+    <Compile Include="Game\GameSystem.cs" />
+    <Compile Include="EngineComponents\NetworkController.cs" />
+    <Compile Include="Grid2D.cs" />
+    <Compile Include="LineSegment.cs" />
+    <Compile Include="Messages.cs" />
+    <Compile Include="Multiplayer\MultiplayerNode.cs" />
+    <Compile Include="Multiplayer\IMultiplayerNode.cs" />
+    <Compile Include="Multiplayer\PeerComponent.cs" />
+    <Compile Include="Multiplayer\PeerGroup.cs" />
+    <Compile Include="Multiplayer\NetworkMessageHelper.cs" />
+    <Compile Include="Multiplayer\MultiplayerClientSession.cs" />
+    <Compile Include="Multiplayer\MultiplayerServerSession.cs" />
+    <Compile Include="Multiplayer\MultiplayerSession.cs" />
+    <Compile Include="Multiplayer\Peer.cs" />
+    <Compile Include="Multiplayer\ResponseData.cs" />
+    <Compile Include="Game\Physics\Circle.cs" />
+    <Compile Include="Game\Physics\Collision.cs" />
+    <Compile Include="Game\Physics\IntersectionTests.cs" />
+    <Compile Include="Game\Physics\PhysicsMaterial.cs" />
+    <Compile Include="Game\Physics\Polygon.cs" />
+    <Compile Include="Game\Physics\Ray.cs" />
+    <Compile Include="Game\Physics\RaycastHit.cs" />
+    <Compile Include="Multiplayer\RPCMethod.cs" />
+    <Compile Include="Game\Physics\Shape.cs" />
+    <Compile Include="Game\SceneEntity.cs" />
+    <Compile Include="Game\GameLogic.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Game\Scene.cs" />
+    <Compile Include="Multiplayer\ViewID.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Swarm2D.Engine.Core\Swarm2D.Engine.Core.csproj">
+      <Project>{00E94D79-DD7A-4DD9-85F8-AD2BFE20C42B}</Project>
+      <Name>Swarm2D.Engine.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Library\Swarm2D.Library.csproj">
+      <Project>{6C71FC43-48A5-49E5-A551-DD2613C6E6AB}</Project>
+      <Name>Swarm2D.Library</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Network\Swarm2D.Network.csproj">
+      <Project>{5B906AF9-46F8-4179-AF2C-C93B631D41A8}</Project>
+      <Name>Swarm2D.Network</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Network.TCPDriver\Swarm2D.Network.TCPDriver.csproj">
+      <Project>{6597A877-2990-448C-B055-B445A9063041}</Project>
+      <Name>Swarm2D.Network.TCPDriver</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
