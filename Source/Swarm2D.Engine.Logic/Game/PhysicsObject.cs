@@ -104,6 +104,12 @@ namespace Swarm2D.Engine.Logic
 
                     _type = value;
 
+                    _minGridX = int.MinValue;
+                    _minGridY = int.MinValue;
+
+                    _maxGridX = int.MinValue;
+                    _maxGridY = int.MinValue; 
+                    
                     if (!Entity.IsPrefab)
                     {
                         PhysicsWorld.AddPhysicsObject(this);
