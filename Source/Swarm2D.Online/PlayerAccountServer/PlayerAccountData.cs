@@ -35,7 +35,7 @@ using Swarm2D.Online.LobbyServer;
 
 namespace Swarm2D.Online.PlayerAccountServer
 {
-    public class PlayerAccountData : Component
+    public class PlayerAccountData : ClusterObjectLogic
     {
         public enum State
         {
@@ -49,19 +49,15 @@ namespace Swarm2D.Online.PlayerAccountServer
         public State CurrentState { get; private set; }
         public Peer CurrentLobbySession { get; private set; }
 
-        private CoroutineManager _coroutineManager;
-
         protected override void OnAdded()
         {
             base.OnAdded();
-
-            _coroutineManager = Engine.FindComponent<CoroutineManager>();
         }
 
         [EntityMessageHandler(MessageType = typeof(LoginPlayerMessage))]
         private void OnPlayerLoginRequest(Message message)
         {
-            _coroutineManager.StartCoroutine(this, HandlePlayerLoginRequest, message);
+            CoroutineManager.StartCoroutine(this, HandlePlayerLoginRequest, message);
         }
 
         private IEnumerator<CoroutineTask> HandlePlayerLoginRequest(Coroutine coroutine)
@@ -102,60 +98,6 @@ namespace Swarm2D.Online.PlayerAccountServer
             CurrentLobbySession = null;
 
             peerOfLobby.ResponseNetworkEntityMessageEvent(informPlayerDisconnect, new ResponseData());
-        }
-    }
-
-    public class LoginPlayerMessage : ClusterObjectMessage
-    {
-        public LoginPlayerMessage()
-        {
-        }
-
-        protected override void OnSerialize(IDataWriter writer)
-        {
-        }
-
-        protected override void OnDeserialize(IDataReader reader)
-        {
-        }
-    }
-
-    public class LoginPlayerResponseMessage : ResponseData
-    {
-        public bool Successful { get; private set; }
-
-        public LoginPlayerResponseMessage()
-        {
-        }
-
-        public LoginPlayerResponseMessage(bool successful)
-        {
-            Successful = successful;
-        }
-
-        protected override void Serialize(IDataWriter writer)
-        {
-            writer.WriteBool(Successful);
-        }
-
-        protected override void Deserialize(IDataReader reader)
-        {
-            Successful = reader.ReadBool();
-        }
-    }
-
-    public class InformPlayerDisconnect : ClusterObjectMessage
-    {
-        public InformPlayerDisconnect()
-        {
-        }
-
-        protected override void OnSerialize(IDataWriter writer)
-        {
-        }
-
-        protected override void OnDeserialize(IDataReader reader)
-        {
         }
     }
 }

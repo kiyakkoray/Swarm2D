@@ -38,7 +38,7 @@ using Swarm2D.Online.GameClient;
 
 namespace Swarm2D.Online.LobbyServer
 {
-    class PlayerLobbyData : Component
+    class PlayerLobbyData : ClusterObjectProxy
     {
         public enum State
         {
@@ -57,10 +57,7 @@ namespace Swarm2D.Online.LobbyServer
 
         public Peer Peer { get; private set; }
 
-        private CoroutineManager _coroutineManager;
         private LobbyServerController _lobbyServerController;
-
-        private ClusterObject _clusterObject;
 
         private bool _killingConnectionForPlayerDataServerRequest = false;
 
@@ -68,8 +65,6 @@ namespace Swarm2D.Online.LobbyServer
         {
             base.OnAdded();
 
-            _coroutineManager = Engine.FindComponent<CoroutineManager>();
-            _clusterObject = GetComponent<ClusterObject>();
             _lobbyServerController = Engine.RootEntity.GetComponent<LobbyServerController>();
         }
 
@@ -85,7 +80,7 @@ namespace Swarm2D.Online.LobbyServer
             Debug.Log("player connection kill request has arrived!");
 
             var killPlayerConnectionMessage = message as KillPlayerConnectionMessage;
-            _coroutineManager.StartCoroutine(this, HandleKillPlayerConnection, killPlayerConnectionMessage);
+            CoroutineManager.StartCoroutine(this, HandleKillPlayerConnection, killPlayerConnectionMessage);
         }
 
         private IEnumerator<CoroutineTask> HandleKillPlayerConnection(Coroutine coroutine)
@@ -100,7 +95,7 @@ namespace Swarm2D.Online.LobbyServer
 
             while (playerLobbyData.CurrentState != State.NotAvailable)
             {
-                yield return coroutine.AddComponent<CoroutineTask>();
+                yield return coroutine.AddTask<CoroutineTask>();
             }
 
             killPlayerConnectionMessage.Node.ResponseNetworkEntityMessageEvent(killPlayerConnectionMessage, new ResponseData());
@@ -108,20 +103,20 @@ namespace Swarm2D.Online.LobbyServer
 
         internal Coroutine OnPlayerConnect(Peer peer)
         {
-            return _coroutineManager.StartCoroutine(this, HandlePlayerConnection, peer);
+            return CoroutineManager.StartCoroutine(this, HandlePlayerConnection, peer);
         }
 
         private IEnumerator<CoroutineTask> HandlePlayerConnection(Coroutine coroutine)
         {
             Peer peer = coroutine.Parameter as Peer;
-            LockObjectTask lockObjectTask = coroutine.AddComponent<LockObjectTask>();
-            lockObjectTask.Initialize(_clusterObject);
+            LockObjectTask lockObjectTask = coroutine.AddTask<LockObjectTask>();
+            lockObjectTask.Initialize(ClusterObject);
 
             yield return lockObjectTask;
 
             //login request from player data server
-            var loginPlayerTask = coroutine.AddComponent<ClusterObjectMessageTask>();
-            loginPlayerTask.Initialize(_clusterObject, new LoginPlayerMessage());
+            var loginPlayerTask = coroutine.AddTask<ClusterObjectMessageTask>();
+            loginPlayerTask.Initialize(ClusterObject, new LoginPlayerMessage());
 
             yield return loginPlayerTask;
 
@@ -134,15 +129,15 @@ namespace Swarm2D.Online.LobbyServer
             }
 
             //unlocking player account here,
-            UnlockObjectTask unlockObjectTask = coroutine.AddComponent<UnlockObjectTask>();
-            unlockObjectTask.Initialize(_clusterObject);
+            UnlockObjectTask unlockObjectTask = coroutine.AddTask<UnlockObjectTask>();
+            unlockObjectTask.Initialize(ClusterObject);
 
             yield return unlockObjectTask;
         }
 
         internal void OnPlayerDisconnect()
         {
-            _coroutineManager.StartCoroutine(this, HandlePlayerDisconnect);
+            CoroutineManager.StartCoroutine(this, HandlePlayerDisconnect);
         }
 
         private IEnumerator<CoroutineTask> HandlePlayerDisconnect(Coroutine coroutine)
@@ -170,8 +165,8 @@ namespace Swarm2D.Online.LobbyServer
 
             if (!_killingConnectionForPlayerDataServerRequest)
             {
-                var informPlayerDisconnectTask = coroutine.AddComponent<ClusterObjectMessageTask>();
-                informPlayerDisconnectTask.Initialize(_clusterObject, new InformPlayerDisconnect());
+                var informPlayerDisconnectTask = coroutine.AddTask<ClusterObjectMessageTask>();
+                informPlayerDisconnectTask.Initialize(ClusterObject, new InformPlayerDisconnect());
 
                 yield return informPlayerDisconnectTask;
             }
@@ -183,15 +178,15 @@ namespace Swarm2D.Online.LobbyServer
         public void OnFindGame()
         {
             Debug.Log("Player" + UserName + " wants to join a game");
-            _coroutineManager.StartCoroutine(this, HandlePlayerFindGame);
+            CoroutineManager.StartCoroutine(this, HandlePlayerFindGame);
         }
 
         private IEnumerator<CoroutineTask> HandlePlayerFindGame(Coroutine coroutine)
         {
             //locking player account here,
             {
-                LockObjectTask lockObjectTask = coroutine.AddComponent<LockObjectTask>();
-                lockObjectTask.Initialize(_clusterObject);
+                LockObjectTask lockObjectTask = coroutine.AddTask<LockObjectTask>();
+                lockObjectTask.Initialize(ClusterObject);
 
                 yield return lockObjectTask;
             }
@@ -200,7 +195,7 @@ namespace Swarm2D.Online.LobbyServer
             {
                 CurrentState = State.FindingGame;
 
-                var requestFindGameTask = coroutine.AddComponent<ClusterObjectMessageTask>();
+                var requestFindGameTask = coroutine.AddTask<ClusterObjectMessageTask>();
                 requestFindGameTask.Initialize(_gameScheduler, new RequestFindGame(UserName));
 
                 yield return requestFindGameTask;
@@ -208,8 +203,8 @@ namespace Swarm2D.Online.LobbyServer
 
             //unlocking player account here,
             {
-                UnlockObjectTask unlockObjectTask = coroutine.AddComponent<UnlockObjectTask>();
-                unlockObjectTask.Initialize(_clusterObject);
+                UnlockObjectTask unlockObjectTask = coroutine.AddTask<UnlockObjectTask>();
+                unlockObjectTask.Initialize(ClusterObject);
 
                 yield return unlockObjectTask;
             }
@@ -218,22 +213,22 @@ namespace Swarm2D.Online.LobbyServer
         public void OnCancelFindGame()
         {
             Debug.Log("Player" + UserName + " wants to cancel joining a game");
-            _coroutineManager.StartCoroutine(this, HandlePlayerCancelFindGame);
+            CoroutineManager.StartCoroutine(this, HandlePlayerCancelFindGame);
         }
 
         private IEnumerator<CoroutineTask> HandlePlayerCancelFindGame(Coroutine coroutine)
         {
             //locking player account here,
             {
-                LockObjectTask lockObjectTask = coroutine.AddComponent<LockObjectTask>();
-                lockObjectTask.Initialize(_clusterObject);
+                LockObjectTask lockObjectTask = coroutine.AddTask<LockObjectTask>();
+                lockObjectTask.Initialize(ClusterObject);
 
                 yield return lockObjectTask;
             }
 
             if (CurrentState == State.FindingGame)
             {
-                var requestFindGameTask = coroutine.AddComponent<ClusterObjectMessageTask>();
+                var requestFindGameTask = coroutine.AddTask<ClusterObjectMessageTask>();
                 requestFindGameTask.Initialize(_gameScheduler, new CancelRequestFindGame(UserName));
 
                 yield return requestFindGameTask;
@@ -243,8 +238,8 @@ namespace Swarm2D.Online.LobbyServer
 
             //unlocking player account here,
             {
-                UnlockObjectTask unlockObjectTask = coroutine.AddComponent<UnlockObjectTask>();
-                unlockObjectTask.Initialize(_clusterObject);
+                UnlockObjectTask unlockObjectTask = coroutine.AddTask<UnlockObjectTask>();
+                unlockObjectTask.Initialize(ClusterObject);
 
                 yield return unlockObjectTask;
             }
@@ -269,22 +264,22 @@ namespace Swarm2D.Online.LobbyServer
         public void OnQuitGame()
         {
             Debug.Log("Player" + UserName + " wants to quit game");
-            _coroutineManager.StartCoroutine(this, HandlePlayerQuitGame);
+            CoroutineManager.StartCoroutine(this, HandlePlayerQuitGame);
         }
 
         private IEnumerator<CoroutineTask> HandlePlayerQuitGame(Coroutine coroutine)
         {
             //locking player account here,
             {
-                LockObjectTask lockObjectTask = coroutine.AddComponent<LockObjectTask>();
-                lockObjectTask.Initialize(_clusterObject);
+                LockObjectTask lockObjectTask = coroutine.AddTask<LockObjectTask>();
+                lockObjectTask.Initialize(ClusterObject);
 
                 yield return lockObjectTask;
             }
 
             if (CurrentState == State.InGame)
             {
-                var requestQuitGameTask = coroutine.AddComponent<ClusterObjectMessageTask>();
+                var requestQuitGameTask = coroutine.AddTask<ClusterObjectMessageTask>();
                 requestQuitGameTask.Initialize(_gameScheduler, new QuitGame(UserName));
 
                 yield return requestQuitGameTask;
@@ -294,41 +289,11 @@ namespace Swarm2D.Online.LobbyServer
 
             //unlocking player account here,
             {
-                UnlockObjectTask unlockObjectTask = coroutine.AddComponent<UnlockObjectTask>();
-                unlockObjectTask.Initialize(_clusterObject);
+                UnlockObjectTask unlockObjectTask = coroutine.AddTask<UnlockObjectTask>();
+                unlockObjectTask.Initialize(ClusterObject);
 
                 yield return unlockObjectTask;
             }
-        }
-    }
-
-    class KillPlayerConnectionMessage : NetworkEntityMessage
-    {
-        public KillPlayerConnectionMessage()
-        {
-        }
-
-        protected override void OnSerialize(IDataWriter writer)
-        {
-        }
-
-        protected override void OnDeserialize(IDataReader reader)
-        {
-        }
-    }
-
-    class InformGameFoundMessage : NetworkEntityMessage
-    {
-        public InformGameFoundMessage()
-        {
-        }
-
-        protected override void OnSerialize(IDataWriter writer)
-        {
-        }
-
-        protected override void OnDeserialize(IDataReader reader)
-        {
         }
     }
 }

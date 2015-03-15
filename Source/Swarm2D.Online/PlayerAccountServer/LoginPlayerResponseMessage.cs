@@ -23,45 +23,32 @@ SOFTWARE.
 
 ******************************************************************************/
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using Swarm2D.Cluster;
-using Swarm2D.Engine.Core;
 using Swarm2D.Engine.Logic;
 using Swarm2D.Library;
-using Debug = Swarm2D.Library.Debug;
 
-namespace Swarm2D.Online.MainServer
+namespace Swarm2D.Online.PlayerAccountServer
 {
-    public class MainServerController : ClusterServerController
+    public class LoginPlayerResponseMessage : ResponseData
     {
-        private bool _initialized = false;
+        public bool Successful { get; private set; }
 
-        [DomainMessageHandler(MessageType = typeof(UpdateMessage))]
-        private void OnUpdate(Message message)
+        public LoginPlayerResponseMessage()
         {
-            if (!_initialized)
-            {
-                _initialized = true;
-                ClusterNode.HostCluster("127.0.0.1", Parameters.MainServerPortForCluster);
-            }
         }
 
-        [GlobalMessageHandler(MessageType = typeof(ClientConnectMessage))]
-        private void OnClientConnect(Message message)
+        public LoginPlayerResponseMessage(bool successful)
         {
-            Debug.Log("a client conencted to main server");
-            ClientConnectMessage clientConnectMessage = message as ClientConnectMessage;
+            Successful = successful;
         }
 
-        [GlobalMessageHandler(MessageType = typeof(ClientDisconnectMessage))]
-        private void OnClientDisconnect(Message message)
+        protected override void Serialize(IDataWriter writer)
         {
+            writer.WriteBool(Successful);
+        }
+
+        protected override void Deserialize(IDataReader reader)
+        {
+            Successful = reader.ReadBool();
         }
     }
-
 }

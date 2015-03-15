@@ -39,7 +39,7 @@ using Debug = Swarm2D.Library.Debug;
 
 namespace Swarm2D.Online.LobbyServer
 {
-    public class LobbyServerController : EngineComponent
+    public class LobbyServerController : ClusterServerController
     {
         enum State
         {
@@ -51,34 +51,10 @@ namespace Swarm2D.Online.LobbyServer
 
         private State _state = State.Idle;
 
-        private NetworkController _networkController;
-        private NetworkView _networkView;
-
         private MultiplayerServerSession _gameClientSession;
-
-        private CoroutineManager _coroutineManager;
 
         private ClusterObject _playerAccountManagerObject;
         private ClusterObject _gameSchedulerObject;
-
-        private ClusterNode _clusterNode;
-
-        protected override void OnInitialize()
-        {
-            base.OnInitialize();
-
-            _networkController = GetComponent<NetworkController>();
-            _networkView = GetComponent<NetworkView>();
-
-            _clusterNode = Engine.RootEntity.GetComponent<ClusterNode>();
-        }
-
-        protected override void OnStart()
-        {
-            base.OnStart();
-
-            _coroutineManager = Engine.FindComponent<CoroutineManager>();
-        }
 
         [DomainMessageHandler(MessageType = typeof(UpdateMessage))]
         private void OnUpdate(Message message)
@@ -88,7 +64,7 @@ namespace Swarm2D.Online.LobbyServer
                 case State.Idle:
                     {
                         _state = State.ConnectingToCluster;
-                        _clusterNode.ConnectToCluster("127.0.0.1", Parameters.MainServerPortForCluster, "127.0.0.1", Parameters.LobbyServerPortForCluster);
+                        ClusterNode.ConnectToCluster("127.0.0.1", Parameters.MainServerPortForCluster, "127.0.0.1", Parameters.LobbyServerPortForCluster);
                     }
                     break;
                 case State.ConnectedToCluster:
@@ -96,8 +72,8 @@ namespace Swarm2D.Online.LobbyServer
                         _state = State.Ready;
 
                         Debug.Log("Creating to player lobby session...");
-                        _gameClientSession = _networkController.CreateServerSession(Parameters.LobbyServerPortForClient);
-                        _networkController.DefaultSession = _gameClientSession;
+                        _gameClientSession = NetworkController.CreateServerSession(Parameters.LobbyServerPortForClient);
+                        NetworkController.DefaultSession = _gameClientSession;
                     }
                     break;
                 case State.Ready:
@@ -111,22 +87,22 @@ namespace Swarm2D.Online.LobbyServer
         [GlobalMessageHandler(MessageType = typeof(ClusterInitializedMessage))]
         private void OnClusterConnectionInitialized(Message message)
         {
-            _coroutineManager.StartCoroutine(this, HandleClusterNode);
+            CoroutineManager.StartCoroutine(this, HandleClusterNode);
         }
 
         private IEnumerator<CoroutineTask> HandleClusterNode(Coroutine coroutine)
         {
             {
-                var getPlayerAccountManagerTask = coroutine.AddComponent<GetChildTask>();
-                getPlayerAccountManagerTask.Initialize(_clusterNode.RootClusterObject, "PlayerAccountManager");
+                var getPlayerAccountManagerTask = coroutine.AddTask<GetChildTask>();
+                getPlayerAccountManagerTask.Initialize(ClusterNode.RootClusterObject, "PlayerAccountManager");
                 yield return getPlayerAccountManagerTask;
 
                 _playerAccountManagerObject = getPlayerAccountManagerTask.Child;
             }
 
             {
-                var getGameSchedulerTask = coroutine.AddComponent<GetChildTask>();
-                getGameSchedulerTask.Initialize(_clusterNode.RootClusterObject, "GameScheduler");
+                var getGameSchedulerTask = coroutine.AddTask<GetChildTask>();
+                getGameSchedulerTask.Initialize(ClusterNode.RootClusterObject, "GameScheduler");
                 yield return getGameSchedulerTask;
 
                 _gameSchedulerObject = getGameSchedulerTask.Child;
@@ -146,7 +122,7 @@ namespace Swarm2D.Online.LobbyServer
             Debug.Log("a client conencted to lobby server");
             PeerAuthorizedMessage peerAuthorizedMessage = message as PeerAuthorizedMessage;
 
-            _coroutineManager.StartCoroutine(this, HandlePlayerConnection, peerAuthorizedMessage.Peer);
+            CoroutineManager.StartCoroutine(this, HandlePlayerConnection, peerAuthorizedMessage.Peer);
         }
 
         private IEnumerator<CoroutineTask> HandlePlayerConnection(Coroutine coroutine)
@@ -154,7 +130,7 @@ namespace Swarm2D.Online.LobbyServer
             Peer peer = coroutine.Parameter as Peer;
 
             NetworkEntityMessageTask requestInformationMessageTask =
-                coroutine.CreateNetworkEntityMessageTask(new GameClient.Messages.FromLobbyServer.ToGameClient.RequestInformationMessage(), peer, GetComponent<NetworkView>());
+                coroutine.CreateNetworkEntityMessageTask(new GameClient.Messages.FromLobbyServer.ToGameClient.RequestInformationMessage(), peer, NetworkView);
 
             yield return requestInformationMessageTask;
 
@@ -163,7 +139,7 @@ namespace Swarm2D.Online.LobbyServer
             string playerName = playerInformationResponse.Name;
 
             {
-                var getPlayerAccountTask = coroutine.AddComponent<GetChildTask>();
+                var getPlayerAccountTask = coroutine.AddTask<GetChildTask>();
                 getPlayerAccountTask.Initialize(_playerAccountManagerObject, playerName);
                 yield return getPlayerAccountTask;
 
@@ -184,7 +160,7 @@ namespace Swarm2D.Online.LobbyServer
 
                     Coroutine playerConnectionCoroutine = playerLobbyData.OnPlayerConnect(peer);
 
-                    WaitCoroutineTask waitCoroutineTask = coroutine.AddComponent<WaitCoroutineTask>();
+                    WaitCoroutineTask waitCoroutineTask = coroutine.AddTask<WaitCoroutineTask>();
                     waitCoroutineTask.Initialize(playerConnectionCoroutine);
 
                     yield return waitCoroutineTask;

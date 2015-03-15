@@ -29,7 +29,6 @@ using System.Linq;
 using System.Text;
 using Swarm2D.Engine.Core;
 using Swarm2D.Engine.Logic;
-using Swarm2D.Library;
 
 namespace Swarm2D.Cluster
 {
@@ -291,101 +290,5 @@ namespace Swarm2D.Cluster
                 return _clusterObjectManager.RootClusterObject;
             }
         }
-    }
-
-    class RequestClusterJoinMessage : ClientEntityMessage
-    {
-        public string Address { get; private set; }
-        public int Port { get; private set; }
-
-        public RequestClusterJoinMessage()
-        {
-
-        }
-
-        public RequestClusterJoinMessage(string address, int port)
-        {
-            Address = address;
-            Port = port;
-        }
-
-        protected override void OnSerialize(IDataWriter writer)
-        {
-            writer.WriteUnicodeString(Address);
-            writer.WriteInt32(Port);
-        }
-
-        protected override void OnDeserialize(IDataReader reader)
-        {
-            Address = reader.ReadUnicodeString();
-            Port = reader.ReadInt32();
-        }
-    }
-
-    class ClusterJoinResponse : ResponseData
-    {
-        public NetworkID ClusterObjectManagerId { get; private set; }
-        public NetworkID RootClusterObjectNetworkId { get; private set; }
-        public ClusterNodeInformation[] ClusterNodeInformations { get; private set; }
-
-        public ClusterJoinResponse()
-        {
-
-        }
-
-        public ClusterJoinResponse(NetworkID clusterObjectManagerId, NetworkID rootClusterObjectNetworkId, ClusterNodeInformation[] clusterNodeInformations)
-        {
-            ClusterObjectManagerId = clusterObjectManagerId;
-            RootClusterObjectNetworkId = rootClusterObjectNetworkId;
-            ClusterNodeInformations = clusterNodeInformations;
-        }
-
-        protected override void Serialize(IDataWriter writer)
-        {
-            writer.WriteNetworkID(ClusterObjectManagerId);
-            writer.WriteNetworkID(RootClusterObjectNetworkId);
-
-            writer.WriteInt32(ClusterNodeInformations.Length);
-
-            foreach (var clusterNodeInformation in ClusterNodeInformations)
-            {
-                writer.WriteUnicodeString(clusterNodeInformation.Address);
-                writer.WriteInt32(clusterNodeInformation.Port);
-                writer.WriteNetworkID(clusterNodeInformation.Id);
-            }
-        }
-
-        protected override void Deserialize(IDataReader reader)
-        {
-            ClusterObjectManagerId = reader.ReadNetworkID();
-            RootClusterObjectNetworkId = reader.ReadNetworkID();
-
-            int length = reader.ReadInt32();
-
-            ClusterNodeInformations = new ClusterNodeInformation[length];
-
-            for (int i = 0; i < length; i++)
-            {
-                var clusterNodeInformation = new ClusterNodeInformation();
-
-                clusterNodeInformation.Address = reader.ReadUnicodeString();
-                clusterNodeInformation.Port = reader.ReadInt32();
-                clusterNodeInformation.Id = reader.ReadNetworkID();
-
-                ClusterNodeInformations[i] = clusterNodeInformation;
-            }
-        }
-    }
-
-    struct ClusterNodeInformation
-    {
-        public string Address;
-        public int Port;
-        public NetworkID Id;
-    }
-
-    public class ClusterInitializedMessage : GlobalMessage
-    {
-
     }
 }

@@ -38,11 +38,8 @@ using Debug = Swarm2D.Library.Debug;
 
 namespace Swarm2D.Online.GameSchedulerServer
 {
-    public class GameSchedulerServerController : EngineComponent
+    public class GameSchedulerServerController : ClusterServerController
     {
-        private NetworkController _networkController;
-        private NetworkView _networkView;
-
         enum State
         {
             Idle,
@@ -52,31 +49,7 @@ namespace Swarm2D.Online.GameSchedulerServer
 
         private State _state = State.Idle;
 
-        private CoroutineManager _coroutineManager;
-
-        private ClusterNode _clusterNode;
         private GameScheduler _gameScheduler;
-
-        private Stopwatch _timer;
-        private long _lastScheduleTime = 0;
-
-        protected override void OnInitialize()
-        {
-            base.OnInitialize();
-
-            _networkController = GetComponent<NetworkController>();
-            _networkView = GetComponent<NetworkView>();
-
-            _timer = new Stopwatch();
-        }
-
-        protected override void OnStart()
-        {
-            base.OnStart();
-
-            _clusterNode = Entity.GetComponent<ClusterNode>();
-            _coroutineManager = Engine.FindComponent<CoroutineManager>();
-        }
 
         [DomainMessageHandler(MessageType = typeof(UpdateMessage))]
         private void OnUpdate(Message message)
@@ -87,12 +60,7 @@ namespace Swarm2D.Online.GameSchedulerServer
             }
             else if (_state == State.Ready)
             {
-                if (_timer.ElapsedMilliseconds - _lastScheduleTime > 1000)
-                {
-                    _gameScheduler.ScheduleGames();
-
-                    _lastScheduleTime = _timer.ElapsedMilliseconds;
-                }
+                _gameScheduler.Update();
             }
         }
 
@@ -100,29 +68,24 @@ namespace Swarm2D.Online.GameSchedulerServer
         {
             Debug.Log("Connecting to cluster");
             _state = State.ConnectingToCluster;
-            _clusterNode.ConnectToCluster("127.0.0.1", Parameters.MainServerPortForCluster, "127.0.0.1", Parameters.GameSchedulerServerPortForCluster);
+            ClusterNode.ConnectToCluster("127.0.0.1", Parameters.MainServerPortForCluster, "127.0.0.1", Parameters.GameSchedulerServerPortForCluster);
         }
 
         [GlobalMessageHandler(MessageType = typeof(ClusterInitializedMessage))]
         private void OnClusterConnectionInitialized(Message message)
         {
-            _coroutineManager.StartCoroutine(this, HandleClusterNode);
+            CoroutineManager.StartCoroutine(this, HandleClusterNode);
         }
 
         private IEnumerator<CoroutineTask> HandleClusterNode(Coroutine coroutine)
         {
-            var createGameSchedulerTask = coroutine.AddComponent<CreateChildObjectTask>();
-            createGameSchedulerTask.Initialize(_clusterNode.RootClusterObject, "GameScheduler");
+            var createGameSchedulerTask = coroutine.AddTask<CreateChildObjectTask>();
+            createGameSchedulerTask.Initialize(ClusterNode.RootClusterObject, "GameScheduler");
             yield return createGameSchedulerTask;
 
             var gameSchedulerObject = createGameSchedulerTask.CreatedChild;
             _gameScheduler = gameSchedulerObject.AddComponent<GameScheduler>();
 
-            var createGameServerContainerTask = coroutine.AddComponent<CreateChildObjectTask>();
-            createGameServerContainerTask.Initialize(gameSchedulerObject, "GameServers");
-            yield return createGameServerContainerTask;
-
-            _timer.Start();
             _state = State.Ready;
         }
     }

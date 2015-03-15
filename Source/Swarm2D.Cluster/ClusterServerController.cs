@@ -24,44 +24,38 @@ SOFTWARE.
 ******************************************************************************/
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using Swarm2D.Cluster;
 using Swarm2D.Engine.Core;
 using Swarm2D.Engine.Logic;
-using Swarm2D.Library;
-using Debug = Swarm2D.Library.Debug;
 
-namespace Swarm2D.Online.MainServer
+namespace Swarm2D.Cluster
 {
-    public class MainServerController : ClusterServerController
+    public abstract class ClusterServerController : EngineComponent
     {
-        private bool _initialized = false;
+        public ClusterNode ClusterNode { get; private set; }
 
-        [DomainMessageHandler(MessageType = typeof(UpdateMessage))]
-        private void OnUpdate(Message message)
+        public NetworkController NetworkController { get; private set; }
+
+        public CoroutineManager CoroutineManager { get; private set; }
+
+        public NetworkView NetworkView { get; private set; }
+
+        protected override void OnInitialize()
         {
-            if (!_initialized)
-            {
-                _initialized = true;
-                ClusterNode.HostCluster("127.0.0.1", Parameters.MainServerPortForCluster);
-            }
+            base.OnInitialize();
+
+            ClusterNode = GetComponent<ClusterNode>();
+            NetworkController = GetComponent<NetworkController>();
+            NetworkView = GetComponent<NetworkView>();
         }
 
-        [GlobalMessageHandler(MessageType = typeof(ClientConnectMessage))]
-        private void OnClientConnect(Message message)
+        protected override void OnStart()
         {
-            Debug.Log("a client conencted to main server");
-            ClientConnectMessage clientConnectMessage = message as ClientConnectMessage;
-        }
+            base.OnStart();
 
-        [GlobalMessageHandler(MessageType = typeof(ClientDisconnectMessage))]
-        private void OnClientDisconnect(Message message)
-        {
+            CoroutineManager = Engine.FindComponent<CoroutineManager>();
         }
     }
-
 }

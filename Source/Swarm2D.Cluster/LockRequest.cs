@@ -23,45 +23,19 @@ SOFTWARE.
 
 ******************************************************************************/
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using Swarm2D.Cluster;
-using Swarm2D.Engine.Core;
 using Swarm2D.Engine.Logic;
-using Swarm2D.Library;
-using Debug = Swarm2D.Library.Debug;
 
-namespace Swarm2D.Online.MainServer
+namespace Swarm2D.Cluster
 {
-    public class MainServerController : ClusterServerController
+    class LockRequest
     {
-        private bool _initialized = false;
+        internal IMultiplayerNode Requester { get; private set; }
+        internal LockRequestMessage RequestMessage { get; private set; }
 
-        [DomainMessageHandler(MessageType = typeof(UpdateMessage))]
-        private void OnUpdate(Message message)
+        internal LockRequest(LockRequestMessage requestMessage)
         {
-            if (!_initialized)
-            {
-                _initialized = true;
-                ClusterNode.HostCluster("127.0.0.1", Parameters.MainServerPortForCluster);
-            }
-        }
-
-        [GlobalMessageHandler(MessageType = typeof(ClientConnectMessage))]
-        private void OnClientConnect(Message message)
-        {
-            Debug.Log("a client conencted to main server");
-            ClientConnectMessage clientConnectMessage = message as ClientConnectMessage;
-        }
-
-        [GlobalMessageHandler(MessageType = typeof(ClientDisconnectMessage))]
-        private void OnClientDisconnect(Message message)
-        {
+            RequestMessage = requestMessage;
+            Requester = requestMessage.Node;
         }
     }
-
 }

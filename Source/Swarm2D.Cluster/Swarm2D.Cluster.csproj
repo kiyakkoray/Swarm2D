@@ -41,18 +41,33 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClusterObjectComponent.cs" />
+    <Compile Include="ClusterObjectProxy.cs" />
+    <Compile Include="ClusterObjectLogic.cs" />
+    <Compile Include="Messages\ClusterInitializedMessage.cs" />
+    <Compile Include="Messages\ClusterJoinResponse.cs" />
     <Compile Include="ClusterNode.cs" />
+    <Compile Include="ClusterNodeInformation.cs" />
     <Compile Include="ClusterObject.cs" />
     <Compile Include="ClusterObjectManager.cs" />
     <Compile Include="ClusterObjectMessage.cs" />
     <Compile Include="ClusterPeer.cs" />
+    <Compile Include="Messages\CreateChildMessage.cs" />
+    <Compile Include="Messages\CreateChildResponseMessage.cs" />
+    <Compile Include="Messages\GetChildMessage.cs" />
+    <Compile Include="Messages\GetChildResponseMessage.cs" />
+    <Compile Include="LockRequest.cs" />
+    <Compile Include="Messages\LockRequestMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Messages\RequestClusterJoinMessage.cs" />
+    <Compile Include="ClusterServerController.cs" />
     <Compile Include="Tasks\ClusterProxyMessageTask.cs" />
     <Compile Include="Tasks\ClusterObjectMessageTask.cs" />
     <Compile Include="Tasks\CreateChildObjectTask.cs" />
     <Compile Include="Tasks\GetChildTask.cs" />
     <Compile Include="Tasks\LockObjectTask.cs" />
     <Compile Include="Tasks\UnlockObjectTask.cs" />
+    <Compile Include="Messages\UnlockRequestMessage.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Swarm2D.Engine.Core\Swarm2D.Engine.Core.csproj">

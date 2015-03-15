@@ -25,42 +25,50 @@ SOFTWARE.
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Swarm2D.Cluster;
 using Swarm2D.Cluster.Tasks;
 using Swarm2D.Engine.Core;
 using Swarm2D.Engine.Logic;
-using Swarm2D.Library;
+using Debug = Swarm2D.Library.Debug;
 
 namespace Swarm2D.Online.GameSchedulerServer
 {
-    public class GameScheduler : Component
+    public class GameScheduler : ClusterObjectLogic
     {
-        private CoroutineManager _coroutineManager;
-
-        private ClusterNode _clusterNode;
-
         private ClusterObject _playerAccountManager;
-        private ClusterObject _rootClusterObject;
 
         private List<PlayerGameSchedulerData> _awaitingPlayers;
 
-        private NetworkController _networkController;
+        private Stopwatch _timer;
+        private long _lastScheduleTime = 0;
+
+        private bool _initialized;
 
         protected override void OnAdded()
         {
             base.OnAdded();
 
-            _coroutineManager = Engine.FindComponent<CoroutineManager>();
-            _networkController = Engine.RootEntity.GetComponent<NetworkController>();
-            _clusterNode = Engine.RootEntity.GetComponent<ClusterNode>();
-            _rootClusterObject = _clusterNode.RootClusterObject;
-
             _awaitingPlayers = new List<PlayerGameSchedulerData>();
+
+            _timer = new Stopwatch();
+            CoroutineManager.StartCoroutine(this, InitializeGameScheduler);
         }
 
-        public void ScheduleGames()
+        private IEnumerator<CoroutineTask> InitializeGameScheduler(Coroutine coroutine)
+        {
+            var createGameServerContainerTask = coroutine.AddTask<CreateChildObjectTask>();
+            createGameServerContainerTask.Initialize(ClusterObject, "GameServers");
+            yield return createGameServerContainerTask;
+
+            _timer.Start();
+
+            _initialized = true;
+        }
+
+        private void ScheduleGames()
         {
             if (_awaitingPlayers.Count > 0)
             {
@@ -73,12 +81,27 @@ namespace Swarm2D.Online.GameSchedulerServer
             }
         }
 
+        //[DomainMessageHandler(MessageType = typeof (UpdateMessage))]
+        //private void OnUpdate(Message message)
+        public void Update()
+        {
+            if (_initialized)
+            {
+                if (_timer.ElapsedMilliseconds - _lastScheduleTime > 1000)
+                {
+                    ScheduleGames();
+
+                    _lastScheduleTime = _timer.ElapsedMilliseconds;
+                }
+            }
+        }
+
         [EntityMessageHandler(MessageType = typeof(RequestFindGame))]
         private void OnRequestFindGame(Message message)
         {
             var requestFindGameMessage = message as RequestFindGame;
 
-            _coroutineManager.StartCoroutine(this, HandleRequestFindGame, requestFindGameMessage);
+            CoroutineManager.StartCoroutine(this, HandleRequestFindGame, requestFindGameMessage);
         }
 
         private IEnumerator<CoroutineTask> HandleRequestFindGame(Coroutine coroutine)
@@ -91,14 +114,14 @@ namespace Swarm2D.Online.GameSchedulerServer
 
             if (_playerAccountManager == null)
             {
-                var getPlayerAccountManagerTask = coroutine.AddComponent<GetChildTask>();
-                getPlayerAccountManagerTask.Initialize(_rootClusterObject, "PlayerAccountManager");
+                var getPlayerAccountManagerTask = coroutine.AddTask<GetChildTask>();
+                getPlayerAccountManagerTask.Initialize(RootClusterObject, "PlayerAccountManager");
                 yield return getPlayerAccountManagerTask;
 
                 _playerAccountManager = getPlayerAccountManagerTask.Child;
             }
 
-            var getPlayerAccountTask = coroutine.AddComponent<GetChildTask>();
+            var getPlayerAccountTask = coroutine.AddTask<GetChildTask>();
             getPlayerAccountTask.Initialize(_playerAccountManager, playerName);
             yield return getPlayerAccountTask;
 
@@ -110,7 +133,7 @@ namespace Swarm2D.Online.GameSchedulerServer
                 playerGameSchedulerData = playerAccount.AddComponent<PlayerGameSchedulerData>();
             }
 
-            ClusterPeer lobbyClusterPeer = _clusterNode.GetClusterPeer(peerOfLobby);
+            ClusterPeer lobbyClusterPeer = ClusterNode.GetClusterPeer(peerOfLobby);
 
             playerGameSchedulerData.Initialize(lobbyClusterPeer, playerName);
             playerGameSchedulerData.OnRequestFindGame();
@@ -125,7 +148,7 @@ namespace Swarm2D.Online.GameSchedulerServer
         {
             var cancelRequestFindGame = message as CancelRequestFindGame;
 
-            _coroutineManager.StartCoroutine(this, HandleCancelRequestFindGame, cancelRequestFindGame);
+            CoroutineManager.StartCoroutine(this, HandleCancelRequestFindGame, cancelRequestFindGame);
         }
 
         private IEnumerator<CoroutineTask> HandleCancelRequestFindGame(Coroutine coroutine)
@@ -138,21 +161,21 @@ namespace Swarm2D.Online.GameSchedulerServer
 
             if (_playerAccountManager == null)
             {
-                var getPlayerAccountManagerTask = coroutine.AddComponent<GetChildTask>();
-                getPlayerAccountManagerTask.Initialize(_rootClusterObject, "PlayerAccountManager");
+                var getPlayerAccountManagerTask = coroutine.AddTask<GetChildTask>();
+                getPlayerAccountManagerTask.Initialize(RootClusterObject, "PlayerAccountManager");
                 yield return getPlayerAccountManagerTask;
 
                 _playerAccountManager = getPlayerAccountManagerTask.Child;
             }
 
-            var getPlayerAccountTask = coroutine.AddComponent<GetChildTask>();
+            var getPlayerAccountTask = coroutine.AddTask<GetChildTask>();
             getPlayerAccountTask.Initialize(_playerAccountManager, playerName);
             yield return getPlayerAccountTask;
 
             var playerAccount = getPlayerAccountTask.Child;
             var playerGameSchedulerData = playerAccount.GetComponent<PlayerGameSchedulerData>();
 
-            ClusterPeer lobbyClusterPeer = _clusterNode.GetClusterPeer(peerOfLobby);
+            ClusterPeer lobbyClusterPeer = ClusterNode.GetClusterPeer(peerOfLobby);
             playerGameSchedulerData.Initialize(lobbyClusterPeer, playerName);
 
             playerGameSchedulerData.OnCancelRequestFindGame();
@@ -165,7 +188,7 @@ namespace Swarm2D.Online.GameSchedulerServer
         {
             var quitGame = message as QuitGame;
 
-            _coroutineManager.StartCoroutine(this, HandleQuitGame, quitGame);
+            CoroutineManager.StartCoroutine(this, HandleQuitGame, quitGame);
         }
 
         private IEnumerator<CoroutineTask> HandleQuitGame(Coroutine coroutine)
@@ -176,91 +199,19 @@ namespace Swarm2D.Online.GameSchedulerServer
             string playerName = quitGameMessage.UserName;
             Debug.Log("Player " + playerName + " requested to quit game");
 
-            var getPlayerAccountTask = coroutine.AddComponent<GetChildTask>();
+            var getPlayerAccountTask = coroutine.AddTask<GetChildTask>();
             getPlayerAccountTask.Initialize(_playerAccountManager, playerName);
             yield return getPlayerAccountTask;
 
             var playerAccount = getPlayerAccountTask.Child;
             var playerGameSchedulerData = playerAccount.GetComponent<PlayerGameSchedulerData>();
 
-            ClusterPeer lobbyClusterPeer = _clusterNode.GetClusterPeer(peerOfLobby);
+            ClusterPeer lobbyClusterPeer = ClusterNode.GetClusterPeer(peerOfLobby);
             playerGameSchedulerData.Initialize(lobbyClusterPeer, playerName);
 
             playerGameSchedulerData.OnQuitGame();
 
             peerOfLobby.ResponseNetworkEntityMessageEvent(quitGameMessage, new ResponseData());
-        }
-    }
-
-    public class RequestFindGame : ClusterObjectMessage
-    {
-        public string UserName { get; private set; }
-
-        public RequestFindGame()
-        {
-        }
-
-        public RequestFindGame(string userName)
-        {
-            UserName = userName;
-        }
-
-        protected override void OnSerialize(IDataWriter writer)
-        {
-            writer.WriteUnicodeString(UserName);
-        }
-
-        protected override void OnDeserialize(IDataReader reader)
-        {
-            UserName = reader.ReadUnicodeString();
-        }
-    }
-
-    public class CancelRequestFindGame : ClusterObjectMessage
-    {
-        public string UserName { get; private set; }
-
-        public CancelRequestFindGame()
-        {
-        }
-
-        public CancelRequestFindGame(string userName)
-        {
-            UserName = userName;
-        }
-
-        protected override void OnSerialize(IDataWriter writer)
-        {
-            writer.WriteUnicodeString(UserName);
-        }
-
-        protected override void OnDeserialize(IDataReader reader)
-        {
-            UserName = reader.ReadUnicodeString();
-        }
-    }
-
-    public class QuitGame : ClusterObjectMessage
-    {
-        public string UserName { get; private set; }
-
-        public QuitGame()
-        {
-        }
-
-        public QuitGame(string userName)
-        {
-            UserName = userName;
-        }
-
-        protected override void OnSerialize(IDataWriter writer)
-        {
-            writer.WriteUnicodeString(UserName);
-        }
-
-        protected override void OnDeserialize(IDataReader reader)
-        {
-            UserName = reader.ReadUnicodeString();
         }
     }
 }

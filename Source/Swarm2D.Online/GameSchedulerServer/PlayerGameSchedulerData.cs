@@ -35,12 +35,10 @@ using Swarm2D.Online.LobbyServer;
 
 namespace Swarm2D.Online.GameSchedulerServer
 {
-    public class PlayerGameSchedulerData : Component
+    public class PlayerGameSchedulerData : ClusterObjectProxy
     {
         public ClusterPeer Lobby { get; private set; }
         public string UserName { get; private set; }
-
-        private ClusterObject _clusterObject;
 
         enum State
         {
@@ -51,14 +49,9 @@ namespace Swarm2D.Online.GameSchedulerServer
 
         private State _currentState = State.Idle;
 
-        private CoroutineManager _coroutineManager;
-
         protected override void OnAdded()
         {
             base.OnAdded();
-
-            _clusterObject = GetComponent<ClusterObject>();
-            _coroutineManager = Engine.FindComponent<CoroutineManager>();
         }
 
         public void Initialize(ClusterPeer lobby, string userName)
@@ -85,15 +78,15 @@ namespace Swarm2D.Online.GameSchedulerServer
 
         public void OnGameFound()
         {
-            _coroutineManager.StartCoroutine(this, HandleGameFound);
+            CoroutineManager.StartCoroutine(this, HandleGameFound);
         }
 
         private IEnumerator<CoroutineTask> HandleGameFound(Coroutine coroutine)
         {
             //locking player account here,
             {
-                LockObjectTask lockObjectTask = coroutine.AddComponent<LockObjectTask>();
-                lockObjectTask.Initialize(_clusterObject);
+                LockObjectTask lockObjectTask = coroutine.AddTask<LockObjectTask>();
+                lockObjectTask.Initialize(ClusterObject);
 
                 yield return lockObjectTask;
             }
@@ -102,16 +95,16 @@ namespace Swarm2D.Online.GameSchedulerServer
             {
                 _currentState = State.InGame;
 
-                var informLobbyObjectGameFoundTask = coroutine.AddComponent<ClusterProxyMessageTask>();
-                informLobbyObjectGameFoundTask.Initialize(_clusterObject, new InformGameFoundMessage(), Lobby);
+                var informLobbyObjectGameFoundTask = coroutine.AddTask<ClusterProxyMessageTask>();
+                informLobbyObjectGameFoundTask.Initialize(ClusterObject, new InformGameFoundMessage(), Lobby);
 
                 yield return informLobbyObjectGameFoundTask;
             }
 
             //unlocking player account here,
             {
-                UnlockObjectTask unlockObjectTask = coroutine.AddComponent<UnlockObjectTask>();
-                unlockObjectTask.Initialize(_clusterObject);
+                UnlockObjectTask unlockObjectTask = coroutine.AddTask<UnlockObjectTask>();
+                unlockObjectTask.Initialize(ClusterObject);
 
                 yield return unlockObjectTask;
             }

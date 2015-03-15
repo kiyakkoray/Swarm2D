@@ -41,14 +41,22 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FarmServer\FarmServerController.cs" />
+    <Compile Include="GameSchedulerServer\CancelRequestFindGame.cs" />
     <Compile Include="GameSchedulerServer\GameScheduler.cs" />
     <Compile Include="GameSchedulerServer\GameSchedulerServerController.cs" />
     <Compile Include="GameSchedulerServer\PlayerGameSchedulerData.cs" />
+    <Compile Include="GameSchedulerServer\QuitGame.cs" />
+    <Compile Include="GameSchedulerServer\RequestFindGame.cs" />
+    <Compile Include="LobbyServer\InformGameFoundMessage.cs" />
+    <Compile Include="LobbyServer\KillPlayerConnectionMessage.cs" />
     <Compile Include="LobbyServer\LobbyServerController.cs" />
     <Compile Include="LobbyServer\PlayerLobbyData.cs" />
     <Compile Include="LobbyServer\PlayerPeer.cs" />
     <Compile Include="MainServer\MainServerController.cs" />
     <Compile Include="Parameters.cs" />
+    <Compile Include="PlayerAccountServer\InformPlayerDisconnect.cs" />
+    <Compile Include="PlayerAccountServer\LoginPlayerMessage.cs" />
+    <Compile Include="PlayerAccountServer\LoginPlayerResponseMessage.cs" />
     <Compile Include="PlayerAccountServer\PlayerAccountData.cs" />
     <Compile Include="PlayerAccountServer\PlayerAccountServerController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

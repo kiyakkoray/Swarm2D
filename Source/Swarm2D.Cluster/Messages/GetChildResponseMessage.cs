@@ -1,4 +1,4 @@
-﻿/******************************************************************************
+/******************************************************************************
 Copyright (c) 2015 Koray Kiyakoglu
 
 http://www.swarm2d.com
@@ -23,45 +23,49 @@ SOFTWARE.
 
 ******************************************************************************/
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using Swarm2D.Cluster;
-using Swarm2D.Engine.Core;
 using Swarm2D.Engine.Logic;
 using Swarm2D.Library;
-using Debug = Swarm2D.Library.Debug;
 
-namespace Swarm2D.Online.MainServer
+namespace Swarm2D.Cluster
 {
-    public class MainServerController : ClusterServerController
+    public class GetChildResponseMessage : ResponseData
     {
-        private bool _initialized = false;
+        public NetworkID Id { get; private set; }
+        public NetworkID ClusterObjectPeerId { get; private set; }
 
-        [DomainMessageHandler(MessageType = typeof(UpdateMessage))]
-        private void OnUpdate(Message message)
+        public GetChildResponseMessage()
         {
-            if (!_initialized)
+        }
+
+        public GetChildResponseMessage(NetworkID id, NetworkID clusterObjectPeerId)
+        {
+            Id = id;
+            ClusterObjectPeerId = clusterObjectPeerId;
+        }
+
+        protected override void Serialize(IDataWriter writer)
+        {
+            if (Id != null)
             {
-                _initialized = true;
-                ClusterNode.HostCluster("127.0.0.1", Parameters.MainServerPortForCluster);
+                writer.WriteBool(true);
+                writer.WriteNetworkID(Id);
+                writer.WriteNetworkID(ClusterObjectPeerId);
+            }
+            else
+            {
+                writer.WriteBool(false);
             }
         }
 
-        [GlobalMessageHandler(MessageType = typeof(ClientConnectMessage))]
-        private void OnClientConnect(Message message)
+        protected override void Deserialize(IDataReader reader)
         {
-            Debug.Log("a client conencted to main server");
-            ClientConnectMessage clientConnectMessage = message as ClientConnectMessage;
-        }
+            bool exists = reader.ReadBool();
 
-        [GlobalMessageHandler(MessageType = typeof(ClientDisconnectMessage))]
-        private void OnClientDisconnect(Message message)
-        {
+            if (exists)
+            {
+                Id = reader.ReadNetworkID();
+                ClusterObjectPeerId = reader.ReadNetworkID();
+            }
         }
     }
-
 }

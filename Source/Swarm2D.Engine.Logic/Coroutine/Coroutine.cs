@@ -75,6 +75,11 @@ namespace Swarm2D.Engine.Logic
                 }
             }
         }
+
+        public T AddTask<T>() where T : CoroutineTask
+        {
+            return this.AddComponent<T>();
+        }
     }
 
     public delegate IEnumerator<CoroutineTask> CoroutineMethod(Coroutine coroutine);

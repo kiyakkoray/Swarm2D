@@ -38,49 +38,26 @@ using Debug = Swarm2D.Library.Debug;
 
 namespace Swarm2D.Online.PlayerAccountServer
 {
-    public class PlayerAccountServerController : EngineComponent
+    public class PlayerAccountServerController : ClusterServerController
     {
-        private NetworkController _networkController;
-        private NetworkView _networkView;
-
         private bool _initialized = false;
-
-        private CoroutineManager _coroutineManager;
-
-        private ClusterNode _clusterNode;
 
         private ClusterObject _playerAccountManagerObjeect;
         private ClusterObject _gameSchedulerObject;
 
-        protected override void OnInitialize()
-        {
-            base.OnInitialize();
-
-            _networkController = GetComponent<NetworkController>();
-            _networkView = GetComponent<NetworkView>();
-        }
-
-        protected override void OnStart()
-        {
-            base.OnStart();
-
-            _clusterNode = Entity.GetComponent<ClusterNode>();
-            _coroutineManager = Engine.FindComponent<CoroutineManager>();
-        }
-
         private IEnumerator<CoroutineTask> HandleClusterNode(Coroutine coroutine)
         {
             {
-                var getGameSchedulerTask = coroutine.AddComponent<GetChildTask>();
-                getGameSchedulerTask.Initialize(_clusterNode.RootClusterObject, "GameScheduler");
+                var getGameSchedulerTask = coroutine.AddTask<GetChildTask>();
+                getGameSchedulerTask.Initialize(ClusterNode.RootClusterObject, "GameScheduler");
                 yield return getGameSchedulerTask;
 
                 _gameSchedulerObject = getGameSchedulerTask.Child;
             }
 
             {
-                var createPlayerAccountManagerTask = coroutine.AddComponent<CreateChildObjectTask>();
-                createPlayerAccountManagerTask.Initialize(_clusterNode.RootClusterObject, "PlayerAccountManager");
+                var createPlayerAccountManagerTask = coroutine.AddTask<CreateChildObjectTask>();
+                createPlayerAccountManagerTask.Initialize(ClusterNode.RootClusterObject, "PlayerAccountManager");
                 yield return createPlayerAccountManagerTask;
 
                 _playerAccountManagerObjeect = createPlayerAccountManagerTask.CreatedChild;
@@ -92,7 +69,7 @@ namespace Swarm2D.Online.PlayerAccountServer
 
             for (int i = 0; i < playerCount; i++)
             {
-                var createPlayerAccountTask = coroutine.AddComponent<CreateChildObjectTask>();
+                var createPlayerAccountTask = coroutine.AddTask<CreateChildObjectTask>();
                 createPlayerAccountTask.Initialize(_playerAccountManagerObjeect, "player" + i);
                 yield return createPlayerAccountTask;
 
@@ -119,7 +96,7 @@ namespace Swarm2D.Online.PlayerAccountServer
         {
             Debug.Log("Creating Player Data Server Session");
 
-            _clusterNode.ConnectToCluster("127.0.0.1", Parameters.MainServerPortForCluster, "127.0.0.1", Parameters.PlayerDataServerPortForCluster);
+            ClusterNode.ConnectToCluster("127.0.0.1", Parameters.MainServerPortForCluster, "127.0.0.1", Parameters.PlayerDataServerPortForCluster);
 
             //_networkController.ParentSession = _networkController.CreateClientSession("127.0.0.1", Parameters.MainServerPort);
             //_networkController.DefaultSession = _networkController.CreateServerSession(Parameters.PlayerDataServerPort);
@@ -128,7 +105,7 @@ namespace Swarm2D.Online.PlayerAccountServer
         [GlobalMessageHandler(MessageType = typeof(ClusterInitializedMessage))]
         private void OnClusterConnectionInitialized(Message message)
         {
-            _coroutineManager.StartCoroutine(this, HandleClusterNode);
+            CoroutineManager.StartCoroutine(this, HandleClusterNode);
         }
 
         [GlobalMessageHandler(MessageType = typeof(ClientDisconnectMessage))]

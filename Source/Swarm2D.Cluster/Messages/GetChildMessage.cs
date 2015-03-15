@@ -1,4 +1,4 @@
-﻿/******************************************************************************
+/******************************************************************************
 Copyright (c) 2015 Koray Kiyakoglu
 
 http://www.swarm2d.com
@@ -23,45 +23,31 @@ SOFTWARE.
 
 ******************************************************************************/
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using Swarm2D.Cluster;
-using Swarm2D.Engine.Core;
-using Swarm2D.Engine.Logic;
 using Swarm2D.Library;
-using Debug = Swarm2D.Library.Debug;
 
-namespace Swarm2D.Online.MainServer
+namespace Swarm2D.Cluster
 {
-    public class MainServerController : ClusterServerController
+    public class GetChildMessage : ClusterObjectMessage
     {
-        private bool _initialized = false;
+        public string Name { get; private set; }
 
-        [DomainMessageHandler(MessageType = typeof(UpdateMessage))]
-        private void OnUpdate(Message message)
+        public GetChildMessage()
         {
-            if (!_initialized)
-            {
-                _initialized = true;
-                ClusterNode.HostCluster("127.0.0.1", Parameters.MainServerPortForCluster);
-            }
         }
 
-        [GlobalMessageHandler(MessageType = typeof(ClientConnectMessage))]
-        private void OnClientConnect(Message message)
+        public GetChildMessage(string name)
         {
-            Debug.Log("a client conencted to main server");
-            ClientConnectMessage clientConnectMessage = message as ClientConnectMessage;
+            Name = name;
         }
 
-        [GlobalMessageHandler(MessageType = typeof(ClientDisconnectMessage))]
-        private void OnClientDisconnect(Message message)
+        protected override void OnSerialize(IDataWriter writer)
         {
+            writer.WriteUnicodeString(Name);
+        }
+
+        protected override void OnDeserialize(IDataReader reader)
+        {
+            Name = reader.ReadUnicodeString();
         }
     }
-
 }

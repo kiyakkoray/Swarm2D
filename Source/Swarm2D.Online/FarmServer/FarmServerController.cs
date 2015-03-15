@@ -35,17 +35,12 @@ using Swarm2D.Library;
 
 namespace Swarm2D.Online.FarmServer
 {
-    public class FarmServerController : Component
+    public class FarmServerController : ClusterServerController
     {
-        private CoroutineManager _coroutineManager;
-
-        private ClusterNode _clusterNode;
-
         private ClusterObject _rootClusterObject;
         private ClusterObject _gameSchedulerObject;
         private ClusterObject _gameServerContainerObject;
 
-        private NetworkController _networkController;
         private MultiplayerServerSession _gameServerSession;
 
         enum State
@@ -57,21 +52,6 @@ namespace Swarm2D.Online.FarmServer
 
         private State _state;
         private int _lastGameServerId = 0;
-
-        protected override void OnAdded()
-        {
-            base.OnAdded();
-
-            _networkController = Entity.GetComponent<NetworkController>();
-            _clusterNode = Entity.GetComponent<ClusterNode>();
-        }
-
-        protected override void OnStart()
-        {
-            base.OnStart();
-
-            _coroutineManager = Engine.FindComponent<CoroutineManager>();
-        }
 
         [DomainMessageHandler(MessageType = typeof(UpdateMessage))]
         private void OnUpdate(Message message)
@@ -89,32 +69,32 @@ namespace Swarm2D.Online.FarmServer
         {
             Debug.Log("Connecting to cluster");
             _state = State.ConnectingToCluster;
-            _clusterNode.ConnectToCluster("127.0.0.1", Parameters.MainServerPortForCluster, "127.0.0.1", Parameters.FarmServerPortForCluster);
+            ClusterNode.ConnectToCluster("127.0.0.1", Parameters.MainServerPortForCluster, "127.0.0.1", Parameters.FarmServerPortForCluster);
         }
 
         [GlobalMessageHandler(MessageType = typeof(ClusterInitializedMessage))]
         private void OnClusterConnectionInitialized(Message message)
         {
-            _coroutineManager.StartCoroutine(this, HandleClusterNode);
+            CoroutineManager.StartCoroutine(this, HandleClusterNode);
         }
 
         private IEnumerator<CoroutineTask> HandleClusterNode(Coroutine coroutine)
         {
-            _rootClusterObject = _clusterNode.RootClusterObject;
+            _rootClusterObject = ClusterNode.RootClusterObject;
 
-            var getGameSchedulerTask = coroutine.AddComponent<GetChildTask>();
+            var getGameSchedulerTask = coroutine.AddTask<GetChildTask>();
             getGameSchedulerTask.Initialize(_rootClusterObject, "GameScheduler");
             yield return getGameSchedulerTask;
 
             _gameSchedulerObject = getGameSchedulerTask.Child;
 
-            var getGameServerContainerTask = coroutine.AddComponent<GetChildTask>();
+            var getGameServerContainerTask = coroutine.AddTask<GetChildTask>();
             getGameServerContainerTask.Initialize(_gameSchedulerObject, "GameServers");
             yield return getGameServerContainerTask;
 
             _gameServerContainerObject = getGameServerContainerTask.Child;
 
-            _gameServerSession = _networkController.CreateServerSession(Parameters.FarmServerPortForGameServer);
+            _gameServerSession = NetworkController.CreateServerSession(Parameters.FarmServerPortForGameServer);
 
             _state = State.Ready;
         }
@@ -127,14 +107,13 @@ namespace Swarm2D.Online.FarmServer
             if (_gameServerSession == peerAuthorizedMessage.Peer.ServerSession)
             {
                 Debug.Log("a game server connected to farm server");
-                _coroutineManager.StartCoroutine(this, HandleGameServerConnection);
-
+                CoroutineManager.StartCoroutine(this, HandleGameServerConnection);
             }
         }
 
         private IEnumerator<CoroutineTask> HandleGameServerConnection(Coroutine coroutine)
         {
-            var createGameServerDataTask = coroutine.AddComponent<CreateChildObjectTask>();
+            var createGameServerDataTask = coroutine.AddTask<CreateChildObjectTask>();
             createGameServerDataTask.Initialize(_gameServerContainerObject, "GameServer" + _lastGameServerId);
             _lastGameServerId++;
             yield return createGameServerDataTask;
