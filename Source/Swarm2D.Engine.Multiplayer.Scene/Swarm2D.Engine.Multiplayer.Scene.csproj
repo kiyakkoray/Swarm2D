@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="GameObject.cs" />
     <Compile Include="GameObjectClient.cs" />
+    <Compile Include="GameObjectComponent.cs" />
     <Compile Include="GameObjectGridCell.cs" />
     <Compile Include="GameObjectServer.cs" />
     <Compile Include="GameScenePeer.cs" />

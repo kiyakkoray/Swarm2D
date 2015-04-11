@@ -62,7 +62,7 @@ namespace Swarm2D.Engine.Logic
 
             if (parentNetworkView != null)
             {
-                parentNetworkView.Children.Remove(_networkId);
+                parentNetworkView._children.Remove(_networkId);
             }
 
             _networkId = newNetworkId;
@@ -71,7 +71,7 @@ namespace Swarm2D.Engine.Logic
 
             if (oldNetworkId != null)
             {
-                Dictionary<NetworkID, NetworkView> oldChildrenData = new Dictionary<NetworkID, NetworkView>(Children);
+                Dictionary<NetworkID, NetworkView> oldChildrenData = new Dictionary<NetworkID, NetworkView>(_children);
 
                 foreach (var child in oldChildrenData)
                 {
@@ -85,14 +85,6 @@ namespace Swarm2D.Engine.Logic
             }
         }
 
-        private NetworkView _parent;
-
-        internal NetworkView Parent
-        {
-            get { return _parent; }
-            set { _parent = value; }
-        }
-
         private void CheckAndRemoveNetworkIDFromParent()
         {
             if (_networkId != null)
@@ -101,7 +93,7 @@ namespace Swarm2D.Engine.Logic
 
                 if (oldParentView != null)
                 {
-                    oldParentView.Children.Remove(_networkId);
+                    oldParentView._children.Remove(_networkId);
                 }
             }
         }
@@ -112,7 +104,7 @@ namespace Swarm2D.Engine.Logic
             {
                 NetworkView newParentView = NetworkController.FindNetworkView(_networkId.ParentObjectId);
 
-                newParentView.Children.Add(_networkId, this);
+                newParentView._children.Add(_networkId, this);
             }
         }
 
@@ -132,7 +124,7 @@ namespace Swarm2D.Engine.Logic
             }
         }
 
-        internal Dictionary<NetworkID, NetworkView> Children { get; private set; }
+        private Dictionary<NetworkID, NetworkView> _children;
 
         private INetworkSynchronizeHandler _synchronizeHandler;
 
@@ -169,7 +161,7 @@ namespace Swarm2D.Engine.Logic
 
                 NetworkView foundChild = null;
 
-                if (Children.TryGetValue(childNetworkId, out foundChild))
+                if (_children.TryGetValue(childNetworkId, out foundChild))
                 {
                     if (childNetworkId.Level != targetLevel)
                     {
@@ -187,7 +179,7 @@ namespace Swarm2D.Engine.Logic
 
         protected override void OnAdded()
         {
-            Children = new Dictionary<NetworkID, NetworkView>();
+            _children = new Dictionary<NetworkID, NetworkView>();
 
             NetworkController = Engine.RootEntity.GetComponent<NetworkController>();
         }

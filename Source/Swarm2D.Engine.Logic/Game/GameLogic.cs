@@ -144,6 +144,9 @@ namespace Swarm2D.Engine.Logic
         {
             if (IsRunning)
             {
+                _entityDomain.InitializeNonInitializedEntityComponents();
+                _entityDomain.StartNotStartedEntityComponents();
+
                 float fixedDt = 1.0f / (float)FrameRate;
 
                 FixedDeltaTime = fixedDt;
@@ -176,6 +179,8 @@ namespace Swarm2D.Engine.Logic
             }
             else
             {
+                _entityDomain.InitializeNonInitializedEntityComponents();
+
                 SceneManager.Entity.SendMessage(_onIdleGameFrameUpdate);
 
                 _firstFrame = false;

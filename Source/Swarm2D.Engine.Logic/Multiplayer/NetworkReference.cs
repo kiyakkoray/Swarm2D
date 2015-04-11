@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Swarm2D.Engine.Core;
+using Swarm2D.Library;
 
 namespace Swarm2D.Engine.Logic
 {
@@ -35,40 +36,116 @@ namespace Swarm2D.Engine.Logic
     {
         private readonly NetworkController _networkController;
         private readonly NetworkID _id;
-        private T _target;
+        private WeakReference _reference;
+        private bool _invalid;
+
+        public bool IsValid
+        {
+            get { return !_invalid; }
+        }
+
+        public NetworkID Id
+        {
+            get { return _id; }
+        }
 
         public T Target
         {
             get
             {
-                if (_target == null)
+                if (_invalid)
                 {
-                    NetworkView networkView = _networkController.FindNetworkView(_id);
+                    return null;
+                }
 
-                    if (networkView != null)
+                RefreshTarget();
+
+                if (_reference.Target != null)
+                {
+                    T target = (T)_reference.Target;
+
+                    if (target.Entity.IsDestroyed)
                     {
-                        _target = networkView.GetComponent<T>();
+                        _reference.Target = null;
+
+                        RefreshTarget();
                     }
                 }
 
-                return _target;
+                return (T)_reference.Target;
+            }
+        }
+
+        private void RefreshTarget()
+        {
+            if (_reference.Target == null)
+            {
+                NetworkView networkView = _networkController.FindNetworkView(_id);
+
+                if (networkView != null)
+                {
+                    _reference.Target = networkView.GetComponent<T>();
+                }
             }
         }
 
         public NetworkReference(NetworkController networkController, NetworkID id)
         {
-            _target = null;
-            _networkController = networkController;
-            _id = id;
+            if (id == null)
+            {
+                _invalid = true;
+
+                _reference = null;
+                _networkController = null;
+                _id = null;
+            }
+            else
+            {
+                _reference = new WeakReference(null);
+                _networkController = networkController;
+                _id = id;
+                _invalid = false;
+            }
         }
 
         public NetworkReference(T networkObject)
         {
-            NetworkView networkView = networkObject.GetComponent<NetworkView>();
+            if (networkObject == null)
+            {
+                _invalid = true;
 
-            _target = networkObject;
-            _networkController = networkView.NetworkController;
-            _id = networkView.NetworkID;
+                _reference = null;
+                _networkController = null;
+                _id = null;
+            }
+            else
+            {
+                _invalid = false;
+
+                NetworkView networkView = networkObject.GetComponent<NetworkView>();
+
+                _reference = new WeakReference(networkObject);
+                _networkController = networkView.NetworkController;
+                _id = networkView.NetworkID;
+            }
+        }
+
+        public static implicit operator T(NetworkReference<T> networkReference)
+        {
+            if (networkReference._invalid)
+            {
+                return null;
+            }
+
+            return networkReference.Target;
+        }
+
+        public static NetworkReference<T> Invalid
+        {
+            get
+            {
+                return new NetworkReference<T>(null);
+            }
         }
     }
 }

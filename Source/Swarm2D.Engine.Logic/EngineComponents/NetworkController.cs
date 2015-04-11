@@ -312,6 +312,11 @@ namespace Swarm2D.Engine.Logic
             return new NetworkReference<T>(this, id);
         }
 
+        public NetworkReference<T> CreateNetworkReference<T>(T component) where T : Component
+        {
+            return new NetworkReference<T>(this, component.GetComponent<NetworkView>().NetworkID);
+        }
+
         public NetworkID PeerId { get; private set; }
 
         private bool _isRoot = false;
