@@ -58,6 +58,16 @@ namespace Swarm2D.Engine.Multiplayer.Scene
 
         private long _synchronizationTick = 0;
 
+        internal bool CurrentlySynchronizing { get; private set; }
+
+        public IEnumerable<GameScenePeer> Players
+        {
+            get
+            {
+                return _players.AsReadOnly();
+            }
+        }
+
         protected override void OnAdded()
         {
             base.OnAdded();
@@ -91,13 +101,6 @@ namespace Swarm2D.Engine.Multiplayer.Scene
         [EntityMessageHandler(MessageType = typeof(SceneControllerUpdateMessage))]
         private void OnUpdate(Message message)
         {
-            while (_gameObjectsWithDirtyTransform.Count > 0)
-            {
-                GameObjectServer gameObject = _gameObjectsWithDirtyTransform.First.Value;
-
-                gameObject.UpdateOnGrid();
-            }
-
             if (DoesSceneNeedsSynchronization())
             {
                 DoSynchronizeJob();
@@ -110,7 +113,7 @@ namespace Swarm2D.Engine.Multiplayer.Scene
             {
                 _synchronizationTick++;
 
-                return _synchronizationTick %24 == 0;
+                return _synchronizationTick % 24 == 0;
             }
 
             if (_networkController.SessionUpdateCheckType == NetworkUpdateCheckType.Frame)
@@ -130,6 +133,15 @@ namespace Swarm2D.Engine.Multiplayer.Scene
 
         private void DoSynchronizeJob()
         {
+            CurrentlySynchronizing = true;
+
+            while (_gameObjectsWithDirtyTransform.Count > 0)
+            {
+                GameObjectServer gameObject = _gameObjectsWithDirtyTransform.First.Value;
+
+                gameObject.UpdateOnGrid();
+            }
+
             foreach (GameScenePeer peer in _players)
             {
                 GameScenePeerGridUpdateData updateData = peer.UpdateOnGameObjectGrid();
@@ -168,6 +180,8 @@ namespace Swarm2D.Engine.Multiplayer.Scene
             }
 
             _peersWithSynchronizationJob.Clear();
+
+            CurrentlySynchronizing = false;
         }
 
         [EntityMessageHandler(MessageType = typeof(PeerEnteredToSceneMessage))]
@@ -202,32 +216,12 @@ namespace Swarm2D.Engine.Multiplayer.Scene
             }
         }
 
-        internal void OnGameObjectDestroyed(GameObjectServer gameObject)
-        {
-            gameObject.CurrentGridCell.OnGameObjectDestroyed(gameObject);
-        }
-
         internal void OnGameObjectGridCellHasJob(GameObjectGridCell gameObjectGridCell)
         {
             _cellsWithJob.Add(gameObjectGridCell);
         }
 
-        internal void UpdateGameObjectGridCell(GameObjectGridCell oldCell, GameObjectGridCell newCell, GameObjectServer gameObject)
-        {
-            if (oldCell != null)
-            {
-                oldCell.RemoveGameObject(gameObject);
-            }
-
-            newCell.AddGameObject(gameObject);
-        }
-
-        internal void RemoveGameObjectFromPeer(GameScenePeer peer, GameObjectServer gameObject)
-        {
-            _networkView.RPC(peer.Peer, "RemoveGameObject", gameObject.GetComponent<NetworkView>().NetworkID);
-        }
-
-        internal void RemoveGameObjectFromPeerOnGrid(GameScenePeer peer, GameObjectServer gameObject)
+        internal void UnSynchronizeGameObjectFromPeer(GameScenePeer peer, GameObjectServer gameObject)
         {
             if (!peer.HasUnSynchronizationJob)
             {

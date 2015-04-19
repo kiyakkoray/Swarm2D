@@ -57,8 +57,9 @@ namespace Swarm2D.WindowsFramework
 
         void IDebug.Assert(bool condition, string message)
         {
-            StackTrace stackTrace = new StackTrace();
-            System.Windows.Forms.MessageBox.Show(message, "Assertion Failed!\n" + stackTrace.ToString(), MessageBoxButtons.OK);
+            //StackTrace stackTrace = new StackTrace();
+            System.Diagnostics.Debug.Assert(condition, message);
+            //System.Windows.Forms.MessageBox.Show(message +"\n" + stackTrace.ToString(), "Assertion Failed!", MessageBoxButtons.OK);
         }
 
         private void DebugLoop()

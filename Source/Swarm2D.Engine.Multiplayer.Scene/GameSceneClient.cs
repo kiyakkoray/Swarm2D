@@ -25,6 +25,7 @@ SOFTWARE.
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Swarm2D.Engine.Core;
@@ -42,6 +43,14 @@ namespace Swarm2D.Engine.Multiplayer.Scene
             base.OnAdded();
 
             _networkController = Engine.RootEntity.GetComponent<NetworkController>();
+        }
+
+        [RPCMethod]
+        private void RemoveGameObjectWithDebugName(NetworkID networkId, string name)
+        {
+            Swarm2D.Library.Debug.Log("Requested to remove game object named with: " + name);
+            NetworkView networkView = _networkController.FindNetworkView(networkId);
+            networkView.Entity.Destroy();
         }
 
         [RPCMethod]

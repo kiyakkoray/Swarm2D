@@ -26,25 +26,38 @@ SOFTWARE.
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
+using Swarm2D.Engine.Core;
+using Swarm2D.Engine.Logic;
+using Swarm2D.Engine.Multiplayer.Scene;
 using Swarm2D.Library;
 
-namespace Swarm2D.Engine.View
+namespace Swarm2D.Test.FastMovingMultiplayerGameObjectTest
 {
-    public class CommandDrawDebugPolygon : GraphicsCommand
+    public class SceneServer : SceneEntityComponent
     {
-        private List<Vector2> _vertices;
-        private Color _color;
+        public Role TestRole { get; internal set; }
 
-        public CommandDrawDebugPolygon(List<Vector2> vertices, Color color)
+        private bool _firstSynchronization = true;
+
+        [EntityMessageHandler(MessageType = typeof (OnSynchronizeGameSceneToPeerMessage))]
+        private void OnSynchronizeSmallBlocksToPeer(Message message)
         {
-            _vertices = vertices;
-            _color = color;
+            Debug.Log("Synchronizing scene to client");
+
+            if (TestRole.CurrentState == Role.State.WaitingFirstSynchronization)
+            {
+                Debug.Assert(_firstSynchronization, "It's not first synchronization!");
+
+                TestRole.CurrentState = Role.State.WaitingServerToMoveAvatar1;
+                _firstSynchronization = false;
+            }
         }
 
-        internal override void DoJob()
+        [EntityMessageHandler(MessageType = typeof (SceneControllerUpdateMessage))]
+        private void OnUpdate(Message message)
         {
-            DebugRender.DrawDebugPolygon(_vertices, _color);
         }
     }
 }

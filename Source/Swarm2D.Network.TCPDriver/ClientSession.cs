@@ -113,7 +113,7 @@ namespace Swarm2D.Network.TCPDriver
             return Reader.ProcessMessageFromQueue(_handler);
         }
 
-        public void HandleConnectionEvents()
+        void INetworkSession.HandleConnectionEvents()
         {
             if (!_connectionHandled)
             {

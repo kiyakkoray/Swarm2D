@@ -27,24 +27,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Swarm2D.Library;
+using Swarm2D.Engine.Core;
+using Swarm2D.Engine.Logic;
+using Swarm2D.Test;
 
-namespace Swarm2D.Engine.View
+namespace Swarm2D.Test
 {
-    public class CommandDrawDebugPolygon : GraphicsCommand
+    class Program
     {
-        private List<Vector2> _vertices;
-        private Color _color;
-
-        public CommandDrawDebugPolygon(List<Vector2> vertices, Color color)
+        static void Main(string[] args)
         {
-            _vertices = vertices;
-            _color = color;
+            var test1 = new FastMovingMultiplayerGameObjectTest.Role();
+
+            test1.DoTest();
+
+            Console.ReadKey();
         }
 
-        internal override void DoJob()
-        {
-            DebugRender.DrawDebugPolygon(_vertices, _color);
-        }
     }
 }

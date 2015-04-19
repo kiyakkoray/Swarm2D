@@ -26,25 +26,42 @@ SOFTWARE.
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
+using Swarm2D.Engine.Core;
+using Swarm2D.Engine.Logic;
+using Swarm2D.Engine.Multiplayer.Scene;
 using Swarm2D.Library;
 
-namespace Swarm2D.Engine.View
+namespace Swarm2D.Test.FastMovingMultiplayerGameObjectTest
 {
-    public class CommandDrawDebugPolygon : GraphicsCommand
+    public class Controller : EngineComponent
     {
-        private List<Vector2> _vertices;
-        private Color _color;
-
-        public CommandDrawDebugPolygon(List<Vector2> vertices, Color color)
+        protected override void OnInitialize()
         {
-            _vertices = vertices;
-            _color = color;
+            base.OnInitialize();
+
+            CreateAvatarPrefab();
         }
 
-        internal override void DoJob()
+        private void CreateAvatarPrefab()
         {
-            DebugRender.DrawDebugPolygon(_vertices, _color);
+            Entity avatarPrefab = Engine.CreatePrefab("AvatarPrefab");
+
+            avatarPrefab.AddComponent<SceneEntity>();
+
+            PhysicsMaterial characterMaterial = new PhysicsMaterial(Resource.GenerateName<PhysicsMaterial>());
+            characterMaterial.Density = 5.0f;
+            characterMaterial.Restutition = 0.95f;
+
+            CircleShapeFilter circleShapeFilter = avatarPrefab.AddComponent<CircleShapeFilter>();
+            circleShapeFilter.Radius = 15.0f;
+
+            PhysicsObject rigidBody = avatarPrefab.AddComponent<PhysicsObject>();
+            rigidBody.Material = characterMaterial;
+
+            avatarPrefab.AddComponent<NetworkView>();
+            avatarPrefab.AddComponent<GameObject>();
         }
     }
 }

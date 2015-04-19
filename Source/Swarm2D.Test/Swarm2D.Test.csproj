@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{31FD3234-2573-410F-BECE-E027EE1BA805}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Swarm2D.Test</RootNamespace>
+    <AssemblyName>Swarm2D.Test</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\Binary\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\Binary\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="FastMovingMultiplayerGameObjectTest\SceneServer.cs" />
+    <Compile Include="FastMovingMultiplayerGameObjectTest\ClientController.cs" />
+    <Compile Include="FastMovingMultiplayerGameObjectTest\ServerController.cs" />
+    <Compile Include="FastMovingMultiplayerGameObjectTest\Controller.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="FastMovingMultiplayerGameObjectTest\Role.cs" />
+    <Compile Include="TestController.cs" />
+    <Compile Include="TestNetworkDriver\ClientSession.cs" />
+    <Compile Include="TestNetworkDriver\ServerSession.cs" />
+    <Compile Include="TestNetworkDriver\ServerSideClientSession.cs" />
+    <Compile Include="TestNetworkDriver\TestNetworkDriver.cs" />
+    <Compile Include="TestRole.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Swarm2D.Engine.Core\Swarm2D.Engine.Core.csproj">
+      <Project>{00e94d79-dd7a-4dd9-85f8-ad2bfe20c42b}</Project>
+      <Name>Swarm2D.Engine.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Engine.Logic\Swarm2D.Engine.Logic.csproj">
+      <Project>{d4be5483-b175-42af-bc61-11f69b7ff33a}</Project>
+      <Name>Swarm2D.Engine.Logic</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Engine.Multiplayer.Scene\Swarm2D.Engine.Multiplayer.Scene.csproj">
+      <Project>{20a34109-df7f-4948-aa14-2741efff47a8}</Project>
+      <Name>Swarm2D.Engine.Multiplayer.Scene</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Library\Swarm2D.Library.csproj">
+      <Project>{6c71fc43-48a5-49e5-a551-dd2613c6e6ab}</Project>
+      <Name>Swarm2D.Library</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Network.TCPDriver\Swarm2D.Network.TCPDriver.csproj">
+      <Project>{6597a877-2990-448c-b055-b445a9063041}</Project>
+      <Name>Swarm2D.Network.TCPDriver</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Network\Swarm2D.Network.csproj">
+      <Project>{5b906af9-46f8-4179-af2c-c93b631d41a8}</Project>
+      <Name>Swarm2D.Network</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

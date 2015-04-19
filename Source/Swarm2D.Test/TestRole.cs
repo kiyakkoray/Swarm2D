@@ -23,136 +23,122 @@ SOFTWARE.
 
 ******************************************************************************/
 
+using Swarm2D.Engine.Core;
+using Swarm2D.Library;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
 using System.Xml;
-using Swarm2D.Engine.Core;
-using Swarm2D.Engine.Logic;
-using Swarm2D.Engine.View;
-using Swarm2D.WindowsFramework.Native.Windows;
 using Debug = Swarm2D.Library.Debug;
-using Framework = Swarm2D.Engine.Core.Framework;
 
-namespace Swarm2D.WindowsFramework
+namespace Swarm2D.Test
 {
-    public class WindowsDedicatedServerFramework : Framework
+    public abstract class TestRole : Framework, IDebug
     {
-        private Thread _mainThread;
+        public abstract void DoTest();
+
+        void IDebug.Log(object log)
+        {
+            Console.WriteLine(log);
+        }
+
+        void IDebug.Assert(bool condition, string message)
+        {
+            StackTrace stackTrace = new StackTrace();
+            Console.WriteLine("Assertion Failed!\n" + stackTrace + "\n" + message);
+        }
 
         private FrameworkDomain[] _frameworkDomains;
 
-        private Stopwatch _timer;
+        private int _currentFrame = 0;
 
-        public WindowsDedicatedServerFramework()
+        protected TestRole()
         {
-            Debug.Initialize(new WindowsDebug());
-            _timer = new Stopwatch();
+            Debug.Initialize(this);
         }
 
-        public override void Initialize(string resourcesPath, FrameworkDomain[] frameworkDomains)
+        public override void Initialize(string resources, FrameworkDomain[] frameworkDomains)
         {
-            Resources.Initialize(resourcesPath);
             _frameworkDomains = frameworkDomains;
-        }
-
-        void MessageLoop()
-        {
-
-        }
-
-        void MainLoop()
-        {
-            _timer.Start();
-
-            while (true)
-            {
-                Update();
-            }
-        }
-
-        void Update()
-        {
-            foreach (FrameworkDomain frameworkDomain in _frameworkDomains)
-            {
-                frameworkDomain.Update();
-            }
         }
 
         public override void Start()
         {
-            _mainThread = new Thread(MainLoop);
 
-            _mainThread.SetApartmentState(ApartmentState.STA);
-            _mainThread.Start();
+        }
 
-            _mainThread.Join();
+        public void Update()
+        {
+            for (int i = 0; i < _frameworkDomains.Length; i++)
+            {
+                FrameworkDomain frameworkDomain = _frameworkDomains[i];
+
+                frameworkDomain.Update();
+            }
+
+            _currentFrame++;
         }
 
         #region Resources
 
-        public override string ResourcesName { get { return Resources.ResourcesName; } }
+        public override string ResourcesName { get { return ""; } }
 
-        public override string ResourcesPath { get { return Resources.ResourcesPath; } }
+        public override string ResourcesPath { get { return ""; } }
 
         public override byte[] LoadBinaryData(string name)
         {
-            return Resources.LoadBinaryData(name);
+            return null;
         }
 
         public override byte[] LoadBinaryData(string resourcesName, string name)
         {
-            return Resources.LoadBinaryData(resourcesName, name);
+            return null;
         }
 
         public override string LoadTextData(string name)
         {
-            throw new NotImplementedException();
+            return "";
         }
 
         public override string LoadTextData(string resourcesName, string name)
         {
-            throw new NotImplementedException();
+            return "";
         }
 
         public override XmlDocument LoadXmlData(string resourcesName, string name)
         {
-            return Resources.LoadXmlData(resourcesName, name);
+            return null;
         }
 
         public override XmlDocument LoadXmlData(string name)
         {
-            return Resources.LoadXmlData(name);
+            return null;
         }
 
         public override void SaveBinaryData(string name, byte[] data)
         {
-            Resources.SaveBinaryData(name, data);
         }
 
         public override void SaveXmlData(string name, XmlDocument xmlDocument)
         {
-            Resources.SaveXmlData(name, xmlDocument);
         }
 
         public override string[] GetFilesInFolder(String path, ResourceFileType fileType)
         {
-            return Resources.GetFilesInFolder(path, fileType);
+            return null;
         }
 
         public override string GetResourcesNameOf(string fileName)
         {
-            return Resources.GetResourcesNameOf(fileName);
+            return "";
         }
 
         #endregion
 
-        public override long ElapsedTicks { get { return _timer.ElapsedTicks; } }
+        public override long ElapsedTicks { get { return _currentFrame; } }
 
-        public override long TicksPerSecond { get { return Stopwatch.Frequency; } }
+        public override long TicksPerSecond { get { return 50; } }
     }
 }

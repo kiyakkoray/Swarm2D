@@ -59,8 +59,6 @@ namespace Swarm2D.Engine.Logic
 
         private bool _firstFrame = true;
 
-        private Stopwatch _timer;
-
         public float FixedDeltaTime { get; internal set; }
         public float FixedTime { get; internal set; }
 
@@ -86,10 +84,7 @@ namespace Swarm2D.Engine.Logic
         {
             if (!IsGameStarted)
             {
-                _timer = new Stopwatch();
-                _timer.Start();
-
-                _startTick = _timer.ElapsedTicks;
+                _startTick = Time.ElapsedTicks;
                 IsRunning = true;
                 IsGameStarted = true;
 
@@ -124,7 +119,7 @@ namespace Swarm2D.Engine.Logic
             if (IsGameStarted && IsRunning)
             {
                 IsRunning = false;
-                _lastPauseTick = _timer.ElapsedTicks;
+                _lastPauseTick = Time.ElapsedTicks;
             }
         }
 
@@ -134,7 +129,7 @@ namespace Swarm2D.Engine.Logic
             {
                 IsRunning = true;
 
-                long currentTick = _timer.ElapsedTicks;
+                long currentTick = Time.ElapsedTicks;
                 _delayTick += currentTick - _lastPauseTick;
             }
         }
@@ -151,9 +146,9 @@ namespace Swarm2D.Engine.Logic
 
                 FixedDeltaTime = fixedDt;
 
-                long currentTick = _timer.ElapsedTicks;
+                long currentTick = Time.ElapsedTicks;
                 long passedTick = currentTick - _startTick - _delayTick;
-                int currentFrame = (int)((float)(FrameRate * passedTick) / (float)Stopwatch.Frequency);
+                int currentFrame = (int)((float)(FrameRate * passedTick) / (float)Time.TicksPerSecond);
 
                 int currentUpdateFrameCount = 0;
 

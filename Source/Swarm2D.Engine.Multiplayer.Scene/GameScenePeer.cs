@@ -35,9 +35,39 @@ namespace Swarm2D.Engine.Multiplayer.Scene
 {
     public class GameScenePeer : PeerComponent
     {
-        public GameScene GameScene { get; set; }
+        private GameSceneServer _gameSceneServer;
+        private GameScene _gameScene;
+        private NetworkView _gameSceneNetworkView;
 
-        public GameObject Avatar { get; set; }
+        public GameScene GameScene
+        {
+            get
+            {
+                return _gameScene;
+            }
+            internal set
+            {
+                _gameScene = value;
+                _gameSceneServer = _gameScene.GetComponent<GameSceneServer>();
+                _gameSceneNetworkView = _gameScene.GetComponent<NetworkView>();
+            }
+        }
+
+        private GameObject _avatar;
+
+        public GameObject Avatar
+        {
+            get
+            {
+                return _avatar;
+            }
+            set
+            {
+                Debug.Assert(value == null || !value.IsDestroyed, "Wrong Avatar Object Assigned!");
+
+                _avatar = value;
+            }
+        }
 
         internal bool HasSynchronizationJob { get; private set; }
         internal bool HasUnSynchronizationJob { get; private set; }
@@ -45,18 +75,26 @@ namespace Swarm2D.Engine.Multiplayer.Scene
         private List<GameObjectGridCell> _lastSynchronizedGridCells;
         private GameObjectGridCell _lastCenterGridCell;
 
-        private List<GameObjectServer> _destroyedGameObjects; //used by grid game object sync
-        private List<GameObjectServer> _createdGameObjects; //used by grid game object sync
+        private List<GameObjectServer> _removedGameObjects; //used by grid game object sync
+        private List<GameObjectServer> _addedGameObjects; //used by grid game object sync
 
         private OnSynchronizeGameObjectToPeerMessage _message;
+
+#if DEBUG
+        private List<GameObjectServer> _debugSynchronizedGameObjects;
+#endif
 
         protected override void OnAdded()
         {
             base.OnAdded();
 
-            _destroyedGameObjects = new List<GameObjectServer>();
-            _createdGameObjects = new List<GameObjectServer>();
+            _removedGameObjects = new List<GameObjectServer>();
+            _addedGameObjects = new List<GameObjectServer>();
             _lastSynchronizedGridCells = new List<GameObjectGridCell>();
+
+#if DEBUG
+            _debugSynchronizedGameObjects = new List<GameObjectServer>();
+#endif
 
             _message = new OnSynchronizeGameObjectToPeerMessage(this);
         }
@@ -65,9 +103,11 @@ namespace Swarm2D.Engine.Multiplayer.Scene
         {
             base.OnDestroy();
 
+            Debug.Assert(!_gameSceneServer.CurrentlySynchronizing, "This method must be called when there are no active synchronization is in progress.");
+
             foreach (var lastSynchronizedGridCell in _lastSynchronizedGridCells)
             {
-                lastSynchronizedGridCell.DeletePeer(this);
+                lastSynchronizedGridCell.OnPeerDestroyed(this);
             }
 
             if (Avatar != null)
@@ -81,37 +121,36 @@ namespace Swarm2D.Engine.Multiplayer.Scene
 
         internal GameScenePeerGridUpdateData UpdateOnGameObjectGrid()
         {
-            if (Avatar != null)
+            Debug.Assert(_gameSceneServer.CurrentlySynchronizing, "This method must be called when an active synchronization is in progress.");
+            Debug.Assert(Avatar != null, "Peer's avatar must be set!");
+            Debug.Assert(!Avatar.IsDestroyed, "Peer's avatar must not be destroyed!");
+
+            GameObjectServer avatarGameObject = Avatar.GetComponent<GameObjectServer>();
+
+            if (_lastCenterGridCell != avatarGameObject.CurrentGridCell)
             {
-                GameObjectServer avatarGameObject = Avatar.GetComponent<GameObjectServer>();
+                GameScenePeerGridUpdateData updateData = new GameScenePeerGridUpdateData();
 
-                if (_lastCenterGridCell != avatarGameObject.CurrentGridCell)
+                updateData.CurrentGridCells = _gameSceneServer.GetGridCellsAround(avatarGameObject.CurrentGridCell);
+                updateData.OldGridCells = _gameSceneServer.GetGridCellsAround(_lastCenterGridCell);
+
+                updateData.CalculateAddedRemovedCells();
+
+                foreach (var removedCell in updateData.RemovedGridCells)
                 {
-                    GameSceneServer gameSceneServer = this.GameScene.GetComponent<GameSceneServer>();
-
-                    GameScenePeerGridUpdateData updateData = new GameScenePeerGridUpdateData();
-
-                    updateData.CurrentGridCells = gameSceneServer.GetGridCellsAround(avatarGameObject.CurrentGridCell);
-                    updateData.OldGridCells = gameSceneServer.GetGridCellsAround(_lastCenterGridCell);
-
-                    updateData.CalculateAddedRemovedCells();
-
-                    foreach (var removedCell in updateData.RemovedGridCells)
-                    {
-                        _lastSynchronizedGridCells.Remove(removedCell);
-                        removedCell.RemovePeer(this);
-                    }
-
-                    foreach (var addedCell in updateData.AddedGridCells)
-                    {
-                        _lastSynchronizedGridCells.Add(addedCell);
-                        addedCell.AddPeer(this);
-                    }
-
-                    _lastCenterGridCell = avatarGameObject.CurrentGridCell;
-
-                    return updateData;
+                    _lastSynchronizedGridCells.Remove(removedCell);
+                    removedCell.RemovePeer(this);
                 }
+
+                foreach (var addedCell in updateData.AddedGridCells)
+                {
+                    _lastSynchronizedGridCells.Add(addedCell);
+                    addedCell.AddPeer(this);
+                }
+
+                _lastCenterGridCell = avatarGameObject.CurrentGridCell;
+
+                return updateData;
             }
 
             return null;
@@ -119,56 +158,94 @@ namespace Swarm2D.Engine.Multiplayer.Scene
 
         internal void DoSynchronizationJob()
         {
-            NetworkView gameSceneNetworkView = Avatar.Scene.GetComponent<NetworkView>();
+            Debug.Assert(_gameSceneServer.CurrentlySynchronizing, "This method must be called when an active synchronization is in progress.");
 
-            foreach (GameObjectServer gameObject in _createdGameObjects)
+            foreach (GameObjectServer gameObject in _addedGameObjects)
             {
-                var networkMessage = new SynchronizeGameObjectMessage
-                (
-                    gameObject.PrefabNameForSynchronization,
-                    gameObject.Entity.Name,
-                    gameObject.GetComponent<NetworkView>().NetworkID,
-                    gameObject.SceneEntity.LocalPosition,
-                    gameObject.SceneEntity.LocalRotation
-                );
-
-                gameSceneNetworkView.NetworkEntityMessageEvent(Peer, networkMessage);
-                gameObject.Entity.SendMessage(_message);
+                AddGameObjectToPeer(gameObject);
             }
 
             HasSynchronizationJob = false;
-            _createdGameObjects.Clear();
+            _addedGameObjects.Clear();
         }
 
         internal void DoUnSynchronizationJob()
         {
-            foreach (GameObjectServer gameObject in _destroyedGameObjects)
+            Debug.Assert(_gameSceneServer.CurrentlySynchronizing, "This method must be called when an active synchronization is in progress.");
+
+            foreach (GameObjectServer gameObject in _removedGameObjects)
             {
-                GameScene.GetComponent<GameSceneServer>().RemoveGameObjectFromPeer(this, gameObject);
+                RemoveGameObjectFromPeer(gameObject);
             }
 
             HasUnSynchronizationJob = false;
-            _destroyedGameObjects.Clear();
+            _removedGameObjects.Clear();
+        }
+
+        private void AddGameObjectToPeer(GameObjectServer gameObject)
+        {
+            Debug.Assert(_gameSceneServer.CurrentlySynchronizing, "This method must be called when an active synchronization is in progress.");
+
+#if DEBUG
+            Debug.Assert(!_debugSynchronizedGameObjects.Contains(gameObject), "Game object " + gameObject.Entity.Name + " is already synchronized to client.");
+            _debugSynchronizedGameObjects.Add(gameObject);
+#endif
+
+            var networkMessage = new SynchronizeGameObjectMessage
+            (
+                gameObject.PrefabNameForSynchronization,
+                gameObject.Entity.Name,
+                gameObject.GetComponent<NetworkView>().NetworkID,
+                gameObject.SceneEntity.LocalPosition,
+                gameObject.SceneEntity.LocalRotation
+            );
+
+            _gameSceneNetworkView.NetworkEntityMessageEvent(Peer, networkMessage);
+            gameObject.Entity.SendMessage(_message);
+        }
+
+        internal void RemoveGameObjectFromPeer(GameObjectServer gameObject)
+        {
+            Debug.Assert(_gameSceneServer.CurrentlySynchronizing, "This method must be called when an active synchronization is in progress.");
+            Debug.Assert(this.Avatar != gameObject.GameObject, "GameScenePeer has an avatar UnSynchronization job");
+
+#if DEBUG
+            Debug.Assert(_debugSynchronizedGameObjects.Contains(gameObject), "Game object " + gameObject.Entity.Name + " does not exist on client.");
+            _debugSynchronizedGameObjects.Remove(gameObject);
+#endif
+
+#if DEBUG
+            _gameSceneNetworkView.RPC(Peer, "RemoveGameObjectWithDebugName", gameObject.GetComponent<NetworkView>().NetworkID, gameObject.Entity.Name);
+#else
+            _gameSceneNetworkView.RPC(Peer, "RemoveGameObject", gameObject.GetComponent<NetworkView>().NetworkID);
+#endif
         }
 
         internal void AddGameObjectToSynchronizeJob(GameObjectServer gameObject)
         {
+            Debug.Assert(_gameSceneServer.CurrentlySynchronizing, "This method must be called when an active synchronization is in progress.");
+            Debug.Assert(!_addedGameObjects.Contains(gameObject), "Added GameObject " + gameObject.Entity.Name + " is already in _addedGameObjects list.");
+
             HasSynchronizationJob = true;
 
-            if (_destroyedGameObjects.Contains(gameObject))
+            if (_removedGameObjects.Contains(gameObject))
             {
-                _destroyedGameObjects.Remove(gameObject);
+                _removedGameObjects.Remove(gameObject);
             }
             else
             {
-                _createdGameObjects.Add(gameObject);
+                _addedGameObjects.Add(gameObject);
             }
         }
 
         internal void AddGameObjectToUnSynchronizeJob(GameObjectServer gameObject)
         {
+            Debug.Assert(_gameSceneServer.CurrentlySynchronizing, "This method must be called when an active synchronization is in progress.");
+            Debug.Assert(!_addedGameObjects.Contains(gameObject), "Removed gameObject " + gameObject.Entity.Name + " is in _addedGameObjects list.");
+            Debug.Assert(!_removedGameObjects.Contains(gameObject), "Removed GameObject " + gameObject.Entity.Name + " is already in _removedGameObjects list.");
+
             HasUnSynchronizationJob = true;
-            _destroyedGameObjects.Add(gameObject);
+            _removedGameObjects.Add(gameObject);
         }
     }
 

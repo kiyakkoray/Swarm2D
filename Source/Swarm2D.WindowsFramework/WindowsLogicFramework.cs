@@ -25,6 +25,7 @@ SOFTWARE.
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
@@ -34,8 +35,8 @@ using System.Xml;
 using Swarm2D.Engine.Core;
 using Swarm2D.Engine.Logic;
 using Swarm2D.Engine.View;
-using Swarm2D.Library;
 using Swarm2D.WindowsFramework.Native.Windows;
+using Debug = Swarm2D.Library.Debug;
 
 namespace Swarm2D.WindowsFramework
 {
@@ -44,12 +45,14 @@ namespace Swarm2D.WindowsFramework
         private FrameworkDomain[] _frameworkDomains;
 
         private Thread[] _frameworkDomainThreads;
+        private Stopwatch _timer;
 
         public bool SingleThreaded { get; set; }
 
         public WindowsLogicFramework()
         {
             Debug.Initialize(new WindowsDebug());
+            _timer = new Stopwatch();
         }
 
         public override void Initialize(string resourcesPath, FrameworkDomain[] frameworkDomains)
@@ -119,6 +122,8 @@ namespace Swarm2D.WindowsFramework
 
         public override void Start()
         {
+            _timer.Start();
+
             if (SingleThreaded)
             {
                 _frameworkDomainThreads[0].Start();
@@ -204,5 +209,9 @@ namespace Swarm2D.WindowsFramework
         }
 
         #endregion
+
+        public override long ElapsedTicks { get { return _timer.ElapsedTicks; } }
+
+        public override long TicksPerSecond { get { return Stopwatch.Frequency; } }
     }
 }

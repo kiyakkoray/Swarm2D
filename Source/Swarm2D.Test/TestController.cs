@@ -27,24 +27,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Swarm2D.Library;
+using Swarm2D.Engine.Core;
+using Swarm2D.Engine.Logic;
 
-namespace Swarm2D.Engine.View
+namespace Swarm2D.Test
 {
-    public class CommandDrawDebugPolygon : GraphicsCommand
+    public class TestController : EngineComponent
     {
-        private List<Vector2> _vertices;
-        private Color _color;
+        public GameLogic GameLogic { get; private set; }
 
-        public CommandDrawDebugPolygon(List<Vector2> vertices, Color color)
+        public Entity CreateGame()
         {
-            _vertices = vertices;
-            _color = color;
-        }
+            Entity gameLogicEntity = Entity.CreateChildEntity("GameLogic");
+            GameLogic = gameLogicEntity.AddComponent<GameLogic>();
 
-        internal override void DoJob()
-        {
-            DebugRender.DrawDebugPolygon(_vertices, _color);
+            return gameLogicEntity;
         }
     }
 }

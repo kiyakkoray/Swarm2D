@@ -58,6 +58,7 @@
     <Compile Include="PropertyInfos\ComponentProperty.cs" />
     <Compile Include="PropertyInfos\ComponentPropertyInfo.cs" />
     <Compile Include="Resource.cs" />
+    <Compile Include="Time.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Swarm2D.Library\Swarm2D.Library.csproj">

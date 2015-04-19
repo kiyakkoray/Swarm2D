@@ -179,5 +179,9 @@ namespace Swarm2D.Unity.Logic
         }
 
         #endregion
+
+        public override long ElapsedTicks { get { return ((long)(UnityEngine.Time.time) * 100); } }
+
+        public override long TicksPerSecond { get { return 100; } }
     }
 }

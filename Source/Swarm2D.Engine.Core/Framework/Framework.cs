@@ -73,5 +73,9 @@ namespace Swarm2D.Engine.Core
         public abstract string GetResourcesNameOf(string fileName);
 
         #endregion
+
+        public abstract long ElapsedTicks { get; }
+
+        public abstract long TicksPerSecond { get; }
     }
 }

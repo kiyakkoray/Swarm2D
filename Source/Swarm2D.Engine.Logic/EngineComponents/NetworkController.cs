@@ -67,7 +67,10 @@ namespace Swarm2D.Engine.Logic
             _timer = new Stopwatch();
             _timer.Start();
 
-            DefaultNetworkDriver = new TcpDriver();
+            if (DefaultNetworkDriver == null)
+            {
+                DefaultNetworkDriver = new TcpDriver();
+            }
         }
 
         [DomainMessageHandler(MessageType = typeof(UpdateMessage))]

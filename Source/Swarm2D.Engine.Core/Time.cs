@@ -27,24 +27,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Swarm2D.Library;
 
-namespace Swarm2D.Engine.View
+namespace Swarm2D.Engine.Core
 {
-    public class CommandDrawDebugPolygon : GraphicsCommand
+    public static class Time
     {
-        private List<Vector2> _vertices;
-        private Color _color;
-
-        public CommandDrawDebugPolygon(List<Vector2> vertices, Color color)
+        public static long ElapsedTicks
         {
-            _vertices = vertices;
-            _color = color;
+            get { return Framework.Current.ElapsedTicks; }
         }
 
-        internal override void DoJob()
+        public static long TicksPerSecond
         {
-            DebugRender.DrawDebugPolygon(_vertices, _color);
+            get { return Framework.Current.TicksPerSecond; }
         }
     }
 }

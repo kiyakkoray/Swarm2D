@@ -213,9 +213,12 @@ namespace Swarm2D.Engine.Logic
 
         public void RPC(PeerGroup targetPeerGroup, string methodName, params object[] parameters)
         {
-            foreach (Peer peer in targetPeerGroup.Peers)
+            if (targetPeerGroup != null)
             {
-                peer.AddRPCEvent(NetworkID, methodName, parameters);
+                foreach (Peer peer in targetPeerGroup.Peers)
+                {
+                    peer.AddRPCEvent(NetworkID, methodName, parameters);
+                }
             }
         }
 

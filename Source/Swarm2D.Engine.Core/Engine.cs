@@ -39,8 +39,6 @@ namespace Swarm2D.Engine.Core
 
         private bool _domainsInitialized = false;
 
-        private Stopwatch _timer;
-
         private Entity _rootEntity;
 
         private bool _currentFrameHadJob = false;
@@ -95,9 +93,6 @@ namespace Swarm2D.Engine.Core
 
             if (!_domainsInitialized)
             {
-                _timer = new Stopwatch();
-                _timer.Start();
-
                 _domainsInitialized = true;
                 _currentFrameHadJob = true;
             }

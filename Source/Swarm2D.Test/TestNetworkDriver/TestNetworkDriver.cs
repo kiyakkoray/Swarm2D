@@ -27,24 +27,35 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Swarm2D.Library;
+using Swarm2D.Network;
 
-namespace Swarm2D.Engine.View
+namespace Swarm2D.Test.TestNetworkDriver
 {
-    public class CommandDrawDebugPolygon : GraphicsCommand
+    public class TestNetworkDriver : INetworkDriver
     {
-        private List<Vector2> _vertices;
-        private Color _color;
+        private Dictionary<int, ServerSession> _serverSessions;
 
-        public CommandDrawDebugPolygon(List<Vector2> vertices, Color color)
+        public TestNetworkDriver()
         {
-            _vertices = vertices;
-            _color = color;
+            _serverSessions = new Dictionary<int, ServerSession>();
         }
 
-        internal override void DoJob()
+        IServerSession INetworkDriver.CreateServerSession(IServerSessionHandler handler, int port)
         {
-            DebugRender.DrawDebugPolygon(_vertices, _color);
+            var serverSession =  new ServerSession(this, handler);
+
+            _serverSessions.Add(port, serverSession);
+
+            return serverSession;
+        }
+
+        IClientSession INetworkDriver.CreateClientSession(IClientSessionHandler handler, string address, int port)
+        {
+            ServerSession serverSession = _serverSessions[port];
+
+            var clientSession = new ClientSession(this, serverSession, handler);
+
+            return clientSession;
         }
     }
 }
