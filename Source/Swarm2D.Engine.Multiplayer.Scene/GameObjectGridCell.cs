@@ -40,6 +40,7 @@ namespace Swarm2D.Engine.Multiplayer.Scene
         public int Y { get; private set; }
 
         public List<GameObjectServer> GameObjects { get; private set; }
+        public List<GameObjectServer> CustomSynchronizationGameObjects { get; private set; }
 
         private List<GameObjectServer> _newlyAddedGameObjects; //used for synchronizing
         private List<GameObjectServer> _newlyRemovedGameObjects; //used for synchronizing
@@ -76,6 +77,7 @@ namespace Swarm2D.Engine.Multiplayer.Scene
             _activePeers = new List<GameScenePeer>();
 
             GameObjects = new List<GameObjectServer>();
+            CustomSynchronizationGameObjects = new List<GameObjectServer>();
             _newlyAddedGameObjects = new List<GameObjectServer>();
             _newlyRemovedGameObjects = new List<GameObjectServer>();
             _newlyAddedPeers = new List<GameScenePeer>();
@@ -96,6 +98,7 @@ namespace Swarm2D.Engine.Multiplayer.Scene
         internal void AddPeer(GameScenePeer gameScenePeer)
         {
             Debug.Assert(GameSceneServer.CurrentlySynchronizing, "This method must be called when an active synchronization is in progress.");
+            Debug.Assert(!_activePeers.Contains(gameScenePeer), "Trying to add a peer which is in the _activePeers list.");
 
             JobAdded();
 
@@ -125,8 +128,6 @@ namespace Swarm2D.Engine.Multiplayer.Scene
             Debug.Assert(GameSceneServer.CurrentlySynchronizing, "This method must be called when an active synchronization is in progress.");
             Debug.Assert(!GameObjects.Contains(gameObject), "Trying to add gameObject " + gameObject.Entity.Name + " which is already in GameObjects List.");
 
-            GameObjects.Add(gameObject);
-
             if (!gameObject.IsCustomSynchronization)
             {
                 Debug.Assert(!_newlyAddedGameObjects.Contains(gameObject), "Removed gameObject " + gameObject.Entity.Name + " is already exist in _newlyAddedGameObjects List.");
@@ -134,6 +135,10 @@ namespace Swarm2D.Engine.Multiplayer.Scene
                 JobAdded();
 
                 _newlyAddedGameObjects.Add(gameObject);
+            }
+            else
+            {
+                CustomSynchronizationGameObjects.Add(gameObject);
             }
         }
 
@@ -152,16 +157,30 @@ namespace Swarm2D.Engine.Multiplayer.Scene
 
                 _newlyRemovedGameObjects.Add(gameObject);
             }
+            else
+            {
+                CustomSynchronizationGameObjects.Remove(gameObject);
+            }
         }
 
         internal void OnGameObjectDestroyed(GameObjectServer gameObject)
         {
             Debug.Assert(!GameSceneServer.CurrentlySynchronizing, "This method must be called when there are no active synchronization is in progress.");
-            Debug.Assert(GameObjects.Contains(gameObject), "Destroyed gameObject " + gameObject.Entity.Name + " does not exist in GameObjects List.");
             Debug.Assert(!_newlyAddedGameObjects.Contains(gameObject), "Destroyed gameObject " + gameObject.Entity.Name + " should not be in _newlyAddedGameObjects List.");
             Debug.Assert(!_newlyRemovedGameObjects.Contains(gameObject), "Destroyed gameObject " + gameObject.Entity.Name + " should not be in _newlyRemovedGameObjects List.");
 
-            GameObjects.Remove(gameObject);
+            if (!gameObject.IsCustomSynchronization)
+            {
+                Debug.Assert(GameObjects.Contains(gameObject), "Destroyed gameObject " + gameObject.Entity.Name + " does not exist in GameObjects List.");
+
+                GameObjects.Remove(gameObject);
+            }
+            else
+            {
+                Debug.Assert(CustomSynchronizationGameObjects.Contains(gameObject), "Destroyed gameObject " + gameObject.Entity.Name + " does not exist in CustomSynchronizationGameObjects List.");
+
+                CustomSynchronizationGameObjects.Remove(gameObject);
+            }
         }
 
         internal void DoUnSynchronizationJob()
@@ -184,10 +203,10 @@ namespace Swarm2D.Engine.Multiplayer.Scene
             {
                 foreach (GameObjectServer gameObject in GameObjects)
                 {
-                    if (!gameObject.IsCustomSynchronization)
-                    {
-                        GameSceneServer.UnSynchronizeGameObjectFromPeer(gameScenePeer, gameObject);
-                    }
+                    Debug.Assert(!_newlyAddedGameObjects.Contains(gameObject), "Game object " + gameObject.Entity.Name + " is newly added");
+                    Debug.Assert(!gameObject.IsCustomSynchronization, "A custom synchronization can't be in GameObjects list");
+
+                    GameSceneServer.UnSynchronizeGameObjectFromPeer(gameScenePeer, gameObject);
                 }
             }
 
@@ -206,7 +225,7 @@ namespace Swarm2D.Engine.Multiplayer.Scene
 
             foreach (GameObjectServer gameObject in _newlyAddedGameObjects)
             {
-                Debug.Assert(GameObjects.Contains(gameObject), "Added gameObject " + gameObject.Entity.Name + " does not exist in GameObjects list.");
+                Debug.Assert(!GameObjects.Contains(gameObject), "Newly added gameObject " + gameObject.Entity.Name + " is already exist in GameObjects list.");
 
                 foreach (GameScenePeer gameScenePeer in _activePeers)
                 {
@@ -214,16 +233,17 @@ namespace Swarm2D.Engine.Multiplayer.Scene
                 }
             }
 
+            GameObjects.AddRange(_newlyAddedGameObjects);
+
             _newlyAddedGameObjects.Clear();
 
             foreach (GameScenePeer gameScenePeer in _newlyAddedPeers)
             {
                 foreach (GameObjectServer gameObject in GameObjects)
                 {
-                    if (!gameObject.IsCustomSynchronization)
-                    {
-                        GameSceneServer.SynchronizeGameObjectToPeer(gameScenePeer, gameObject);
-                    }
+                    Debug.Assert(!gameObject.IsCustomSynchronization, "A custom synchronization can't be in GameObjects list");
+
+                    GameSceneServer.SynchronizeGameObjectToPeer(gameScenePeer, gameObject);
                 }
             }
 

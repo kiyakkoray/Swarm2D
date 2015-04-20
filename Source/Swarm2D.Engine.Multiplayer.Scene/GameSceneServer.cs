@@ -35,7 +35,30 @@ namespace Swarm2D.Engine.Multiplayer.Scene
 {
     public class GameSceneServer : SceneController
     {
-        public float Length = 256.0f;
+        private float _length;
+        private float _inverseLength;
+
+        public float Length
+        {
+            get
+            {
+                return _length;
+            }
+            set
+            {
+                _length = value;
+                _inverseLength = 1.0f / _length;
+            }
+        }
+
+        public float InverseLength
+        {
+            get
+            {
+                return _inverseLength;
+            }
+        }
+
         public int Size = 64;
 
         private GameObjectGridCell[,] _grid;
@@ -71,6 +94,8 @@ namespace Swarm2D.Engine.Multiplayer.Scene
         protected override void OnAdded()
         {
             base.OnAdded();
+
+            Length = 256.0f;
 
             _networkView = GetComponent<NetworkView>();
             GameScene = GetComponent<GameScene>();
@@ -187,6 +212,8 @@ namespace Swarm2D.Engine.Multiplayer.Scene
         [EntityMessageHandler(MessageType = typeof(PeerEnteredToSceneMessage))]
         private void OnPeerEnteredToScene(Message message)
         {
+            Debug.Assert(!CurrentlySynchronizing, "This method must be called when there are no active synchronization is in progress.");
+
             PeerEnteredToSceneMessage peerAuthorizedMessage = message as PeerEnteredToSceneMessage;
 
             GameScenePeer gameScenePeer = peerAuthorizedMessage.Peer.AddComponent<GameScenePeer>();
@@ -198,6 +225,8 @@ namespace Swarm2D.Engine.Multiplayer.Scene
         [EntityMessageHandler(MessageType = typeof(PeerRemovedFromSceneMessage))]
         private void OnGameScenePeerRemoved(Message message)
         {
+            Debug.Assert(!CurrentlySynchronizing, "This method must be called when there are no active synchronization is in progress.");
+
             PeerRemovedFromSceneMessage gameScenePeerRemovedMessage = message as PeerRemovedFromSceneMessage;
             GameScenePeer gameScenePeer = gameScenePeerRemovedMessage.GameScenePeer;
 
@@ -218,11 +247,15 @@ namespace Swarm2D.Engine.Multiplayer.Scene
 
         internal void OnGameObjectGridCellHasJob(GameObjectGridCell gameObjectGridCell)
         {
+            Debug.Assert(CurrentlySynchronizing, "This method must be called when an active synchronization is in progress.");
+
             _cellsWithJob.Add(gameObjectGridCell);
         }
 
         internal void UnSynchronizeGameObjectFromPeer(GameScenePeer peer, GameObjectServer gameObject)
         {
+            Debug.Assert(CurrentlySynchronizing, "This method must be called when an active synchronization is in progress.");
+
             if (!peer.HasUnSynchronizationJob)
             {
                 Debug.Assert(peer.Avatar != null, "peer's avatar is null!");
@@ -235,6 +268,8 @@ namespace Swarm2D.Engine.Multiplayer.Scene
 
         internal void SynchronizeGameObjectToPeer(GameScenePeer peer, GameObjectServer gameObject)
         {
+            Debug.Assert(CurrentlySynchronizing, "This method must be called when an active synchronization is in progress.");
+
             if (!peer.HasSynchronizationJob)
             {
                 Debug.Assert(peer.Avatar != null, "peer's avatar is null!");
@@ -247,14 +282,18 @@ namespace Swarm2D.Engine.Multiplayer.Scene
 
         internal void OnGameObjectTransformClean(GameObjectServer gameObject)
         {
-            if (gameObject.NodeOnDirtyTransformList != null)
-            {
-                _gameObjectsWithDirtyTransform.Remove(gameObject.NodeOnDirtyTransformList);
-            }
+            Debug.Assert(gameObject.NodeOnDirtyTransformList != null, "GameObject's NodeOnDirtyTransformList must be valid");
+            Debug.Assert(gameObject.IsTransformDirty, "GameObject's IsTransformDirty must be true");
+
+            _gameObjectsWithDirtyTransform.Remove(gameObject.NodeOnDirtyTransformList);
         }
 
         internal LinkedListNode<GameObjectServer> OnGameObjectTransformDirty(GameObjectServer gameObject)
         {
+            Debug.Assert(!CurrentlySynchronizing, "This method must be called when there are no active synchronization is in progress.");
+            Debug.Assert(!gameObject.IsTransformDirty, "GameObject's IsTransformDirty must be false");
+            Debug.Assert(gameObject.NodeOnDirtyTransformList == null, "GameObject's NodeOnDirtyTransformList must be null");
+
             return _gameObjectsWithDirtyTransform.AddLast(gameObject);
         }
 

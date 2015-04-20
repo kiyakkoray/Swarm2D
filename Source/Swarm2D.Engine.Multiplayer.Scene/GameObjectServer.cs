@@ -131,10 +131,13 @@ namespace Swarm2D.Engine.Multiplayer.Scene
 
             if (_synchronizedAtLeastOneTime)
             {
-                foreach (Peer peer in PeerGroup.Peers)
+                if (!IsCustomSynchronization)
                 {
-                    GameScenePeer gameScenePeer = _gameSceneServer.GetGameScenePeerOfPeer(peer);
-                    gameScenePeer.RemoveGameObjectFromPeer(this);
+                    foreach (Peer peer in PeerGroup.Peers)
+                    {
+                        GameScenePeer gameScenePeer = _gameSceneServer.GetGameScenePeerOfPeer(peer);
+                        gameScenePeer.DestroyGameObjectFromPeer(this);
+                    }
                 }
 
                 CurrentGridCell.OnGameObjectDestroyed(this);
@@ -148,29 +151,45 @@ namespace Swarm2D.Engine.Multiplayer.Scene
         {
             Debug.Assert(!_gameSceneServer.CurrentlySynchronizing, "This method must be called when there are no active synchronization is in progress.");
 
-            MakeTransformDirty();
-        }
+            float inverseLength = _gameSceneServer.InverseLength;
 
-        internal void UpdateOnGrid()
-        {
-            Debug.Assert(_gameSceneServer.CurrentlySynchronizing, "This method must be called when an active synchronization is in progress.");
-
-            int newGridX = (int)(SceneEntity.LocalPosition.X / _gameSceneServer.Length);
-            int newGridY = (int)(SceneEntity.LocalPosition.Y / _gameSceneServer.Length);
+            int newGridX = (int)Math.Floor(SceneEntity.LocalPosition.X * inverseLength);
+            int newGridY = (int)Math.Floor(SceneEntity.LocalPosition.Y * inverseLength);
 
             GameObjectGridCell newGridCell = _gameSceneServer[newGridX, newGridY];
 
             if (newGridCell != CurrentGridCell)
             {
-                if (CurrentGridCell != null)
-                {
-                    CurrentGridCell.RemoveGameObject(this);
-                }
-
-                newGridCell.AddGameObject(this);
-
-                CurrentGridCell = newGridCell;
+                MakeTransformDirty();
             }
+            else
+            {
+                RemoveTransformDirtyInformation();
+            }
+        }
+
+        internal void UpdateOnGrid()
+        {
+            Debug.Assert(_gameSceneServer.CurrentlySynchronizing, "This method must be called when an active synchronization is in progress.");
+            Debug.Assert(IsTransformDirty, "GameObject's transform must be dirty when updating on grid");
+
+            float inverseLength = _gameSceneServer.InverseLength;
+
+            int newGridX = (int)Math.Floor(SceneEntity.LocalPosition.X * inverseLength);
+            int newGridY = (int)Math.Floor(SceneEntity.LocalPosition.Y * inverseLength);
+
+            GameObjectGridCell newGridCell = _gameSceneServer[newGridX, newGridY];
+
+            Debug.Assert(newGridCell != CurrentGridCell, "GameObject's new grid cell and old grid cell must be different.");
+
+            if (CurrentGridCell != null)
+            {
+                CurrentGridCell.RemoveGameObject(this);
+            }
+
+            newGridCell.AddGameObject(this);
+
+            CurrentGridCell = newGridCell;
 
             RemoveTransformDirtyInformation();
         }
@@ -179,10 +198,10 @@ namespace Swarm2D.Engine.Multiplayer.Scene
         {
             Debug.Assert(!_gameSceneServer.CurrentlySynchronizing, "This method must be called when there are no active synchronization is in progress.");
 
-            if (!IsTransformDirty && _gameScene != null)
+            if (!IsTransformDirty)
             {
-                IsTransformDirty = true;
                 NodeOnDirtyTransformList = _gameSceneServer.OnGameObjectTransformDirty(this);
+                IsTransformDirty = true;
             }
         }
 

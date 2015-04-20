@@ -204,9 +204,26 @@ namespace Swarm2D.Engine.Multiplayer.Scene
             gameObject.Entity.SendMessage(_message);
         }
 
-        internal void RemoveGameObjectFromPeer(GameObjectServer gameObject)
+        private void RemoveGameObjectFromPeer(GameObjectServer gameObject)
         {
             Debug.Assert(_gameSceneServer.CurrentlySynchronizing, "This method must be called when an active synchronization is in progress.");
+            Debug.Assert(this.Avatar != gameObject.GameObject, "GameScenePeer has an avatar UnSynchronization job");
+
+#if DEBUG
+            Debug.Assert(_debugSynchronizedGameObjects.Contains(gameObject), "Game object " + gameObject.Entity.Name + " does not exist on client.");
+            _debugSynchronizedGameObjects.Remove(gameObject);
+#endif
+
+#if DEBUG
+            _gameSceneNetworkView.RPC(Peer, "RemoveGameObjectWithDebugName", gameObject.GetComponent<NetworkView>().NetworkID, gameObject.Entity.Name);
+#else
+            _gameSceneNetworkView.RPC(Peer, "RemoveGameObject", gameObject.GetComponent<NetworkView>().NetworkID);
+#endif
+        }
+
+        internal void DestroyGameObjectFromPeer(GameObjectServer gameObject)
+        {
+            Debug.Assert(!_gameSceneServer.CurrentlySynchronizing, "This method must be called when there are no active synchronization is in progress.");
             Debug.Assert(this.Avatar != gameObject.GameObject, "GameScenePeer has an avatar UnSynchronization job");
 
 #if DEBUG
