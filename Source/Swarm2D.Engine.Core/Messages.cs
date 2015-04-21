@@ -132,6 +132,11 @@ namespace Swarm2D.Engine.Core
 
         public static Message CreateMessageWithId(short id)
         {
+            if (!_typesOfMessages.ContainsKey(id))
+            {
+                SearchMessages();
+            }
+
             return Activator.CreateInstance(_typesOfMessages[id]) as Message;
         }
 

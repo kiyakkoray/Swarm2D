@@ -109,7 +109,7 @@ namespace Swarm2D.Engine.Logic
 
             message.ReadRPCEvent(out networkId, out methodName, out types, out parameters);
 
-            //Debug.Log("RPC EVENT, id: " + networkId.Id + ", name: " + methodName + ", parameter count: " + parameterCount);
+            //Debug.Log("RPC Event, id: " + networkId.Id + ", name: " + methodName + ", parameter count: " + parameters.Length);
 
             NetworkView networkView = NetworkController.FindNetworkView(networkId);
 
@@ -125,6 +125,8 @@ namespace Swarm2D.Engine.Logic
             byte[] data;
 
             message.ReadSynchronizeEvent(out networkId, out data);
+
+            //Debug.Log("Synchronize Event, id: " + networkId.Id);
 
             NetworkView networkView = NetworkController.FindNetworkView(networkId);
 
@@ -143,7 +145,7 @@ namespace Swarm2D.Engine.Logic
 
             OnEntityMessageEventRead(networkEntityMessage);
 
-            //Debug.Log("NetworkEntityMessage EVENT, id: " + networkId.Id + ", message: " + networkEntityMessage);
+            //Debug.Log("NetworkEntityMessage Event, id: " + networkId.Id + ", message: " + networkEntityMessage);
 
             NetworkView networkView = NetworkController.FindNetworkView(networkId);
 
@@ -159,6 +161,8 @@ namespace Swarm2D.Engine.Logic
             ResponseData responseData;
 
             message.ReadResponseNetworkEntityMessageEvent(out responseId, out responseData);
+
+            //Debug.Log("NetworkEntityMessage Response Event, response id: " + responseId + ", responseData: " + responseData);
 
             Entity requestEntity = this._requestEntities[responseId];
 
