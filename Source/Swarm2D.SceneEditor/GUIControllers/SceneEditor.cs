@@ -47,6 +47,7 @@ namespace Swarm2D.SceneEditor.GUIControllers
         private UIFrame _leftPanel;
 
         private UIButton _createNewSceneEntityButton;
+        private UIButton _createNewSceneEntityFromPrefabButton;
         private UIButton _sceneEntityProperties;
         private UITreeView _currentSceneObjectsList;
 
@@ -73,6 +74,12 @@ namespace Swarm2D.SceneEditor.GUIControllers
         private UIContextMenu _currentSceneObjectMenu;
         private UIPositionParameter _currentSceneObjectTopParameter;
         private UIPositionParameter _currentSceneObjectLeftParameter;
+
+        #endregion
+
+        #region Current New Entity Menu
+
+        private UIContextMenu _currentNewEntityFromPrefabMenu;
 
         #endregion
 
@@ -372,14 +379,17 @@ namespace Swarm2D.SceneEditor.GUIControllers
                 _leftPanel = ControllerFrame.GetChildAtPath("EntitiesPanel");
 
                 _createNewSceneEntityButton = (UIButton)_leftPanel.GetChildAtPath("CreateNewSceneEntityButton");
+                _createNewSceneEntityFromPrefabButton = (UIButton)_leftPanel.GetChildAtPath("CreateNewSceneEntityFromPrefabButton");
                 _sceneEntityProperties = (UIButton)_leftPanel.GetChildAtPath("SceneEntityProperties");
                 _currentSceneObjectsList = (UITreeView)_leftPanel.GetChildAtPath("CurrentSceneObjectsList");
 
                 _createNewSceneEntityButton.MouseClick += OnCreateNewSceneEntityButtonClick;
+                _createNewSceneEntityFromPrefabButton.MouseClick += OnCreateNewSceneEntityFromPrefabMenuButtonClick;
                 _sceneEntityProperties.MouseClick += OnSceneEntityPropertiesButtonClick;
                 _currentSceneObjectsList.ItemMouseRightClick += OnCurrentSceneObjectsItemRightClick;
 
                 CreateCurrentSceneObjectMenu();
+                CreateCurrentNewEntityFromPrefabMenu();
             }
 
             UIFrame entityPropertiesPanelFrame = ControllerFrame.GetChildAtPath("EntityPropertiesPanel");
@@ -429,6 +439,33 @@ namespace Swarm2D.SceneEditor.GUIControllers
             addChildEntityButton.Click += new ContextMenuItemEvent(OnAddChildEntityButtonClick);
             entityPropertiesButton.Click += new ContextMenuItemEvent(OnEntityPropertiesButtonClick);
             deleteEntityButton.Click += new ContextMenuItemEvent(OnDeleteEntityButtonClick);
+        }
+        
+        private void CreateCurrentNewEntityFromPrefabMenu()
+        {
+            UIFrame rootFrame = _leftPanel.Manager.RootObject;
+
+            List<UIPositionParameter> menuParameters = new List<UIPositionParameter>();
+
+            var currentNewEntityFromPrefabMenuTopParameter = UIPositionParameter.AnchorToSideParameter(_createNewSceneEntityFromPrefabButton.Widget, AnchorSide.Bottom, AnchorToSideType.Outer, 0);
+            var currentNewEntityFromPrefabMenuLeftParameter = UIPositionParameter.AnchorToSideParameter(_createNewSceneEntityFromPrefabButton.Widget, AnchorSide.Left, AnchorToSideType.Inner, 0);
+
+            menuParameters.Add(currentNewEntityFromPrefabMenuTopParameter);
+            menuParameters.Add(currentNewEntityFromPrefabMenuLeftParameter);
+
+            _currentNewEntityFromPrefabMenu = _leftPanel.Manager.CreateContextMenu(menuParameters);
+
+            _currentNewEntityFromPrefabMenu.Name = "NewEntityFromPrefabMenu";
+
+            foreach (var prefab in Engine.Prefabs)
+            {
+                ContextMenuItem prefabButton = _currentNewEntityFromPrefabMenu.AddItem(prefab.Name);
+                prefabButton.Click += OnCreateNewSceneEntityFromPrefabButtonClick;
+                prefabButton.Data = prefab.Name;
+            }
+
+            _currentNewEntityFromPrefabMenu.Enabled = false;
+            _currentNewEntityFromPrefabMenu.BringToFront();
         }
 
         public override void Update()
@@ -1028,6 +1065,26 @@ namespace Swarm2D.SceneEditor.GUIControllers
             if (Scene != null)
             {
                 Scene.CreateChildEntity("newSceneEntity");
+            }
+        }
+
+        private void OnCreateNewSceneEntityFromPrefabMenuButtonClick(UIWidget sender, MouseEventArgs e)
+        {
+            if (Scene != null)
+            {
+                _currentNewEntityFromPrefabMenu.Enabled = true;
+                _currentNewEntityFromPrefabMenu.BringToFront();
+                _currentNewEntityFromPrefabMenu.SetNonUpdatedWithChildrenOnAllDomains();
+            }
+        }
+
+        private void OnCreateNewSceneEntityFromPrefabButtonClick(ContextMenuItem item)
+        {
+            if (Scene != null)
+            {
+                string prefabName = (string)item.Data;
+
+                Engine.InstantiatePrefab(prefabName, Scene);
             }
         }
 

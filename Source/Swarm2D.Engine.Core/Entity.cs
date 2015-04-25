@@ -166,6 +166,21 @@ namespace Swarm2D.Engine.Core
             return null;
         }
 
+        public Component GetComponent(string type)
+        {
+            for (int i = 0; i < Components.Count; i++)
+            {
+                Component component = Components[i];
+
+                if (type == component.GetType().Name)
+                {
+                    return component;
+                }
+            }
+
+            return null;
+        }
+
         public T GetComponent<T>() where T : Component
         {
             for (int i = 0; i < Components.Count; i++)

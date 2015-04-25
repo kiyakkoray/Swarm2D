@@ -211,7 +211,21 @@ namespace Swarm2D.Engine.Logic
             {
                 XmlNode entitiyNode = entitiesElement.ChildNodes[i];
 
-                Entity entity = Entity.CreateChildEntity(entitiyNode.Attributes["name"].Value);
+                string entityName = entitiyNode.Attributes["name"].Value;
+                bool instantiatedFromPrefab = entitiyNode.Attributes["prefab"] != null;
+
+                Entity entity = null;
+
+                if (instantiatedFromPrefab)
+                {
+                    string prefab = entitiyNode.Attributes["prefab"].Value;
+                    entity = Engine.InstantiatePrefab(prefab, this);
+                }
+                else
+                {
+                    entity = Entity.CreateChildEntity(entityName);
+                    entity.Name = entityName;
+                }
 
                 XmlNode componentsNode = entitiyNode["Components"];
 
@@ -221,15 +235,13 @@ namespace Swarm2D.Engine.Logic
 
                     string componentType = componentNode.Attributes["type"].Value;
 
-                    Component component = null;
+                    //TODO: multiple instantiation of same component at same time?
 
-                    if (componentType != "SceneEntity")
+                    Component component = entity.GetComponent(componentType);
+
+                    if (component == null)
                     {
                         component = entity.AddComponent(componentType);
-                    }
-                    else
-                    {
-                        component = entity.GetComponent<SceneEntity>();
                     }
 
                     ComponentInfo componentInfo = component.GetComponentInfo();
@@ -271,12 +283,12 @@ namespace Swarm2D.Engine.Logic
 
                 foreach (ComponentPropertyInfo componentPropertyInfo in componentInfo.ComponentPropertyInfos.Values)
                 {
+                    string value = componentPropertyInfo.GetValueAsStringFrom(component);
+
                     XmlElement propertyElement = xmlDocument.CreateElement("Property");
                     componentElement.AppendChild(propertyElement);
 
                     propertyElement.SetAttribute("name", componentPropertyInfo.Name);
-
-                    string value = componentPropertyInfo.GetValueAsStringFrom(component);
                     propertyElement.SetAttribute("value", value);
                 }
             }
@@ -293,28 +305,66 @@ namespace Swarm2D.Engine.Logic
 
                 entityElement.SetAttribute("name", entity.Name);
 
+                Entity prefab = null;
+
+                if (entity.IsInstantiatedFromPrefab)
+                {
+                    entityElement.SetAttribute("prefab", entity.PrefabName);
+                    prefab = Engine.GetPrefab(entity.PrefabName);
+                }
+
                 XmlElement componentsElement = xmlDocument.CreateElement("Components");
                 entityElement.AppendChild(componentsElement);
 
                 for (int j = 0; j < entity.Components.Count; j++)
                 {
                     Component component = entity.Components[j];
+                    Component componentFromPrefab = null;
+
+                    if (prefab != null)
+                    {
+                        componentFromPrefab = prefab.GetComponent(component.GetType());
+                    }
+
                     ComponentInfo componentInfo = component.GetComponentInfo();
 
                     XmlElement componentElement = xmlDocument.CreateElement("Component");
-                    componentsElement.AppendChild(componentElement);
+
+                    bool appendComponent = componentFromPrefab == null;
 
                     componentElement.SetAttribute("type", componentInfo.Name);
 
                     foreach (ComponentPropertyInfo componentPropertyInfo in componentInfo.ComponentPropertyInfos.Values)
                     {
-                        XmlElement propertyElement = xmlDocument.CreateElement("Property");
-                        componentElement.AppendChild(propertyElement);
+                        string valueFromEntity = componentPropertyInfo.GetValueAsStringFrom(component);
 
-                        propertyElement.SetAttribute("name", componentPropertyInfo.Name);
+                        bool appendProperty = true;
 
-                        string value = componentPropertyInfo.GetValueAsStringFrom(component);
-                        propertyElement.SetAttribute("value", value);
+                        if (componentFromPrefab != null)
+                        {
+                            string valueFromPrefab = componentPropertyInfo.GetValueAsStringFrom(componentFromPrefab);
+
+                            if (valueFromPrefab == valueFromEntity)
+                            {
+                                appendProperty = false;
+                            }
+                        }
+
+                        if (appendProperty)
+                        {
+                            appendComponent = true;
+
+                            XmlElement propertyElement = xmlDocument.CreateElement("Property");
+                            componentElement.AppendChild(propertyElement);
+
+                            propertyElement.SetAttribute("name", componentPropertyInfo.Name);
+                            propertyElement.SetAttribute("value", valueFromEntity);
+                        }
+                    }
+
+                    if (appendComponent)
+                    {
+                        componentsElement.AppendChild(componentElement);
                     }
                 }
             }

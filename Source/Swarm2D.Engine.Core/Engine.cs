@@ -203,6 +203,11 @@ namespace Swarm2D.Engine.Core
 
         private Dictionary<string, Entity> _prefabs;
 
+        public IEnumerable<Entity> Prefabs
+        {
+            get { return _prefabs.Values; }
+        }
+
         private void InitializePrefabManager()
         {
             _prefabs = new Dictionary<string, Entity>();
