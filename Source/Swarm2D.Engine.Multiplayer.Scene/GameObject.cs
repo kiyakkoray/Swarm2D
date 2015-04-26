@@ -35,21 +35,26 @@ namespace Swarm2D.Engine.Multiplayer.Scene
     public class GameObject : SceneEntityComponent
     {
         public NetworkView NetworkView { get; private set; }
+        
+        public GameObjectClient GameObjectClient { get; private set; }
+        public GameObjectServer GameObjectServer { get; private set; }
 
         protected override void OnAdded()
         {
             base.OnAdded();
 
             NetworkView = GetComponent<NetworkView>();
+            
+            var defaultSession = NetworkView.NetworkController.DefaultSession;
 
-            if (NetworkView.NetworkController.DefaultSession.IsClient)
+            if (defaultSession.IsClient)
             {
-                AddComponent<GameObjectClient>();
+                GameObjectClient = AddComponent<GameObjectClient>();
             }
 
-            if (NetworkView.NetworkController.DefaultSession.IsServer)
+            if (defaultSession.IsServer)
             {
-                AddComponent<GameObjectServer>();
+                GameObjectServer = AddComponent<GameObjectServer>();
             }
         }
     }

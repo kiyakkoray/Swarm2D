@@ -62,7 +62,7 @@ namespace Swarm2D.Engine.Core
 
                     try
                     {
-                        messageHandlerDelegate(message);
+                        messageHandlerDelegate.Invoke(message);
                     }
                     catch (Exception e)
                     {

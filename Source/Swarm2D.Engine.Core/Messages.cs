@@ -210,5 +210,5 @@ namespace Swarm2D.Engine.Core
         public float Dt { get; set; }
     }
 
-    public delegate void MessageHandlerDelegate(Message message);
+    internal delegate void MessageHandlerDelegate(Message message);
 }

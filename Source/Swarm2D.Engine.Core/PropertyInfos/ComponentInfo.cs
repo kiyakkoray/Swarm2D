@@ -201,7 +201,7 @@ namespace Swarm2D.Engine.Core
         {
             Engine engine = entity.Engine;
 
-            Component component = _componentConstructor.Invoke(ConstructorParameters) as Component;
+            Component component = (Component)_componentConstructor.Invoke(ConstructorParameters);
             //Component component = _componentFastConstructor.Construct() as Component;
             component.Entity = entity;
 
@@ -210,7 +210,7 @@ namespace Swarm2D.Engine.Core
                 Type globalMessageType = globalMessageHandler.Key;
                 MethodInfo globalMessageHandlerMethod = globalMessageHandler.Value;
 
-                MessageHandlerDelegate messageHandler = Delegate.CreateDelegate(typeof(MessageHandlerDelegate), component, globalMessageHandlerMethod) as MessageHandlerDelegate;
+                MessageHandlerDelegate messageHandler = (MessageHandlerDelegate)Delegate.CreateDelegate(typeof(MessageHandlerDelegate), component, globalMessageHandlerMethod);
 
                 int globalMessageId = Message.GetMessageId(globalMessageType);
 
@@ -238,7 +238,7 @@ namespace Swarm2D.Engine.Core
                 Type domainMessageType = domainMessageHandler.Key;
                 MethodInfo domainMessageHandlerMethod = domainMessageHandler.Value;
 
-                MessageHandlerDelegate messageHandler = Delegate.CreateDelegate(typeof(MessageHandlerDelegate), component, domainMessageHandlerMethod) as MessageHandlerDelegate;
+                MessageHandlerDelegate messageHandler = (MessageHandlerDelegate)Delegate.CreateDelegate(typeof(MessageHandlerDelegate), component, domainMessageHandlerMethod);
 
                 int entityMessageId = Message.GetMessageId(domainMessageType);
 
@@ -257,7 +257,7 @@ namespace Swarm2D.Engine.Core
                 Type entityMessageType = entityMessageHandler.Key;
                 MethodInfo entityMessageHandlerMethod = entityMessageHandler.Value;
 
-                MessageHandlerDelegate messageHandler = Delegate.CreateDelegate(typeof(MessageHandlerDelegate), component, entityMessageHandlerMethod) as MessageHandlerDelegate;
+                MessageHandlerDelegate messageHandler = (MessageHandlerDelegate)Delegate.CreateDelegate(typeof(MessageHandlerDelegate), component, entityMessageHandlerMethod);
 
                 int entityMessageId = Message.GetMessageId(entityMessageType);
 

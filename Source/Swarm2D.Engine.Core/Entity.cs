@@ -283,6 +283,7 @@ namespace Swarm2D.Engine.Core
                 for (int i = 0; i < messageHandlers.Count; i++)
                 {
                     MessageHandlerDelegate messageHandlerDelegate = messageHandlers[i];
+
                     try
                     {
                         messageHandlerDelegate.Invoke(message);

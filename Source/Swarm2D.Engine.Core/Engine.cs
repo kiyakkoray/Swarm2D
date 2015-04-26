@@ -141,7 +141,7 @@ namespace Swarm2D.Engine.Core
 
                 foreach (MessageHandlerDelegate messageHandlerDelegate in delegates)
                 {
-                    messageHandlerDelegate(message);
+                    messageHandlerDelegate.Invoke(message);
                 }
             }
         }
