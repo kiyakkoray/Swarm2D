@@ -41,6 +41,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Coroutine\WaitCoroutineTask.cs" />
+    <Compile Include="Game\Navigation\INavigableNode.cs" />
+    <Compile Include="Game\Navigation\INavigableWorld.cs" />
+    <Compile Include="Game\Navigation\NavigationPath.cs" />
     <Compile Include="Game\Physics\BoxShapeFilter.cs" />
     <Compile Include="Game\Physics\CircleShapeFilter.cs" />
     <Compile Include="Game\Physics\ResourceShapeFilter.cs" />

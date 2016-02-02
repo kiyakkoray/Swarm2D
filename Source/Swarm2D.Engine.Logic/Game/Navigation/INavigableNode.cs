@@ -27,50 +27,65 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Swarm2D.Engine.Core;
-using Swarm2D.Engine.Logic;
 using Swarm2D.Library;
 
-namespace Swarm2D.Engine.View
+namespace Swarm2D.Engine.Logic
 {
-    [RequiresComponent(typeof(SceneEntity))]
-    public abstract class Renderer : SceneEntityComponent, IRenderer
+    public interface INavigableNode
     {
-        public SceneRenderer SceneRenderer { get; private set; }
+        void ResetPathfinding();
 
-        public abstract Box BoundingBox { get; }
-
-        public float Width { get; protected set; }
-        public float Height { get; protected set; }
-
-        protected override void OnInitialize()
+        INavigableNode ParentNode
         {
-            base.OnInitialize();
-
-            SceneRenderer = Scene.GetComponent<SceneRenderer>();
-            SceneRenderer.AddRenderer(this);
+            get;
+            set;
         }
 
-        public virtual void Render(IOSystem ioSystem, Box renderBox)
+        LinkedListNode<INavigableNode> ListNode
         {
-
+            get;
+            set;
         }
 
-        protected override void OnDestroy()
+        NodePathInfo PathInfo
         {
-            base.OnDestroy();
-
-            SceneRenderer.RemoveRenderer(this);
+            get;
+            set;
         }
+
+        float HeuristicCostToEnd
+        {
+            get;
+            set;
+        }
+
+        float MovementCostToHere
+        {
+            get;
+            set;
+        }
+
+        List<INavigableNode> Neighbours
+        {
+            get;
+        }
+
+        Vector2 Position { get; }
+
+        INavigableWorld NavigableWorld { get; }
     }
 
-    public interface IRenderer
+    static class NavigableNodeExtensions
     {
-        Box BoundingBox { get; }
-
-        float Width { get; }
-        float Height { get; }
-
-        void Render(IOSystem ioSystem, Box renderBox);
+        internal static float GetTotalCost(this INavigableNode navigableNode)
+        {
+            return navigableNode.MovementCostToHere + navigableNode.HeuristicCostToEnd;
+        }
+    }
+    public enum NodePathInfo
+    {
+        Undefined,
+        Closed,
+        Opened
     }
 }

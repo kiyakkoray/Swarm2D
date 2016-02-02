@@ -27,50 +27,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Swarm2D.Engine.Core;
-using Swarm2D.Engine.Logic;
-using Swarm2D.Library;
 
-namespace Swarm2D.Engine.View
+namespace Swarm2D.Engine.Logic
 {
-    [RequiresComponent(typeof(SceneEntity))]
-    public abstract class Renderer : SceneEntityComponent, IRenderer
+    public interface INavigableWorld
     {
-        public SceneRenderer SceneRenderer { get; private set; }
-
-        public abstract Box BoundingBox { get; }
-
-        public float Width { get; protected set; }
-        public float Height { get; protected set; }
-
-        protected override void OnInitialize()
-        {
-            base.OnInitialize();
-
-            SceneRenderer = Scene.GetComponent<SceneRenderer>();
-            SceneRenderer.AddRenderer(this);
-        }
-
-        public virtual void Render(IOSystem ioSystem, Box renderBox)
-        {
-
-        }
-
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
-
-            SceneRenderer.RemoveRenderer(this);
-        }
+        IEnumerable<INavigableNode> NavigableNodes { get; }
     }
 
-    public interface IRenderer
+    static class NavigableWorldExtensions
     {
-        Box BoundingBox { get; }
-
-        float Width { get; }
-        float Height { get; }
-
-        void Render(IOSystem ioSystem, Box renderBox);
+        internal static void ResetPathCalculations(this INavigableWorld navigableWorld)
+        {
+            foreach (INavigableNode navigableNode in navigableWorld.NavigableNodes)
+            {
+                navigableNode.ResetPathfinding();
+            }
+        }
     }
 }
