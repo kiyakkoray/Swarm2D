@@ -209,26 +209,22 @@ namespace Swarm2D.Engine.Multiplayer.Scene
             CurrentlySynchronizing = false;
         }
 
-        [EntityMessageHandler(MessageType = typeof(PeerEnteredToSceneMessage))]
-        private void OnPeerEnteredToScene(Message message)
+        public void EnterPeerToScene(Peer peer)
         {
             Debug.Assert(!CurrentlySynchronizing, "This method must be called when there are no active synchronization is in progress.");
 
-            PeerEnteredToSceneMessage peerAuthorizedMessage = message as PeerEnteredToSceneMessage;
-
-            GameScenePeer gameScenePeer = peerAuthorizedMessage.Peer.AddComponent<GameScenePeer>();
+            GameScenePeer gameScenePeer = peer.AddComponent<GameScenePeer>();
             gameScenePeer.GameScene = GameScene;
 
             _players.Add(gameScenePeer);
-        }
 
-        [EntityMessageHandler(MessageType = typeof(PeerRemovedFromSceneMessage))]
-        private void OnGameScenePeerRemoved(Message message)
+            Entity.SendMessage(new PeerEnteredToSceneMessage(peer));
+        }
+        public void RemovePeerFromScene(GameScenePeer gameScenePeer)
         {
             Debug.Assert(!CurrentlySynchronizing, "This method must be called when there are no active synchronization is in progress.");
 
-            PeerRemovedFromSceneMessage gameScenePeerRemovedMessage = message as PeerRemovedFromSceneMessage;
-            GameScenePeer gameScenePeer = gameScenePeerRemovedMessage.GameScenePeer;
+            Entity.SendMessage(new PeerRemovedFromSceneMessage(gameScenePeer));
 
             gameScenePeer.Entity.DeleteComponent(gameScenePeer);
 
@@ -365,7 +361,7 @@ namespace Swarm2D.Engine.Multiplayer.Scene
     {
         public Peer Peer { get; private set; }
 
-        public PeerEnteredToSceneMessage(Peer peer)
+        internal PeerEnteredToSceneMessage(Peer peer)
         {
             Peer = peer;
         }
@@ -375,7 +371,7 @@ namespace Swarm2D.Engine.Multiplayer.Scene
     {
         public GameScenePeer GameScenePeer { get; private set; }
 
-        public PeerRemovedFromSceneMessage(GameScenePeer gameScenePeer)
+        internal PeerRemovedFromSceneMessage(GameScenePeer gameScenePeer)
         {
             GameScenePeer = gameScenePeer;
         }

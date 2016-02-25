@@ -83,13 +83,13 @@ namespace Swarm2D.Engine.View
         public void Render(Message message)
         {
             RenderMessage renderMessage = message as RenderMessage;
-            IOSystem ioSystem = renderMessage.IOSystem;
+            RenderContext renderContext = renderMessage.RenderContext;
 
             if (_gameLogic.IsRunning)
             {
-                ioSystem.AddGraphicsCommand(new CommandSetViewMatrix(Matrix4x4.Position2D(_gameRenderer.RenderTargetPosition)));
+                renderContext.AddGraphicsCommand(new CommandSetViewMatrix(Matrix4x4.Position2D(_gameRenderer.RenderTargetPosition)));
                 //graphicsContext.ViewMatrix = Matrix4x4.Position2D(_gameRenderer.RenderTargetPosition);
-                UIManager.Render(ioSystem);
+                UIManager.Render(renderContext);
             }
         }
     }

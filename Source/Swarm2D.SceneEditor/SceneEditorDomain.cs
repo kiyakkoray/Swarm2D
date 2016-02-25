@@ -104,9 +104,9 @@ namespace Swarm2D.SceneEditor
         public void Render(Message message)
         {
             RenderMessage renderMessage = message as RenderMessage;
-            IOSystem ioSystem = renderMessage.IOSystem;
+            RenderContext renderContext = renderMessage.RenderContext;
 
-            UIManager.Render(ioSystem);
+            UIManager.Render(renderContext);
         }
     }
 }

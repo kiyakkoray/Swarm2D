@@ -69,7 +69,7 @@ namespace Swarm2D.Engine.Logic
             foreach (Type responseDataType in responseDataTypes)
             {
                 string name = responseDataType.FullName;
-                short hashCode = Message.GetHashCodeOf(name);
+                short hashCode = IdTypeMap.GetHashCodeOf(name);
 
                 _idsOfResponseDatas.Add(responseDataType, hashCode);
                 _typesOfResponseDatas.Add(hashCode, responseDataType);

@@ -29,7 +29,7 @@ using System.Linq;
 using System.Text;
 using Swarm2D.Library;
 
-namespace Swarm2D.Engine.Core
+namespace Swarm2D.Library
 {
     public interface ISerializableObject
     {

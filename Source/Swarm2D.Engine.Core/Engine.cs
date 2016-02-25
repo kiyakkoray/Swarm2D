@@ -51,9 +51,15 @@ namespace Swarm2D.Engine.Core
             }
         }
 
+        private EntityDomain EntityDomain
+        {
+            get { return _engineController.EntityDomain; }
+        }
+
         internal Dictionary<int, List<MessageHandlerDelegate>> GlobalMessageHandlers { get; private set; }
 
         private Dictionary<Type, LinkedList<Component>> _components; //all created components
+        private EngineController _engineController;
 
         public Engine()
         {
@@ -70,21 +76,9 @@ namespace Swarm2D.Engine.Core
             _rootEntity = new Entity("Engine");
             _rootEntity.Engine = this;
 
-            EngineController engineController = _rootEntity.AddComponent<EngineController>();
-            _rootEntity.Domain = engineController;
-        }
-
-        private void InitializeEngineComponents()
-        {
-            foreach (Component component in _rootEntity.Components)
-            {
-                EngineComponent engineComponent = component as EngineComponent;
-
-                if (engineComponent != null)
-                {
-                    engineComponent.Initialize();
-                }
-            }
+            _engineController = _rootEntity.AddComponent<EngineController>();
+            _rootEntity.Domain = _engineController;
+            _rootEntity.Domain.OnComponentCreated(_engineController);
         }
 
         public override void Update()
@@ -97,17 +91,7 @@ namespace Swarm2D.Engine.Core
                 _currentFrameHadJob = true;
             }
 
-            InitializeEngineComponents();
-
-            Component[] engineComponents = _rootEntity.Components.ToArray();
-
-            foreach (Component engineComponent in engineComponents)
-            {
-                engineComponent.Start();
-            }
-
-            RootEntity.GetComponent<EngineController>().SendMessage(new UpdateMessage());
-
+            SendMessage(new UpdateMessage());
             _rootEntity.SendMessage(new LateUpdateMessage());
 
             if (!_currentFrameHadJob)
@@ -125,7 +109,7 @@ namespace Swarm2D.Engine.Core
 
         public void Start()
         {
-            InitializeEngineComponents();
+            EntityDomain.InitializeNonInitializedEntityComponents();
         }
 
         public void DoneJob()
@@ -144,6 +128,11 @@ namespace Swarm2D.Engine.Core
                     messageHandlerDelegate.Invoke(message);
                 }
             }
+        }
+
+        public void SendMessage(DomainMessage message)
+        {
+            ((IEntityDomain)_engineController).SendMessage(message);
         }
 
         internal void OnComponentCreated(Component component)

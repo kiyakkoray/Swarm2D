@@ -1,5 +1,5 @@
 ﻿/******************************************************************************
-Copyright (c) 2015 Koray Kiyakoglu
+Copyright (c) 2016 Koray Kiyakoglu
 
 http://www.swarm2d.com
 
@@ -27,19 +27,38 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Swarm2D.Library;
 
-namespace Swarm2D.Engine.View
+namespace Swarm2D.Engine.Core
 {
-    class CommandExecuteBufferedCommands : GraphicsCommand
+    public class ChildEngineDomain : EngineComponent
     {
-        internal CommandExecuteBufferedCommands()
+        public Engine ChildEngine { get; private set; }
+
+        protected override void OnDestroy()
         {
+            if (ChildEngine != null)
+            {
+                ChildEngine.Destroy();
+
+                ChildEngine = null;
+            }
+
+            base.OnDestroy();
         }
 
-        internal override void DoJob()
+        [DomainMessageHandler(MessageType = typeof(UpdateMessage))]
+        private void OnUpdate(Message message)
         {
-            IOSystem.ExecuteBufferedCommands();
+            if (ChildEngine != null)
+            {
+                ChildEngine.Update();
+            }
+        }
+
+        public void CreateEngine()
+        {
+            ChildEngine = new Engine();
+            ChildEngine.Start();
         }
     }
 }

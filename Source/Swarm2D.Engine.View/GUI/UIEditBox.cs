@@ -118,7 +118,7 @@ namespace Swarm2D.Engine.View.GUI
             return _isEditing;
         }
 
-        protected override void Render(IOSystem ioSystem)
+        protected override void Render(RenderContext renderContext)
         {
             Sprite currentSprite = null;
 
@@ -137,11 +137,11 @@ namespace Swarm2D.Engine.View.GUI
 
             currentSprite = _mouseDownSprite;
 
-            ioSystem.AddGraphicsCommand(new CommandDrawSprite(X, Y, currentSprite, false, false, 1.0f, false, 0.0f, Width, Height));
+            renderContext.AddGraphicsCommand(new CommandDrawSprite(X, Y, currentSprite, false, false, 1.0f, false, 0.0f, Width, Height));
             //Graphics2D.DrawSprite(X, Y, currentSprite,  false, false, 1.0f, false, 0.0f, Width, Height);
 
             _textRenderer.Update(X, Y, Text);
-            _textRenderer.Render(ioSystem, X, Y);
+            _textRenderer.Render(renderContext, X, Y);
         }
 
         protected internal override void ObjectUpdate()

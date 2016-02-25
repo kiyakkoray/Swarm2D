@@ -59,11 +59,11 @@ namespace Swarm2D.Engine.View
             Height = 30.0f;
         }
 
-        public override void Render(IOSystem ioSystem, Box renderBox)
+        public override void Render(RenderContext renderContext, Box renderBox)
         {
             ShapeFilter shapeFilter = Entity.GetComponent<ShapeFilter>();
 
-            ioSystem.AddGraphicsCommand(new CommandSetWorldMatrix(SceneEntity.TransformMatrix));
+            renderContext.AddGraphicsCommand(new CommandSetWorldMatrix(SceneEntity.TransformMatrix));
             //graphicsContext.WorldMatrix = Transform.TransformMatrix;
 
             if (shapeFilter != null)
@@ -83,7 +83,7 @@ namespace Swarm2D.Engine.View
                     IPolygon polygon = shapeToRender as IPolygon;
                     //PolygonData polygonData = physicsObject.ShapeData as PolygonData;
 
-                    ioSystem.AddGraphicsCommand(new CommandDrawDebugPolygon(polygon.Vertices, DebugPhysics ? debugColor : normalColor));
+                    renderContext.AddGraphicsCommand(new CommandDrawDebugPolygon(polygon.Vertices, DebugPhysics ? debugColor : normalColor));
                     //DebugRender.DrawDebugPolygon(polygon.Vertices);
 
                     Width = 200;
@@ -99,7 +99,7 @@ namespace Swarm2D.Engine.View
                     Width = circle.Radius;
                     Height = circle.Radius;
 
-                    ioSystem.AddGraphicsCommand(new CommandDrawDebugCircle(circle.Radius, DebugPhysics ? debugColor : normalColor));
+                    renderContext.AddGraphicsCommand(new CommandDrawDebugCircle(circle.Radius, DebugPhysics ? debugColor : normalColor));
                     //DebugRender.DrawDebugCircle(circle.Radius);
                 }
 
@@ -125,7 +125,7 @@ namespace Swarm2D.Engine.View
                 Width = 30.0f;
                 Height = 30.0f;
 
-                ioSystem.AddGraphicsCommand(new CommandDrawDebugQuad());
+                renderContext.AddGraphicsCommand(new CommandDrawDebugQuad());
                 //DebugRender.DrawDebugQuad();
             }
             //graphicsContext.DrawDebugQuad(-15, -15, 30, 30);

@@ -46,6 +46,7 @@
     <Compile Include="DataWriter.cs" />
     <Compile Include="Color.cs" />
     <Compile Include="Debug.cs" />
+    <Compile Include="ISerializableObject.cs" />
     <Compile Include="KeyCode.cs" />
     <Compile Include="Mathf.cs" />
     <Compile Include="Matrix4x4.cs" />

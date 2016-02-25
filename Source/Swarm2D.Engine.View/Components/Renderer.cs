@@ -51,7 +51,7 @@ namespace Swarm2D.Engine.View
             SceneRenderer.AddRenderer(this);
         }
 
-        public virtual void Render(IOSystem ioSystem, Box renderBox)
+        public virtual void Render(RenderContext renderContext, Box renderBox)
         {
 
         }
@@ -60,7 +60,10 @@ namespace Swarm2D.Engine.View
         {
             base.OnDestroy();
 
-            SceneRenderer.RemoveRenderer(this);
+            if (IsInitialized)
+            {
+                SceneRenderer.RemoveRenderer(this);
+            }
         }
     }
 
@@ -71,6 +74,6 @@ namespace Swarm2D.Engine.View
         float Width { get; }
         float Height { get; }
 
-        void Render(IOSystem ioSystem, Box renderBox);
+        void Render(RenderContext renderContext, Box renderBox);
     }
 }

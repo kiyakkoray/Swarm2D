@@ -30,27 +30,23 @@ using System.Text;
 
 namespace Swarm2D.Engine.Core
 {
-    public class EngineController : Component, IEntityDomain
+    internal class EngineController : Component, IEntityDomain
     {
-        private EntityDomain _entityDomain;
+        internal EntityDomain EntityDomain { get; private set; }
 
         protected override void OnAdded()
         {
             base.OnAdded();
 
-            _entityDomain = new EntityDomain(Entity);
+            EntityDomain = new EntityDomain(Entity);
             Entity.ChildDomain = this;
         }
 
         [DomainMessageHandler(MessageType = typeof(UpdateMessage))]
         private void OnUpdate(Message message)
         {
-            _entityDomain.InitializeNonInitializedEntityComponents();
-            _entityDomain.StartNotStartedEntityComponents();
-
-            UpdateMessage updateMessage = message as UpdateMessage;
-
-            SendMessage(updateMessage);
+            EntityDomain.InitializeNonInitializedEntityComponents();
+            EntityDomain.StartNotStartedEntityComponents();
         }
 
         void IEntityDomain.OnCreateChildEntity(Entity entity)
@@ -60,24 +56,24 @@ namespace Swarm2D.Engine.Core
             EngineEntity engineEntity = entity.AddComponent<EngineEntity>();
         }
 
-        public void SendMessage(DomainMessage message)
+        void IEntityDomain.SendMessage(DomainMessage message)
         {
-            _entityDomain.SendMessage(message);
+            EntityDomain.SendMessage(message);
         }
 
         void IEntityDomain.OnComponentCreated(Component component)
         {
-            _entityDomain.OnComponentCreated(component);
+            EntityDomain.OnComponentCreated(component);
         }
 
         void IEntityDomain.OnComponentDestroyed(Component component)
         {
-            _entityDomain.OnComponentDestroyed(component);
+            EntityDomain.OnComponentDestroyed(component);
         }
 
         Entity IEntityDomain.InstantiatePrefab(Entity prefab)
         {
-            return _entityDomain.InstantiatePrefab(prefab);
+            return EntityDomain.InstantiatePrefab(prefab);
         }
 
         void IEntityDomain.OnEntityParentChanged(Entity entity)

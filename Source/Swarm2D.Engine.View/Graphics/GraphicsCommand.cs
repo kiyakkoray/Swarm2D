@@ -35,8 +35,8 @@ namespace Swarm2D.Engine.View
     {
         //internal GraphicsContext GraphicsContext;
         //internal GraphicsWindow GraphicsWindow;
-        internal IOSystem IOSystem;
-        internal Framework Framework;
+        internal IOSystem IOSystem { get; set; }
+        internal Framework Framework { get; set; }
 
         internal abstract void DoJob();
     }

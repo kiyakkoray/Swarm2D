@@ -373,23 +373,23 @@ namespace Swarm2D.Engine.View.GUI
 
         }
 
-        protected internal virtual void OnAfterRender(IOSystem ioSystem)
+        protected internal virtual void OnAfterRender(RenderContext renderContext)
         {
             if (AfterRender != null)
             {
-                AfterRender(this, ioSystem);
+                AfterRender(this, renderContext);
             }
         }
 
-        internal void RenderController(IOSystem ioSystem)
+        internal void RenderController(RenderContext renderContext)
         {
             if (ScissorTestOnRender)
             {
-                ioSystem.AddGraphicsCommand(new CommandPushScissor((int)Widget.X, (int)Widget.Y, (int)Widget.Width, (int)Widget.Height));
+                renderContext.AddGraphicsCommand(new CommandPushScissor((int)Widget.X, (int)Widget.Y, (int)Widget.Width, (int)Widget.Height));
                 //graphicsContext.PushScissor((int)X, (int)Y, (int)Width, (int)Height);
             }
 
-            Render(ioSystem);
+            Render(renderContext);
 
             for (int i = Widget.Children.Count - 1; i >= 0; i--)
             {
@@ -401,19 +401,19 @@ namespace Swarm2D.Engine.View.GUI
 
                     if (frame != null)
                     {
-                        frame.RenderController(ioSystem);
+                        frame.RenderController(renderContext);
                     }
                 }
             }
 
             if (ScissorTestOnRender)
             {
-                ioSystem.AddGraphicsCommand(new CommandPopScissor());
+                renderContext.AddGraphicsCommand(new CommandPopScissor());
                 //graphicsContext.PopScissor();
             }
         }
 
-        protected virtual void Render(IOSystem ioSystem)
+        protected virtual void Render(RenderContext renderContext)
         {
             if (ShowBox)
             {
@@ -427,12 +427,12 @@ namespace Swarm2D.Engine.View.GUI
                     int height = (int)Widget.Height;
 
                     //ioSystem.AddGraphicsCommand(new CommandDrawSprite(Math.Floor(X), Math.Floor(Y), sprite, false, false, 1.0f, false, 0.0f, Math.Floor(Width), Math.Floor(Height)));
-                    ioSystem.AddGraphicsCommand(new CommandDrawSprite(x, y, sprite, false, false, 1.0f, false, 0.0f, width, height));
+                    renderContext.AddGraphicsCommand(new CommandDrawSprite(x, y, sprite, false, false, 1.0f, false, 0.0f, width, height));
                     //Graphics2D.DrawSprite(X, Y, sprite, false, false, 1.0f, false, 0.0f, Width, Height);
                 }
             }
 
-            OnAfterRender(ioSystem);
+            OnAfterRender(renderContext);
         }
 
         protected internal virtual void ObjectUpdate()
@@ -478,5 +478,5 @@ namespace Swarm2D.Engine.View.GUI
     }
 
     public delegate void UIFrameEvent(UIFrame frame);
-    public delegate void UIRenderEvent(UIFrame frame, IOSystem ioSystem);
+    public delegate void UIRenderEvent(UIFrame frame, RenderContext renderContext);
 }

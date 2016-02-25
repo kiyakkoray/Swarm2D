@@ -286,9 +286,9 @@ namespace Swarm2D.Engine.View.GUI
             SendMessage(updateMessage);
         }
 
-        public void Render(IOSystem ioSystem)
+        public void Render(RenderContext renderContext)
         {
-            RootObject.RenderController(ioSystem);
+            RootObject.RenderController(renderContext);
         }
 
         public float VerticalScaleValue()

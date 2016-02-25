@@ -58,7 +58,8 @@ namespace Swarm2D.Engine.View
 
         private bool _doNotRender = false;
 
-        private Queue<GraphicsCommand> _graphicsCommands;
+        private RenderContext _currentRootRenderContext;
+        private RenderContext _nextRootRenderContext;
 
         private Framework _framework;
 
@@ -67,9 +68,9 @@ namespace Swarm2D.Engine.View
             base.OnInitialize();
 
             _framework = Framework.Current;
+            _currentRootRenderContext = null;
+             _nextRootRenderContext = new RenderContext(this, _framework);
             Current = this;
-
-            _graphicsCommands = new Queue<GraphicsCommand>(65536);
 
             if (_framework.SupportSeperatedRenderThread)
             {
@@ -84,7 +85,6 @@ namespace Swarm2D.Engine.View
         protected override void OnStart()
         {
             AddGraphicsCommand(new CommandInitializeGraphicsContext());
-            //_graphicsForm.InitializeGraphicsContext();
         }
 
         [DomainMessageHandler(MessageType = typeof(UpdateMessage))]
@@ -97,39 +97,14 @@ namespace Swarm2D.Engine.View
             UpdateInput();
         }
 
-        public void AddGraphicsCommand(GraphicsCommand graphicsCommand)
+        private void AddGraphicsCommand(GraphicsCommand graphicsCommand)
         {
-            graphicsCommand.IOSystem = this;
-            graphicsCommand.Framework = _framework;
-            //graphicsCommand.GraphicsContext = GraphicsContext;
-            //graphicsCommand.GraphicsWindow = _graphicsForm;
-
-            if (_useSeparateRenderingThread && _framework.SupportSeperatedRenderThread)
-            {
-                lock (_graphicsCommands)
-                {
-                    _graphicsCommands.Enqueue(graphicsCommand);
-                }
-            }
-            else
-            {
-                graphicsCommand.DoJob();
-            }
-        }
-
-        internal void ExecuteBufferedCommands()
-        {
-        }
-
-        private void ResetGraphicsContextMatrices()
-        {
-            Graphics.ViewMatrix = Matrix4x4.Identity;
-            Graphics.WorldMatrix = Matrix4x4.Identity;
+            _nextRootRenderContext.AddGraphicsCommand(graphicsCommand);
         }
 
         private void WaitPreviousRenderFrame()
         {
-            while (_graphicsCommands.Count > 1)
+            while (_currentRootRenderContext != null)
             {
                 Thread.Sleep(1);
             }
@@ -142,11 +117,19 @@ namespace Swarm2D.Engine.View
             {
                 WaitPreviousRenderFrame();
 
-                AddGraphicsCommand(new CommandBeginFrame());
+                var nextRenderContext = _nextRootRenderContext;
+                _nextRootRenderContext = new RenderContext(this, _framework);
 
-                Entity.GetComponent<EngineController>().SendMessage(new RenderMessage(this));
+                var previousRenderContext = _nextRootRenderContext.AddChildRenderContext(-10000);
+                previousRenderContext.AddGraphicsCommand(new CommandBeginFrame());
 
-                AddGraphicsCommand(new CommandSwapBuffers());
+                var mainRenderContext = _nextRootRenderContext.AddChildRenderContext(0);
+                Engine.SendMessage(new RenderMessage(mainRenderContext));
+
+                var lastRenderContext = _nextRootRenderContext.AddChildRenderContext(10000);
+                lastRenderContext.AddGraphicsCommand(new CommandSwapBuffers());
+
+                _currentRootRenderContext = nextRenderContext;
             }
         }
 
@@ -172,23 +155,12 @@ namespace Swarm2D.Engine.View
                     AddGraphicsCommand(new CommandSwapBuffers());
                 }
 
-                GraphicsCommand graphicsCommand = null;
+                if (_currentRootRenderContext != null)
+                {
+                    var renderContext = _currentRootRenderContext;
+                    _currentRootRenderContext = null;
 
-                lock (_graphicsCommands)
-                {
-                    if (_graphicsCommands.Count > 0)
-                    {
-                        graphicsCommand = _graphicsCommands.Dequeue();
-                    }
-                }
-
-                if (graphicsCommand != null)
-                {
-                    graphicsCommand.DoJob();
-                }
-                else
-                {
-                    Thread.Sleep(1);
+                    renderContext.Render();
                 }
             }
         }
@@ -335,11 +307,11 @@ namespace Swarm2D.Engine.View
 
     public class RenderMessage : DomainMessage
     {
-        public IOSystem IOSystem { get; set; }
+        public RenderContext RenderContext { get; set; }
 
-        public RenderMessage(IOSystem ioSystem)
+        public RenderMessage(RenderContext renderContext)
         {
-            IOSystem = ioSystem;
+            RenderContext = renderContext;
         }
     }
 }

@@ -47,10 +47,13 @@ namespace Swarm2D.Engine.View
         [ComponentProperty]
         public CameraSizeType Type { get; set; }
 
+        public bool Enabled { get; set; }
+
         public Camera()
         {
             Width = 1024;
             Height = 768;
+            Enabled = true;
         }
 
         protected override void OnInitialize()

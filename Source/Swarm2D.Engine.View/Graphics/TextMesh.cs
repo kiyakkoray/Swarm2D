@@ -79,9 +79,9 @@ namespace Swarm2D.Engine.View
             }
         }
 
-        public void Render(IOSystem ioSystem, float x, float y)
+        public void Render(RenderContext renderContext, float x, float y)
         {
-            ioSystem.AddGraphicsCommand(new CommandDrawArrays(x, y, LabelFont.FontTexture, Vertices, TextureCoordinates, _textMeshCharacterCount * 4));
+            renderContext.AddGraphicsCommand(new CommandDrawArrays(x, y, LabelFont.FontTexture, Vertices, TextureCoordinates, _textMeshCharacterCount * 4));
             //graphicsContext.DrawArrays(x, y, LabelFont.FontTexture, _textVerices, _textUvs, _textMeshCharacterCount * 4);
         }
 

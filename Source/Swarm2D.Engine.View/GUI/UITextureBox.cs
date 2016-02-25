@@ -39,16 +39,16 @@ namespace Swarm2D.Engine.View.GUI
             set;
         }
 
-        protected override void Render(IOSystem ioSystem)
+        protected override void Render(RenderContext renderContext)
         {
             if (Texture != null)
             {
-                ioSystem.AddGraphicsCommand(new CommandDrawTextureOnScreen(X, Y, Texture));
+                renderContext.AddGraphicsCommand(new CommandDrawTextureOnScreen(X, Y, Texture));
                 //graphicsContext.DrawTextureOnScreen(X, Y, Texture.Width, Texture.Height, Texture);
             }
             else
             {
-                base.Render(ioSystem);
+                base.Render(renderContext);
             }
         }
     }

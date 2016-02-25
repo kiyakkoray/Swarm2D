@@ -145,13 +145,13 @@ namespace Swarm2D.Engine.View
             if (RenderEnabled)
             {
                 RenderMessage renderMessage = message as RenderMessage;
-                IOSystem ioSystem = renderMessage.IOSystem;
+                RenderContext renderContext = renderMessage.RenderContext;
 
-                Render(ioSystem);
+                Render(renderContext);
             }
         }
 
-        public void Render(IOSystem ioSystem)
+        public void Render(RenderContext renderContext)
         {
             //Scene scene = _gameLogic.CurrentScene;
 
@@ -167,19 +167,22 @@ namespace Swarm2D.Engine.View
                         {
                             Camera camera = sceneRenderer.CameraComponents[i];
 
-                            Matrix4x4 cameraTransform = camera.GetViewMatrix(Width, Height, RenderTargetPosition);
-                            Box renderBox = camera.GetRenderBox(Width, Height);
+                            if (camera.Enabled)
+                            {
+                                Matrix4x4 cameraTransform = camera.GetViewMatrix(Width, Height, RenderTargetPosition);
+                                Box renderBox = camera.GetRenderBox(Width, Height);
 
-                            ioSystem.AddGraphicsCommand(new CommandSetViewMatrix(cameraTransform));
-                            //graphicsContext.ViewMatrix = Matrix4x4.Position2D(RenderTargetPosition + cameraTransform.GlobalPosition * -1.0f + new Vector2(Width * 0.5f, Height * 0.5f));
+                                renderContext.AddGraphicsCommand(new CommandSetViewMatrix(cameraTransform));
+                                //graphicsContext.ViewMatrix = Matrix4x4.Position2D(RenderTargetPosition + cameraTransform.GlobalPosition * -1.0f + new Vector2(Width * 0.5f, Height * 0.5f));
 
-                            sceneRenderer.Render(ioSystem, renderBox);
+                                sceneRenderer.Render(renderContext, renderBox);
 
-                            ioSystem.AddGraphicsCommand(new CommandSetWorldMatrix(Matrix4x4.Identity));
-                            //graphicsContext.WorldMatrix = Matrix4x4.Identity;
+                                renderContext.AddGraphicsCommand(new CommandSetWorldMatrix(Matrix4x4.Identity));
+                                //graphicsContext.WorldMatrix = Matrix4x4.Identity;
 
-                            ioSystem.AddGraphicsCommand(new CommandDrawBufferedDebugObjects());
-                            //DebugRender.DrawBufferedDebugObjects();
+                                renderContext.AddGraphicsCommand(new CommandDrawBufferedDebugObjects());
+                                //DebugRender.DrawBufferedDebugObjects();
+                            }
                         }
                     }
                 }

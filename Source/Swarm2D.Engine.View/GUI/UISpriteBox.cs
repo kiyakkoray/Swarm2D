@@ -39,15 +39,15 @@ namespace Swarm2D.Engine.View.GUI
             set;
         }
 
-        protected override void Render(IOSystem ioSystem)
+        protected override void Render(RenderContext renderContext)
         {
             if (Sprite != null)
             {
-                ioSystem.AddGraphicsCommand(new CommandDrawSprite(Math.Abs(X), Math.Abs(Y), Sprite, false, false, 1.0f, false, 0.0f, Math.Abs(Width), Math.Abs(Height)));
+                renderContext.AddGraphicsCommand(new CommandDrawSprite(Math.Abs(X), Math.Abs(Y), Sprite, false, false, 1.0f, false, 0.0f, Math.Abs(Width), Math.Abs(Height)));
             }
             else
             {
-                base.Render(ioSystem);
+                base.Render(renderContext);
             }
         }
     }

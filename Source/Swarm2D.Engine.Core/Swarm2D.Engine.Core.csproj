@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChildEngineDomain.cs" />
     <Compile Include="Component.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="EngineComponent.cs" />
@@ -51,7 +52,7 @@
     <Compile Include="Framework\Framework.cs" />
     <Compile Include="Framework\ResourceFileType.cs" />
     <Compile Include="Framework\Resources.cs" />
-    <Compile Include="ISerializableObject.cs" />
+    <Compile Include="IdTypeMap.cs" />
     <Compile Include="Messages.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyInfos\ComponentInfo.cs" />

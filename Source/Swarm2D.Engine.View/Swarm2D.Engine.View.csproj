@@ -69,7 +69,6 @@
     <Compile Include="Graphics\Commands\CommandDrawMesh.cs" />
     <Compile Include="Graphics\Commands\CommandDrawSprite.cs" />
     <Compile Include="Graphics\Commands\CommandDrawTextureOnScreen.cs" />
-    <Compile Include="Graphics\Commands\CommandExecuteBufferedCommands.cs" />
     <Compile Include="Graphics\Commands\CommandInitializeGraphicsContext.cs" />
     <Compile Include="Graphics\Commands\CommandPopScissor.cs" />
     <Compile Include="Graphics\Commands\CommandPushScissor.cs" />
@@ -85,6 +84,7 @@
     <Compile Include="Graphics\Graphics2D.cs" />
     <Compile Include="Graphics\GraphicsCommand.cs" />
     <Compile Include="Graphics\Mesh.cs" />
+    <Compile Include="Graphics\RenderContext.cs" />
     <Compile Include="Graphics\Sprite.cs" />
     <Compile Include="Graphics\SpriteData.cs" />
     <Compile Include="Graphics\TextMesh.cs" />

@@ -39,6 +39,9 @@ namespace Swarm2D.Engine.View
         private Sprite _sprite;
 
         [ComponentProperty]
+        public float RotationAsAngle { get; set; }
+
+        [ComponentProperty]
         public Sprite Sprite
         {
             get { return _sprite; }
@@ -91,14 +94,23 @@ namespace Swarm2D.Engine.View
             }
         }
 
-        public override void Render(IOSystem ioSystem, Box renderBox)
+        public override void Render(RenderContext renderContext, Box renderBox)
         {
-            ioSystem.AddGraphicsCommand(new CommandSetWorldMatrix(SceneEntity.TransformMatrix));
+            if (!Mathf.IsZero(RotationAsAngle))
+            {
+                var worldMatrix = SceneEntity.TransformMatrix * Matrix4x4.RotationAboutZ(RotationAsAngle * Mathf.Deg2Rad);
+                renderContext.AddGraphicsCommand(new CommandSetWorldMatrix(worldMatrix));
+            }
+            else
+            {
+                renderContext.AddGraphicsCommand(new CommandSetWorldMatrix(SceneEntity.TransformMatrix));
+            }
+
             //graphicsContext.WorldMatrix = Transform.TransformMatrix;
 
             if (Sprite != null)
             {
-                ioSystem.AddGraphicsCommand(new CommandDrawSprite(-Sprite.Width / 2, -Sprite.Height / 2, Sprite));
+                renderContext.AddGraphicsCommand(new CommandDrawSprite(-Sprite.Width / 2, -Sprite.Height / 2, Sprite));
                 //Graphics2D.DrawSprite(-Sprite.Width / 2, -Sprite.Height / 2, Sprite);
             }
         }

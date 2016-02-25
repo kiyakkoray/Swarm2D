@@ -1,5 +1,5 @@
 ﻿/******************************************************************************
-Copyright (c) 2015 Koray Kiyakoglu
+Copyright (c) 2016 Koray Kiyakoglu
 
 http://www.swarm2d.com
 
@@ -27,46 +27,55 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Swarm2D.Library;
 
-namespace Swarm2D.Engine.View.GUI
+namespace Swarm2D.Engine.View
 {
-    public class UILabel : UIFrame
+    public class RenderContext
     {
-        private TextMesh _textRenderer;
+        public IOSystem IOSystem { get; private set; }
 
-        protected Font LabelFont;
+        private Framework _framework;
 
-        public override void Initialize(List<UIPositionParameter> positionParameters)
+        private List<GraphicsCommand> _graphicsCommands;
+        private List<RenderContext> _renderContexts; 
+
+        internal RenderContext(IOSystem ioSystem, Framework framework)
         {
-            base.Initialize(positionParameters);
-
-            Text = "Test UILabel";
-
-            LabelFont = Manager.Font;
-
-            _textRenderer = new TextMesh(LabelFont);
-            ShowBox = false;
+            _renderContexts = new List<RenderContext>();
+            _graphicsCommands = new List<GraphicsCommand>(32);
+            IOSystem = ioSystem;
+            _framework = framework;
         }
 
-        public float FontHeight
+        public void AddGraphicsCommand(GraphicsCommand graphicsCommand)
         {
-            get
+            graphicsCommand.IOSystem = IOSystem;
+            graphicsCommand.Framework = _framework;
+
+            _graphicsCommands.Add(graphicsCommand);
+        }
+
+        internal void Render()
+        {
+            for (int i = 0; i < _graphicsCommands.Count; i++)
             {
-                return _textRenderer.FontHeight;
+                GraphicsCommand graphicsCommand = _graphicsCommands[i];
+                graphicsCommand.DoJob();
             }
-            set
+
+            for (int i = 0; i < _renderContexts.Count; i++)
             {
-                _textRenderer.FontHeight = value;
+                var childRenderContext = _renderContexts[i];
+                childRenderContext.Render();
             }
         }
 
-        protected override void Render(RenderContext renderContext)
+        public RenderContext AddChildRenderContext(int order)
         {
-            base.Render(renderContext);
+            var renderContext = new RenderContext(IOSystem, _framework);
+            _renderContexts.Add(renderContext);
 
-            _textRenderer.Update(Width, Height, Text);
-            _textRenderer.Render(renderContext, (float)Math.Floor(X), (float)Math.Floor(Y));
+            return renderContext;
         }
     }
 }

@@ -79,7 +79,7 @@ namespace Swarm2D.Engine.View
             CameraComponents.Clear();
         }
 
-        public void Render(IOSystem ioSystem, Box renderBox)
+        public void Render(RenderContext renderContext, Box renderBox)
         {
             if (IsInitialized)
             {
@@ -87,7 +87,7 @@ namespace Swarm2D.Engine.View
                 {
                     if (renderBox.IsIntersects(renderer.BoundingBox))
                     {
-                        renderer.Render(ioSystem, renderBox);
+                        renderer.Render(renderContext, renderBox);
                     }
                 }
             }

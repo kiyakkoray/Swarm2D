@@ -137,7 +137,7 @@ namespace Swarm2D.Engine.View.GUI
             }
         }
 
-        protected override void Render(IOSystem ioSystem)
+        protected override void Render(RenderContext renderContext)
         {
             List<Sprite> currentSprites = null;
 
@@ -156,7 +156,7 @@ namespace Swarm2D.Engine.View.GUI
 
             foreach (Sprite currentSprite in currentSprites)
             {
-                ioSystem.AddGraphicsCommand(new CommandDrawSprite(X, Y, currentSprite, false, false, 1.0f, false, 0.0f, Width, Height));
+                renderContext.AddGraphicsCommand(new CommandDrawSprite(X, Y, currentSprite, false, false, 1.0f, false, 0.0f, Width, Height));
             }
 
             //Graphics2D.DrawSprite(X, Y, currentSprite, false, false, 1.0f, false, 0.0f, Width, Height);

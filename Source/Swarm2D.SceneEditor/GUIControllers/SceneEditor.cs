@@ -902,17 +902,17 @@ namespace Swarm2D.SceneEditor.GUIControllers
             ActionMode = SceneEditorActionMode.Select;
         }
 
-        private void AfterInGameScreenRender(UIFrame sender, IOSystem ioSystem)
+        private void AfterInGameScreenRender(UIFrame sender, RenderContext renderContext)
         {
-            ioSystem.AddGraphicsCommand(new CommandPushScissor((int)sender.X, (int)sender.Y, (int)sender.Width, (int)sender.Height));
+            renderContext.AddGraphicsCommand(new CommandPushScissor((int)sender.X, (int)sender.Y, (int)sender.Width, (int)sender.Height));
 
-            _gameRenderer.Render(ioSystem);
+            _gameRenderer.Render(renderContext);
 
-            ioSystem.AddGraphicsCommand(new CommandResetMatrices());
-            ioSystem.AddGraphicsCommand(new CommandPopScissor());
+            renderContext.AddGraphicsCommand(new CommandResetMatrices());
+            renderContext.AddGraphicsCommand(new CommandPopScissor());
         }
 
-        private void AfterEditorGameScreenRender(UIFrame sender, IOSystem ioSystem)
+        private void AfterEditorGameScreenRender(UIFrame sender, RenderContext renderContext)
         {
             if (Scene != null)
             {
@@ -922,11 +922,11 @@ namespace Swarm2D.SceneEditor.GUIControllers
                 {
                     Vector2 uiPosition = new Vector2(sender.X, sender.Y);
 
-                    ioSystem.AddGraphicsCommand(new CommandPushScissor((int)sender.X, (int)sender.Y, (int)sender.Width,
+                    renderContext.AddGraphicsCommand(new CommandPushScissor((int)sender.X, (int)sender.Y, (int)sender.Width,
                         (int)sender.Height));
                     //graphicsContext.PushScissor((int)sender.X, (int)sender.Y, (int)sender.Width, (int)sender.Height);
 
-                    ioSystem.AddGraphicsCommand(
+                    renderContext.AddGraphicsCommand(
                         new CommandSetViewMatrix(
                             Matrix4x4.Position2D(uiPosition + _editorCameraPosition * -1.0f +
                                                  new Vector2(sender.Width * 0.5f, sender.Height * 0.5f))));
@@ -939,13 +939,13 @@ namespace Swarm2D.SceneEditor.GUIControllers
                     renderBox.Size = new Vector2(sender.Width, sender.Height);
                     renderBox.Position = _editorCameraPosition - new Vector2(sender.Width * 0.5f, sender.Height * 0.5f);
 
-                    sceneRenderer.Render(ioSystem, renderBox);
+                    sceneRenderer.Render(renderContext, renderBox);
 
-                    ioSystem.AddGraphicsCommand(new CommandResetMatrices());
+                    renderContext.AddGraphicsCommand(new CommandResetMatrices());
                     //graphicsContext.WorldMatrix = Matrix4x4.Identity;
                     //graphicsContext.ViewMatrix = Matrix4x4.Identity;
 
-                    ioSystem.AddGraphicsCommand(new CommandPopScissor());
+                    renderContext.AddGraphicsCommand(new CommandPopScissor());
                     //graphicsContext.PopScissor();
                 }
             }

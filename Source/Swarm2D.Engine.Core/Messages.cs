@@ -59,134 +59,26 @@ namespace Swarm2D.Engine.Core
     {
         public short Id { get; internal set; }
 
-        private static Dictionary<Type, short> _idsOfMessages;
-        private static Dictionary<short, Type> _typesOfMessages;
+        private static IdTypeMap _idTypeMap;
 
         static Message()
         {
-            SearchMessages();
-        }
-
-        private static void SearchMessages()
-        {
-            _idsOfMessages = new Dictionary<Type, short>();
-            _typesOfMessages = new Dictionary<short, Type>();
-
-            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-            List<Type> messageTypes = new List<Type>();
-
-            Debug.Log("Searching messages...");
-
-            foreach (Assembly assembly in assemblies)
-            {
-                Type[] types = assembly.GetTypes();
-
-                foreach (Type type in types)
-                {
-                    if (type != typeof(Message) && type != typeof(EntityMessage) && type != typeof(GlobalMessage))
-                    {
-                        if (typeof(Message).IsAssignableFrom(type))
-                        {
-                            Debug.Log("found message: " + type.Name);
-
-                            messageTypes.Add(type);
-                        }
-                    }
-                }
-            }
-
-            Debug.Log("Message searching is over..");
-
-            messageTypes = messageTypes.OrderBy(type => type.Name).ToList();
-
-            foreach (Type messageType in messageTypes)
-            {
-                string name = messageType.FullName;
-                short hashCode = Message.GetHashCodeOf(name);
-
-                _idsOfMessages.Add(messageType, hashCode);
-                _typesOfMessages.Add(hashCode, messageType);
-            }
+            _idTypeMap = new IdTypeMap(typeof(Message));
         }
 
         internal static int GetMessageId(Type type)
         {
-            if (!_idsOfMessages.ContainsKey(type))
-            {
-                SearchMessages();
-            }
-
-            return _idsOfMessages[type];
+            return _idTypeMap.GetObjectTypeId(type);
         }
 
         protected Message()
         {
-            if (!_idsOfMessages.ContainsKey(GetType()))
-            {
-                SearchMessages();
-            }
-
-            Id = _idsOfMessages[GetType()];
+            Id = _idTypeMap.GetObjectTypeId(GetType());
         }
 
         public static Message CreateMessageWithId(short id)
         {
-            if (!_typesOfMessages.ContainsKey(id))
-            {
-                SearchMessages();
-            }
-
-            return Activator.CreateInstance(_typesOfMessages[id]) as Message;
-        }
-
-        public static short GetHashCodeOf(string text)
-        {
-            short result = 0;
-
-            for (int i = 0; i < text.Length; i++)
-            {
-                short c = (short)text[i];
-                short adder = 0;
-
-                if (i % 2 == 0)
-                {
-                    adder = c;
-                }
-                else
-                {
-                    adder = c;
-
-                    adder = (short)(adder << 8);
-                }
-
-                result = (short)(result ^ adder);
-            }
-
-            result += (short)text.Length;
-
-            return result;
-            
-            //int hashCode = text.GetHashCode();
-            //
-            //short firstPart = (short)hashCode;
-            //short secondPart = (short)(hashCode >> 16);
-            //short result = (short)(firstPart ^ secondPart);
-            //
-            //return result;
-
-            //SHA1 hash = SHA1.Create();
-            //
-            //byte[] byteResult = hash.ComputeHash(Encoding.ASCII.GetBytes(text));
-            //
-            //short result = 0;
-            //
-            //for (int i = 0; i < byteResult.Length / 2; i++)
-            //{
-            //    result = (short)(result ^ BitConverter.ToInt16(byteResult, i * 2));
-            //}
-            //
-            //return result;
+            return (Message)_idTypeMap.CreateObjectWithId(id);
         }
     }
 

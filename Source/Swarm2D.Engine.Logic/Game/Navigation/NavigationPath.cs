@@ -93,7 +93,7 @@ namespace Swarm2D.Engine.Logic
 
             while (currentNode != null)
             {
-                PathNodes.Add(currentNode);
+                _pathNodes.Add(currentNode);
                 currentNode = currentNode.ParentNode;
             }
         }
@@ -104,7 +104,7 @@ namespace Swarm2D.Engine.Logic
 
             if (_openNodes.Count > 0)
             {
-                selectedNode = this._openNodes.First.Value;
+                selectedNode = _openNodes.First.Value;
             }
 
             return selectedNode;
@@ -166,11 +166,11 @@ namespace Swarm2D.Engine.Logic
 
                 if (foundNode != null)
                 {
-                    openedNode.ListNode = this._openNodes.AddBefore(foundNode.ListNode, openedNode);
+                    openedNode.ListNode = _openNodes.AddBefore(foundNode.ListNode, openedNode);
                 }
                 else
                 {
-                    openedNode.ListNode = this._openNodes.AddLast(openedNode);
+                    openedNode.ListNode = _openNodes.AddLast(openedNode);
                 }
             }
         }
@@ -185,12 +185,14 @@ namespace Swarm2D.Engine.Logic
             return Vector2.Distance(currentNode.Position, neighbourNode.Position);
         }
 
-        public List<INavigableNode> PathNodes
+        public INavigableNode this[int index]
         {
-            get
-            {
-                return this._pathNodes;
-            }
+            get { return _pathNodes[index]; }
+        }
+
+        public int NodeCount
+        {
+            get { return _pathNodes.Count; }
         }
     }
 }
