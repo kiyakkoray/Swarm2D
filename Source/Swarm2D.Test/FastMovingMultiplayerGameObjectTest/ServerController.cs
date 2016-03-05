@@ -111,7 +111,7 @@ namespace Swarm2D.Test.FastMovingMultiplayerGameObjectTest
 
         private void MakePeerToEnterScene()
         {
-            _scene.Entity.SendMessage(new PeerEnteredToSceneMessage(_clientTestPeer));
+            _scene.GetComponent<GameSceneServer>().EnterPeerToScene(_clientTestPeer);
             var gameScenePeer = _clientTestPeer.GetComponent<GameScenePeer>();
 
             string name = "PeerAvatar" + _clientTestPeer.Id;
