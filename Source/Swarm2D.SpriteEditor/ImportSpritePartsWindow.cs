@@ -142,13 +142,18 @@ namespace Swarm2D.SpriteEditor
 
         private void RefreshSpriteList()
         {
-            string[] spritePartsList = GetFiles("SpriteParts", "bmp");
+            string[] spriteBmpPartsList = GetFiles("SpriteParts", "bmp");
+            string[] spritePngPartsList = GetFiles("SpriteParts", "png");
+
+            List<string> spritePartsList = new List<string>();
+            spritePartsList.AddRange(spriteBmpPartsList);
+            spritePartsList.AddRange(spritePngPartsList);
 
             List<string> notImportedSpritePartslist = new List<string>();
 
             _spriteList.ClearItems();
 
-            for (int i = 0; i < spritePartsList.Length; i++)
+            for (int i = 0; i < spritePartsList.Count; i++)
             {
                 string spriteName = spritePartsList[i];
 

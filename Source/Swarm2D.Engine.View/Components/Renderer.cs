@@ -43,12 +43,26 @@ namespace Swarm2D.Engine.View
         public float Width { get; protected set; }
         public float Height { get; protected set; }
 
+        private bool _addedToSceneRenderer = false;
+
+        protected override void OnAdded()
+        {
+            base.OnAdded();
+
+            if (!_addedToSceneRenderer)
+            {
+                AddToSceneRenderer();
+            }
+        }
+
         protected override void OnInitialize()
         {
             base.OnInitialize();
 
-            SceneRenderer = Scene.GetComponent<SceneRenderer>();
-            SceneRenderer.AddRenderer(this);
+            if (!_addedToSceneRenderer)
+            {
+                AddToSceneRenderer();
+            }
         }
 
         public virtual void Render(RenderContext renderContext, Box renderBox)
@@ -60,10 +74,29 @@ namespace Swarm2D.Engine.View
         {
             base.OnDestroy();
 
-            if (IsInitialized)
+            if (_addedToSceneRenderer)
             {
-                SceneRenderer.RemoveRenderer(this);
+                RemoveFromSceneRenderer();
             }
+        }
+
+        private void AddToSceneRenderer()
+        {
+            Debug.Assert(!_addedToSceneRenderer);
+
+            SceneRenderer = Scene.GetComponent<SceneRenderer>();
+
+            if (SceneRenderer != null)
+            {
+                SceneRenderer.AddRenderer(this);
+                _addedToSceneRenderer = true;
+            }
+        }
+
+        private void RemoveFromSceneRenderer()
+        {
+            Debug.Assert(_addedToSceneRenderer);
+            SceneRenderer.RemoveRenderer(this);
         }
     }
 

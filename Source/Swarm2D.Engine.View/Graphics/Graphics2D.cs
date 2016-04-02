@@ -108,7 +108,7 @@ namespace Swarm2D.Engine.View
             }
 
             screenX = mapX + objectXOffset;
-            screenY = mapY + objectYOffset;
+            screenY = mapY - objectYOffset;
 
             if (horizontalCenter)
             {
@@ -117,7 +117,7 @@ namespace Swarm2D.Engine.View
 
             if (verticalCenter)
             {
-                screenY = mapY + objectYOffset - objectOriginalHeight * 0.5f;
+                screenY = mapY - objectYOffset - objectOriginalHeight * 0.5f;
             }
 
             outVertices[verticesStartIndex + 0] = screenX + 0;
@@ -127,18 +127,18 @@ namespace Swarm2D.Engine.View
             outVertices[verticesStartIndex + 4] = screenX + objectWidth;
             outVertices[verticesStartIndex + 5] = screenY + objectHeight;
             outVertices[verticesStartIndex + 6] = screenX + objectWidth;
-            outVertices[verticesStartIndex + 7] = screenY + 0;
+            outVertices[verticesStartIndex + 7] = screenY + 0;  
 
             if (spritePart.Rotated)
             {
-                outUvs[uvsStartIndex + 0] = uMax;
-                outUvs[uvsStartIndex + 1] = vMax;
-                outUvs[uvsStartIndex + 2] = uMin;
-                outUvs[uvsStartIndex + 3] = vMax;
-                outUvs[uvsStartIndex + 4] = uMin;
-                outUvs[uvsStartIndex + 5] = vMin;
-                outUvs[uvsStartIndex + 6] = uMax;
-                outUvs[uvsStartIndex + 7] = vMin;
+                outUvs[uvsStartIndex + 0] = uMin;
+                outUvs[uvsStartIndex + 1] = vMin;
+                outUvs[uvsStartIndex + 2] = uMax;
+                outUvs[uvsStartIndex + 3] = vMin;
+                outUvs[uvsStartIndex + 4] = uMax;
+                outUvs[uvsStartIndex + 5] = vMax;
+                outUvs[uvsStartIndex + 6] = uMin;
+                outUvs[uvsStartIndex + 7] = vMax;
             }
             else
             {

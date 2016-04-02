@@ -220,8 +220,8 @@ namespace Swarm2D.SpriteEditor
                 Bitmap spriteBitmap = _spriteDataEditor.GetSpritePartBitmap(spriteInfo.Name);
 
                 DrawBitmapToBitmap(spriteBitmap, sheetBitmap, spriteRect.X, spriteRect.Y, spriteRect.Rotated, sheetSprite.Key, graphics);
-                DrawBitmapEdgesToBitmap(spriteBitmap, sheetBitmap, spriteRect.X, spriteRect.Y, spriteRect.Rotated, sheetSprite.Key, graphics);
-                DrawBitmapCornersToBitmap(spriteBitmap, sheetBitmap, spriteRect.X, spriteRect.Y, spriteRect.Rotated, sheetSprite.Key, graphics);
+                //DrawBitmapEdgesToBitmap(spriteBitmap, sheetBitmap, spriteRect.X, spriteRect.Y, spriteRect.Rotated, sheetSprite.Key, graphics);
+                //DrawBitmapCornersToBitmap(spriteBitmap, sheetBitmap, spriteRect.X, spriteRect.Y, spriteRect.Rotated, sheetSprite.Key, graphics);
 
                 if (spriteBitmap != null)
                 {

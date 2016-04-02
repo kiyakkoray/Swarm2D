@@ -42,6 +42,9 @@ namespace Swarm2D.Engine.View
         public float RotationAsAngle { get; set; }
 
         [ComponentProperty]
+        public Vector2 Offset { get; set; }
+
+        [ComponentProperty]
         public Sprite Sprite
         {
             get { return _sprite; }
@@ -71,12 +74,12 @@ namespace Swarm2D.Engine.View
                 if (Sprite != null)
                 {
                     boundingBox.Size = new Vector2(Sprite.Width, Sprite.Height);
-                    boundingBox.Position = SceneEntity.GlobalPosition - boundingBox.Size * 0.5f;
+                    boundingBox.Position = SceneEntity.GlobalPosition + Offset - boundingBox.Size * 0.5f;
                 }
                 else
                 {
                     boundingBox.Size = new Vector2(0, 0);
-                    boundingBox.Position = SceneEntity.GlobalPosition;
+                    boundingBox.Position = SceneEntity.GlobalPosition + Offset;
                 }
 
                 return boundingBox;
@@ -96,9 +99,9 @@ namespace Swarm2D.Engine.View
 
         public override void Render(RenderContext renderContext, Box renderBox)
         {
-            if (!Mathf.IsZero(RotationAsAngle))
+            if (!Mathf.IsZero(RotationAsAngle) || !Mathf.IsZero(Offset.Length))
             {
-                var worldMatrix = SceneEntity.TransformMatrix * Matrix4x4.RotationAboutZ(RotationAsAngle * Mathf.Deg2Rad);
+                var worldMatrix = SceneEntity.TransformMatrix * Matrix4x4.Position2D(Offset) * Matrix4x4.RotationAboutZ(RotationAsAngle * Mathf.Deg2Rad);
                 renderContext.AddGraphicsCommand(new CommandSetWorldMatrix(worldMatrix));
             }
             else

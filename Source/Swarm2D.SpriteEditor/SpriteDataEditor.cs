@@ -92,9 +92,19 @@ namespace Swarm2D.SpriteEditor
         {
             string spritePartsPath = @"SpriteParts\";
 
-            string bitmapName = Resources.ResourcesPath + @"\" + spritePartsPath + name + ".bmp";
+            string bitmapBmpName = Resources.ResourcesPath + @"\" + spritePartsPath + name + ".bmp";
+            string bitmapPngName = Resources.ResourcesPath + @"\" + spritePartsPath + name + ".png";
 
-            Bitmap bitmap = Bitmap.FromFile(bitmapName) as Bitmap;
+            Bitmap bitmap = null;
+
+            if (File.Exists(bitmapBmpName))
+            {
+                bitmap = Bitmap.FromFile(bitmapBmpName) as Bitmap;
+            }
+            else
+            {
+                bitmap = Bitmap.FromFile(bitmapPngName) as Bitmap;
+            }
 
             //Debug.Log("Importing sprite: " + name);
             //Bitmap bmp = GetSpriteBitmap(name);
