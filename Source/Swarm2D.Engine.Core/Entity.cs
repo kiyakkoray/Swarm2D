@@ -76,21 +76,49 @@ namespace Swarm2D.Engine.Core
 
         internal Dictionary<int, List<MessageHandlerDelegate>> EntityMessageHandlers { get; private set; }
 
-        public bool IsPrefab { get; internal set; }
-        public bool IsInstantiatedFromPrefab { get; internal set; }
-        public string PrefabName { get; internal set; }
+        public bool IsPrefab { get; private set; }
+        public bool IsInstantiatedFromPrefab { get; private set; }
+        public string PrefabName { get; private set; }
 
-        internal Entity(string name)
+        internal Entity(Engine engine)
         {
+            Engine = engine;
             Components = new List<Component>();
             Children = new LinkedList<Entity>();
             EntityMessageHandlers = new Dictionary<int, List<MessageHandlerDelegate>>();
 
-            Name = name;
+            IsDestroyed = true;
+            Name = "";
+        }
 
+        internal void Reset(string name)
+        {
+            Debug.Assert(IsDestroyed, "IsDestroyed");
+
+            Name = name;
+            IsDestroyed = false;
             IsPrefab = false;
             IsInstantiatedFromPrefab = false;
             PrefabName = "";
+        }
+
+        internal void ResetAsPrefab(string name)
+        {
+            Debug.Assert(IsDestroyed, "IsDestroyed");
+
+            Name = name;
+            IsDestroyed = false;
+            IsPrefab = true;
+            IsInstantiatedFromPrefab = false;
+            PrefabName = "";
+        }
+
+        internal void SetAsInstantiatedFromPrefab(string prefabName)
+        {
+            Debug.Assert(!IsDestroyed, "!IsDestroyed");
+
+            IsInstantiatedFromPrefab = true;
+            PrefabName = prefabName;
         }
 
         private Component AddComponentWithInfo(ComponentInfo componentInfo)
@@ -257,15 +285,34 @@ namespace Swarm2D.Engine.Core
                 for (int i = 0; i < Components.Count; i++)
                 {
                     Component component = Components[i];
-
                     component.Destroy();
                 }
+
+                Components.Clear();
 
                 if (Parent != null)
                 {
                     Parent.Children.Remove(NodeOnEntitiesList);
                     NodeOnEntitiesList = null;
                 }
+
+                Debug.Assert(Children.Count == 0, "Children.Count == 0");
+
+#if DEBUG
+                foreach (var entityMessageHandlerList in EntityMessageHandlers.Values)
+                {
+                    Debug.Assert(entityMessageHandlerList.Count == 0, "EntityMessageHandlers.Count == 0");
+                }
+
+#endif
+
+                EntityMessageHandlers.Clear();
+
+                _parent = null;
+                Domain = null;
+                ChildDomain = null;
+
+                Engine.FreeEntity(this);
             }
         }
 
@@ -300,8 +347,8 @@ namespace Swarm2D.Engine.Core
 
         public Entity CreateChildEntity(string name)
         {
-            Entity entity = new Entity(name);
-            entity.Engine = Engine;
+            Entity entity = Engine.CreateEntity();
+            entity.Reset(name);
             entity.Parent = this;
 
             if (ChildDomain != null)
@@ -329,7 +376,7 @@ namespace Swarm2D.Engine.Core
             return null;
         }
 
-        public Engine Engine { get; internal set; }
+        public Engine Engine { get; private set; }
 
         public IEntityDomain Domain { get; set; }
 

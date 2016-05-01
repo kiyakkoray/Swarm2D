@@ -32,7 +32,8 @@ using Swarm2D.Library;
 
 namespace Swarm2D.Engine.Logic
 {
-    public class SceneEntity : Component
+    [PoolableComponent]
+    public sealed class SceneEntity : Component
     {
         public SceneEntity Parent { get; private set; }
 
@@ -205,6 +206,11 @@ namespace Swarm2D.Engine.Logic
             }
         }
 
+        protected override void OnAdded()
+        {
+            base.OnAdded();
+        }
+
         protected override void OnInitialize()
         {
             Parent = Entity.Parent.GetComponent<SceneEntity>();
@@ -215,8 +221,24 @@ namespace Swarm2D.Engine.Logic
 
         protected override void OnDestroy()
         {
-            base.OnDestroy();
             Scene.OnRemoveSceneEntity(this);
+
+            if (Engine.PooledMode)
+            {
+                _transformMatrix = Matrix4x4.Identity;
+                _localTransform = Matrix4x4.Identity;
+                _localPosition = Vector2.Zero;
+                _localScale = new Vector2(1, 1);
+                _localRotation = 0.0f;
+                _localTransformDirty = false;
+                _parentTransformWasDirty = false;
+                _globalPosition = Vector2.Zero;
+
+                Parent = null;
+                Scene = null;
+            }
+
+            base.OnDestroy();
         }
 
         private void RecalculateTransform()

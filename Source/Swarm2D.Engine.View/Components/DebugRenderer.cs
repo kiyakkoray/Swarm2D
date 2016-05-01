@@ -34,7 +34,8 @@ using Swarm2D.Library;
 namespace Swarm2D.Engine.View
 {
     [RequiresComponent(typeof(SceneEntity))]
-    public class DebugRenderer : Renderer
+    [PoolableComponent]
+    public sealed class DebugRenderer : Renderer
     {
         public bool DebugPhysics { get; set; }
 
@@ -57,6 +58,13 @@ namespace Swarm2D.Engine.View
 
             Width = 30.0f;
             Height = 30.0f;
+        }
+
+        protected override void OnDestroy()
+        {
+            DebugPhysics = false;
+
+            base.OnDestroy();
         }
 
         public override void Render(RenderContext renderContext, Box renderBox)

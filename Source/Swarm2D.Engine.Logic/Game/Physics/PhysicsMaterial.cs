@@ -31,7 +31,7 @@ using Swarm2D.Engine.Core;
 
 namespace Swarm2D.Engine.Logic
 {
-    public class PhysicsMaterial : Resource
+    public sealed class PhysicsMaterial : Resource
     {
         public float Density { get; set; }
         public float Restutition { get; set; }

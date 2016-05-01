@@ -311,6 +311,7 @@ namespace Swarm2D.Engine.Logic
         internal void RemovePhysicsObject(PhysicsObject physicsObject)
         {
             PhysicsObjects.Remove(physicsObject.NodeOnPhysicsObjectList);
+            physicsObject.NodeOnPhysicsObjectList = null;
 
             switch (physicsObject.Type)
             {
@@ -324,6 +325,8 @@ namespace Swarm2D.Engine.Logic
                     _triggers.Remove(physicsObject.NodeOnTypeList);
                     break;
             }
+
+            physicsObject.NodeOnTypeList = null;
 
             for (int i = 0; i < physicsObject.CurrentGrids.Count; i++)
             {
@@ -354,11 +357,7 @@ namespace Swarm2D.Engine.Logic
                         ? collision.NodeOnB
                         : collision.NodeOnA;
 
-                    if (otherPhysicsObject.Type == PhysicsObject.PhysicsType.RigidBody)
-                    {
-                        otherPhysicsObject.RemoveCollision(nodeOnOther);
-                    }
-
+                    otherPhysicsObject.RemoveCollision(nodeOnOther);
                     _collisionList.Remove(collision.NodeOnList);
 
                     currentNode = nextNode;
@@ -660,11 +659,7 @@ namespace Swarm2D.Engine.Logic
                     PhysicsObject physicsObjectB = collisionCheckData.PhysicsObjectB;
 
                     collision.NodeOnA = physicsObjectA.AddCollision(collision);
-
-                    if (physicsObjectB.Type == PhysicsObject.PhysicsType.RigidBody)
-                    {
-                        collision.NodeOnB = physicsObjectB.AddCollision(collision);
-                    }
+                    collision.NodeOnB = physicsObjectB.AddCollision(collision);
 
                     collision.NodeOnList = _collisionList.AddLast(collision);
                     _addedCollisionsOnLastSimulate.Add(collision);
@@ -812,11 +807,7 @@ namespace Swarm2D.Engine.Logic
                     _removedCollisionsOnLastSimulate.Add(collision);
 
                     physicsObjectA.RemoveCollision(collision.NodeOnA);
-
-                    if (physicsObjectB.Type == PhysicsObject.PhysicsType.RigidBody)
-                    {
-                        physicsObjectB.RemoveCollision(collision.NodeOnB);
-                    }
+                    physicsObjectB.RemoveCollision(collision.NodeOnB);
                 }
 
                 currentNode = nextNode;
@@ -943,10 +934,13 @@ namespace Swarm2D.Engine.Logic
                                 ? collision.PhysicsObjectB
                                 : collision.PhysicsObjectA;
 
-                            if (!neighbour.AddedToOrderdedRigidBodiesToRepositionList)
+                            if (neighbour.Type == PhysicsObject.PhysicsType.RigidBody)
                             {
-                                neighbour.AddedToOrderdedRigidBodiesToRepositionList = true;
-                                _orderdedRigidBodiesToReposition.Add(neighbour);
+                                if (!neighbour.AddedToOrderdedRigidBodiesToRepositionList)
+                                {
+                                    neighbour.AddedToOrderdedRigidBodiesToRepositionList = true;
+                                    _orderdedRigidBodiesToReposition.Add(neighbour);
+                                }
                             }
                         }
                     }

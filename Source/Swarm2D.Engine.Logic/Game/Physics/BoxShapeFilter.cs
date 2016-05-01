@@ -32,7 +32,8 @@ using Swarm2D.Library;
 
 namespace Swarm2D.Engine.Logic
 {
-    public class BoxShapeFilter : ShapeFilter, IPolygon
+    [PoolableComponent]
+    public sealed class BoxShapeFilter : ShapeFilter, IPolygon
     {
         [ComponentProperty]
         public float Width { get; set; }
@@ -50,18 +51,45 @@ namespace Swarm2D.Engine.Logic
             {
                 if (!_initialized)
                 {
-                    _vertices = new List<Vector2>();
-
-                    _vertices.Add(new Vector2(+Width * 0.5f, +Height * 0.5f));
-                    _vertices.Add(new Vector2(+Width * 0.5f, -Height * 0.5f));
-                    _vertices.Add(new Vector2(-Width * 0.5f, -Height * 0.5f));
-                    _vertices.Add(new Vector2(-Width * 0.5f, +Height * 0.5f));
+                    _vertices[0] = new Vector2(+Width * 0.5f, +Height * 0.5f);
+                    _vertices[1] = new Vector2(+Width * 0.5f, -Height * 0.5f);
+                    _vertices[2] = new Vector2(-Width * 0.5f, -Height * 0.5f);
+                    _vertices[3] = new Vector2(-Width * 0.5f, +Height * 0.5f);
 
                     _initialized = true;
                 }
 
                 return _vertices;
             }
+        }
+
+        public BoxShapeFilter()
+        {
+            _vertices = new List<Vector2>();
+
+            _vertices.Add(Vector2.Zero);
+            _vertices.Add(Vector2.Zero);
+            _vertices.Add(Vector2.Zero);
+            _vertices.Add(Vector2.Zero);
+        }
+
+        protected override void OnAdded()
+        {
+            base.OnAdded();
+        }
+
+        protected override void OnDestroy()
+        {
+            _initialized = false;
+            Width = 0;
+            Height = 0;
+
+            _vertices[0] = Vector2.Zero;
+            _vertices[1] = Vector2.Zero;
+            _vertices[2] = Vector2.Zero;
+            _vertices[3] = Vector2.Zero;
+            
+            base.OnDestroy();
         }
 
         public override ShapeInstance CreateShapeInstance()

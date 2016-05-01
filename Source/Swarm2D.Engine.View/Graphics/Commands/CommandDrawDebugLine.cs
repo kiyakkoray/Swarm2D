@@ -31,12 +31,12 @@ using Swarm2D.Library;
 
 namespace Swarm2D.Engine.View
 {
-    class CommandDrawDebugLine : GraphicsCommand
+    public class CommandDrawDebugLine : GraphicsCommand
     {
         private Vector2 _pointA;
         private Vector2 _pointB;
 
-        internal CommandDrawDebugLine(Vector2 pointA, Vector2 pointB)
+        public CommandDrawDebugLine(Vector2 pointA, Vector2 pointB)
         {
             _pointA = pointA;
             _pointB = pointB;

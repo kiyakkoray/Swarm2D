@@ -182,6 +182,7 @@ namespace Swarm2D.Engine.Core
             //if (prefab.GetComponent<SceneEntity>() != null)
             {
                 clonedPrefab = _entity.CreateChildEntity(prefab.Name + "(Clone)-" + _lastClonedPrefabId);
+                clonedPrefab.SetAsInstantiatedFromPrefab(prefab.Name);
                 _lastClonedPrefabId++;
 
                 foreach (Component componentPrefab in prefab.Components)

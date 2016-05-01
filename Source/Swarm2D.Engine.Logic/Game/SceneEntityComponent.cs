@@ -63,5 +63,12 @@ namespace Swarm2D.Engine.Logic
                 return Scene.GameLogic;
             }
         }
+
+        protected override void OnDestroy()
+        {
+            _sceneEntity = null;
+
+            base.OnDestroy();
+        }
     }
 }

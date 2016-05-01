@@ -72,12 +72,15 @@ namespace Swarm2D.Engine.View
 
         protected override void OnDestroy()
         {
-            base.OnDestroy();
-
             if (_addedToSceneRenderer)
             {
                 RemoveFromSceneRenderer();
             }
+
+            SceneRenderer = null;
+            Width = 0;
+            Height = 0;
+            base.OnDestroy();
         }
 
         private void AddToSceneRenderer()
@@ -97,6 +100,7 @@ namespace Swarm2D.Engine.View
         {
             Debug.Assert(_addedToSceneRenderer);
             SceneRenderer.RemoveRenderer(this);
+            _addedToSceneRenderer = false;
         }
     }
 

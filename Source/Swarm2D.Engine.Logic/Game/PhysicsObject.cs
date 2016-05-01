@@ -33,7 +33,8 @@ using Swarm2D.Library;
 namespace Swarm2D.Engine.Logic
 {
     [RequiresComponent(typeof(SceneEntity))]
-    public class PhysicsObject : SceneEntityComponent
+    [PoolableComponent]
+    public sealed class PhysicsObject : SceneEntityComponent
     {
         public enum PhysicsType
         {
@@ -82,9 +83,10 @@ namespace Swarm2D.Engine.Logic
         public PhysicsWorld PhysicsWorld { get; private set; }
 
         private List<PhysicsWorldGridCell> _newGrids;
+
         internal List<PhysicsWorldGridCell> CurrentGrids { get; private set; }
 
-        private PhysicsType _type = PhysicsType.RigidBody;
+        private PhysicsType _type;
 
         [ComponentProperty]
         public PhysicsType Type
@@ -154,7 +156,7 @@ namespace Swarm2D.Engine.Logic
 
         internal float PreviousRotation { get; set; }
 
-        private bool _isTransformDirty = false; //asigned to true at OnInitialize
+        private bool _isTransformDirty;
 
         internal List<PhysicsObject> CurrentlyCollectedRigidBodiesToCheckWith { get; private set; }
         internal List<PhysicsObject> CurrentlyCollectedStaticBodiesToCheckWith { get; private set; }
@@ -164,27 +166,55 @@ namespace Swarm2D.Engine.Logic
         internal LinkedListNode<PhysicsObject> NodeOnTypeList { get; set; } //rigid body, trigger list etc..
         internal LinkedListNode<PhysicsObject> NodeOnDirtyTransformList { get; private set; }
 
-        private int _minGridX = int.MinValue;
-        private int _minGridY = int.MinValue;
+        private int _minGridX;
+        private int _minGridY;
+                             
+        private int _maxGridX;
+        private int _maxGridY;
 
-        private int _maxGridX = int.MinValue;
-        private int _maxGridY = int.MinValue;
-
-        protected override void OnAdded()
+        public PhysicsObject()
         {
-            base.OnAdded();
-
             _newGrids = new List<PhysicsWorldGridCell>();
             CurrentGrids = new List<PhysicsWorldGridCell>();
 
             Collisions = new LinkedList<Collision>();
-            StaticCollisionCount = 0;
 
             //those below had a parameter in their constructors as 64
             CurrentlyCollectedRigidBodiesToCheckWith = new List<PhysicsObject>();
             CurrentlyCollectedStaticBodiesToCheckWith = new List<PhysicsObject>();
             CurrentlyCollectedTriggersToCheckWith = new List<PhysicsObject>();
+        }
 
+        protected override void OnAdded()
+        {
+            base.OnAdded();
+
+            _isTransformDirty = false; //assigned to true at OnInitialize
+            _minGridX = int.MinValue;
+            _minGridY = int.MinValue;
+
+            _maxGridX = int.MinValue;
+            _maxGridY = int.MinValue;
+            _type = PhysicsType.RigidBody;
+
+            {
+                Velocity = Vector2.Zero;
+                AngularVelocity = 0.0f;
+
+                Mass = 0.0f;
+                InverseMass = 0.0f;
+
+                Inertia = 0.0f;
+                InverseInertia = 0.0f;
+
+                FixedRotation = false;
+                Layer = 0;
+
+                AddedToOrderdedRigidBodiesToRepositionList = false;
+                RepositionedOnCurrentUpdate = false;
+            }
+
+            StaticCollisionCount = 0;
             PhysicsWorld = Scene.GetComponent<PhysicsWorld>();
 
             Debug.Assert(PhysicsWorld != null, "a physics objects added to a scene without physics world");
@@ -246,11 +276,30 @@ namespace Swarm2D.Engine.Logic
 
         protected override void OnDestroy()
         {
-            base.OnDestroy();
-
             Debug.Assert(PhysicsWorld != null, "PhysicsWorld is null on OnDestroy");
 
             PhysicsWorld.RemovePhysicsObject(this);
+
+            Debug.Assert(NodeOnPhysicsObjectList == null, "NodeOnPhysicsObjectList == null");
+            Debug.Assert(NodeOnTypeList == null, "NodeOnTypeList == null");
+            Debug.Assert(NodeOnDirtyTransformList == null, "NodeOnDirtyTransformList == null");
+
+            if (Engine.PooledMode)
+            {
+                _newGrids.Clear();
+                CurrentGrids.Clear();
+                Collisions.Clear();
+                CurrentlyCollectedRigidBodiesToCheckWith.Clear();
+                CurrentlyCollectedStaticBodiesToCheckWith.Clear();
+                CurrentlyCollectedTriggersToCheckWith.Clear();
+
+                _shapeFilter = null;
+                ShapeData = null;
+                Material = null;
+                PhysicsWorld = null;
+            }
+
+            base.OnDestroy();
         }
 
         public void Refresh()
@@ -401,6 +450,8 @@ namespace Swarm2D.Engine.Logic
 
         internal void RepositionUsingCollisionInformations()
         {
+            Debug.Assert(Type == PhysicsType.RigidBody);
+
             MinimumTranslation = Vector2.Zero;
 
             CheckAndMakeTransformation();

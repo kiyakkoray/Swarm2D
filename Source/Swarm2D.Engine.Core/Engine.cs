@@ -27,7 +27,6 @@ using System;
 using System.Collections.Generic;
 using Swarm2D.Library;
 using System.Reflection;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
@@ -35,6 +34,8 @@ namespace Swarm2D.Engine.Core
 {
     public sealed class Engine : FrameworkDomain
     {
+        public bool PooledMode { get; private set; }
+
         public long CurrentFrame { get; private set; }
 
         private bool _domainsInitialized = false;
@@ -61,10 +62,27 @@ namespace Swarm2D.Engine.Core
         private Dictionary<Type, LinkedList<Component>> _components; //all created components
         private EngineController _engineController;
 
-        public Engine()
+        private Stack<Entity> _freeEntities;
+        private Dictionary<Type, Stack<Component>> _freeComponents;
+
+        public Engine(bool pooledMode)
         {
+            PooledMode = pooledMode;
+
             _components = new Dictionary<Type, LinkedList<Component>>();
             GlobalMessageHandlers = new Dictionary<int, List<MessageHandlerDelegate>>();
+
+            if (PooledMode)
+            {
+                _freeEntities = new Stack<Entity>(16384);
+
+                for (int i = 0; i < 16384; i++)
+                {
+                    _freeEntities.Push(new Entity(this));
+                }
+
+                _freeComponents = new Dictionary<Type, Stack<Component>>();
+            }
 
             InitializePrefabManager();
 
@@ -73,8 +91,8 @@ namespace Swarm2D.Engine.Core
 
         private void CreateRootEntity()
         {
-            _rootEntity = new Entity("Engine");
-            _rootEntity.Engine = this;
+            _rootEntity = new Entity(this);
+            _rootEntity.Reset("Engine");
 
             _engineController = _rootEntity.AddComponent<EngineController>();
             _rootEntity.Domain = _engineController;
@@ -214,9 +232,8 @@ namespace Swarm2D.Engine.Core
 
         public Entity CreatePrefab(string name)
         {
-            Entity prefab = new Entity(name);
-            prefab.Engine = this;
-            prefab.IsPrefab = true;
+            Entity prefab = new Entity(this);
+            prefab.ResetAsPrefab(name);
 
             _prefabs.Add(name, prefab);
 
@@ -228,14 +245,69 @@ namespace Swarm2D.Engine.Core
             Entity prefab = _prefabs[name];
 
             Entity clonedPrefab = domain.InstantiatePrefab(prefab);
-
-            clonedPrefab.IsInstantiatedFromPrefab = true;
-            clonedPrefab.PrefabName = name;
+            Debug.Assert(clonedPrefab.IsInstantiatedFromPrefab, "clonedPrefab.IsInstantiatedFromPrefab");
 
             return clonedPrefab;
         }
 
         #endregion
+
+        internal Entity CreateEntity()
+        {
+            if (PooledMode)
+            {
+                if (_freeEntities.Count > 0)
+                {
+                    return _freeEntities.Pop();
+                }
+            }
+
+            return new Entity(this);
+        }
+
+        internal void FreeEntity(Entity entity)
+        {
+            if (PooledMode)
+            {
+                Debug.Assert(entity.Engine == this, "entity.Engine == this");
+                _freeEntities.Push(entity);
+            }
+        }
+
+        internal Component CreateComponentIfExists(Type type)
+        {
+            if (PooledMode)
+            {
+                Stack<Component> _freComponentsOfType;
+
+                if (_freeComponents.TryGetValue(type, out _freComponentsOfType))
+                {
+                    if (_freComponentsOfType.Count > 0)
+                    {
+                        return _freComponentsOfType.Pop();
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        internal void FreeComponent(Component component)
+        {
+            if (PooledMode)
+            {
+                Stack<Component> _freComponentsOfType;
+                Type type = component.GetType();
+
+                if (!_freeComponents.TryGetValue(type, out _freComponentsOfType))
+                {
+                    _freComponentsOfType = new Stack<Component>();
+                    _freeComponents.Add(type, _freComponentsOfType);
+                }
+
+                _freComponentsOfType.Push(component);
+            }
+        }
     }
 
     public class LateUpdateMessage : EntityMessage

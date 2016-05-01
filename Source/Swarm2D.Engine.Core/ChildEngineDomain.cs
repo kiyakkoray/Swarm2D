@@ -57,7 +57,7 @@ namespace Swarm2D.Engine.Core
 
         public void CreateEngine()
         {
-            ChildEngine = new Engine();
+            ChildEngine = new Engine(Engine.PooledMode);
             ChildEngine.Start();
         }
     }

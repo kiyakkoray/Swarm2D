@@ -34,7 +34,8 @@ using Swarm2D.Library;
 namespace Swarm2D.Engine.View
 {
     [RequiresComponent(typeof(SceneEntity))]
-    public class SpriteRenderer : Renderer
+    [PoolableComponent]
+    public sealed class SpriteRenderer : Renderer
     {
         private Sprite _sprite;
 
@@ -95,6 +96,15 @@ namespace Swarm2D.Engine.View
                 Width = Sprite.Width;
                 Height = Sprite.Height;
             }
+        }
+
+        protected override void OnDestroy()
+        {
+            _sprite = null;
+            Offset = Vector2.Zero;
+            RotationAsAngle = 0.0f;
+
+            base.OnDestroy();
         }
 
         public override void Render(RenderContext renderContext, Box renderBox)

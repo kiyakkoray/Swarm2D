@@ -51,6 +51,8 @@ namespace Swarm2D.Engine.Core
 
         public Type ComponentType { get; private set; }
 
+        public bool Poolable { get; private set; }
+
         static ComponentInfo()
         {
             ComponentInfos = new List<ComponentInfo>();
@@ -147,6 +149,15 @@ namespace Swarm2D.Engine.Core
 
                 _componentConstructor = type.GetConstructor(new Type[] { });
 
+                {
+                    object[] poolableAttributes = type.GetCustomAttributes(typeof (PoolableComponent), true);
+                    
+                    if (poolableAttributes != null && poolableAttributes.Length > 0)
+                    {
+                        Poolable = true;
+                    }
+                }
+
                 PropertyInfo[] propertyInfos = type.GetProperties();
 
                 foreach (PropertyInfo propertyInfo in propertyInfos)
@@ -200,10 +211,21 @@ namespace Swarm2D.Engine.Core
         internal Component CreateComponent(Entity entity)
         {
             Engine engine = entity.Engine;
+            bool pooledMode = engine.PooledMode;
 
-            Component component = (Component)_componentConstructor.Invoke(ConstructorParameters);
-            //Component component = _componentFastConstructor.Construct() as Component;
-            component.Entity = entity;
+            Component component = null;
+
+            if (Poolable && pooledMode)
+            {
+                component = engine.CreateComponentIfExists(ComponentType);
+            }
+
+            if (component == null)
+            {
+                component = (Component) _componentConstructor.Invoke(ConstructorParameters);
+            }
+
+            component.Reset(entity);
 
             foreach (KeyValuePair<Type, MethodInfo> globalMessageHandler in GlobalMessageHandlers)
             {

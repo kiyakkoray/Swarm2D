@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Swarm2D.Library;
 
 namespace Swarm2D.Engine.Core
 {
@@ -47,7 +48,7 @@ namespace Swarm2D.Engine.Core
         public Entity Entity
         {
             get;
-            internal set;
+            private set;
         }
 
         protected Component()
@@ -55,6 +56,15 @@ namespace Swarm2D.Engine.Core
             GlobalMessageHandlers = new Dictionary<int, List<MessageHandlerDelegate>>();
             DomainMessageHandlers = new Dictionary<int, List<MessageHandlerDelegate>>();
             EntityMessageHandlers = new Dictionary<int, List<MessageHandlerDelegate>>();
+            IsDestroyed = true;
+        }
+
+        internal void Reset(Entity entity)
+        {
+            Debug.Assert(IsDestroyed, "IsDestroyed");
+            
+            IsDestroyed = false;
+            Entity = entity;
         }
 
         internal void Initialize()
@@ -117,11 +127,14 @@ namespace Swarm2D.Engine.Core
 
         internal void Destroy()
         {
+            Debug.Assert(!IsDestroyed, "!IsDestroyed");
+
             OnDestroy();
 
+            Engine engine = Engine;
             IsDestroyed = true;
 
-            Engine.OnComponentDestroyed(this);
+            engine.OnComponentDestroyed(this);
 
             if (Entity.Domain != null)
             {
@@ -134,7 +147,7 @@ namespace Swarm2D.Engine.Core
 
                 foreach (MessageHandlerDelegate globalMessageHandlerMethod in globalMessageHandlerMethods)
                 {
-                    Engine.GlobalMessageHandlers[globalMessageHandler.Key].Remove(globalMessageHandlerMethod);
+                    engine.GlobalMessageHandlers[globalMessageHandler.Key].Remove(globalMessageHandlerMethod);
                 }
             }
 
@@ -147,6 +160,15 @@ namespace Swarm2D.Engine.Core
                     Entity.EntityMessageHandlers[globalMessageHandler.Key].Remove(messageHandlerMethod);
                 }
             }
+
+            GlobalMessageHandlers.Clear();
+            DomainMessageHandlers.Clear();
+            EntityMessageHandlers.Clear();
+
+            NodeOnAllComponentList = null;
+            Entity = null;
+
+            engine.FreeComponent(this);
         }
 
         protected virtual void OnDestroy()
@@ -188,5 +210,11 @@ namespace Swarm2D.Engine.Core
         {
 
         }
+    }
+
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    public sealed class PoolableComponent : Attribute
+    {
+        
     }
 }
