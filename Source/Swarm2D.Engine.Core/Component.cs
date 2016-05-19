@@ -64,6 +64,9 @@ namespace Swarm2D.Engine.Core
             Debug.Assert(IsDestroyed, "IsDestroyed");
             
             IsDestroyed = false;
+            IsInitialized = false;
+            IsStarted = false;
+
             Entity = entity;
         }
 
