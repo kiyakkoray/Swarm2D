@@ -55,7 +55,7 @@ namespace Swarm2D.SpriteSheetGenerator
             Engine.Core.Engine engine = new Engine.Core.Engine(false);
             Entity rootEntity = engine.RootEntity;
 
-            var workspace = rootEntity.AddComponent<SpriteSheetGeneratorWorkspace>();
+            rootEntity.AddComponent<SpriteEditorDomain>();
 
             engine.Start();
 
