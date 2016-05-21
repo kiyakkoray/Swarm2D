@@ -1,5 +1,5 @@
 ﻿/******************************************************************************
-Copyright (c) 2015 Koray Kiyakoglu
+Copyright (c) 2016 Koray Kiyakoglu
 
 http://www.swarm2d.com
 
@@ -23,108 +23,170 @@ SOFTWARE.
 
 ******************************************************************************/
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Swarm2D.Engine.Core;
-using Swarm2D.Engine.Logic;
 using Swarm2D.Engine.View;
-using Swarm2D.Engine.View.GUI;
 using Swarm2D.Library;
 
 namespace Swarm2D.SpriteEditor
 {
-    public class SpriteEditorDomain : EngineComponent
+    class SpriteEditorDomain : EngineComponent
     {
-        public UIFrame UIRootObject
+        private SpriteDataEditor _spriteDataEditor;
+        private SpriteData _spriteData;
+
+        private string[] _spritePartNames;
+
+        private bool _generated = false;
+
+        protected override void OnAdded()
         {
-            get
-            {
-                return UIManager.RootObject;
-            }
-        }
-
-        public UIManager UIManager { get; private set; }
-        public SpriteEditorGUI EditorGUI { get; private set; }
-        public IOSystem IOSystem { get; private set; }
-        public ProjectEditor ProjectEditor { get; private set; }
-
-        public SpriteData EditorSpriteData { get; private set; }
-        public SpriteData SpriteData { get; private set; }
-
-        protected override void OnStart()
-        {
-            SpriteData = new SpriteData("spriteData");
-            SpriteData.Load();
-
-            ProjectEditor = new ProjectEditor(SpriteData);
-
-            EditorSpriteData = new SpriteData("Editor", "spriteData");
-
-            IOSystem = Entity.GetComponent<IOSystem>();
-
-            //EditorInput.Initialize(IOSystem);
-            //EditorScreen.Initialize(IOSystem);
-
-            //_gameDomain->SetUpdateScreenPosition(false);
-
-            //LoadTemporarySprites();
-
-            Entity uiManagerEntity = Entity.CreateChildEntity("UIManager");
-            UIManager = uiManagerEntity.AddComponent<UIManager>();
-            UIManager.Initialize(IOSystem);
-
-            //UIManager.ShowAllBoxes = true;
-
-            EditorGUI = new SpriteEditorGUI(this);
-            //GameLogic.StopGame();
-
-            ProjectEditor.Initialize(this);
-
-            EditorSpriteData.Load();
-
-            SpriteCategory otherSpriteCategory = EditorSpriteData.SpriteCategories["Other"];
-            otherSpriteCategory.Load();
-
-            UISkin skin = UIManager.Skin;
-
-            skin.ButtonNormalSprite = EditorSpriteData.GetSprite(@"GUI\blackButtonNormal");
-            skin.ButtonMouseDownSprite = EditorSpriteData.GetSprite(@"GUI\blackButtonMouseDown");
-            skin.ButtonMouseOverSprite = EditorSpriteData.GetSprite(@"GUI\blackButtonMouseOver");
-
-            skin.FrameBoxSprite = skin.ButtonNormalSprite;
+            base.OnAdded();
         }
 
         [DomainMessageHandler(MessageType = typeof(UpdateMessage))]
         private void OnUpdate(Message message)
         {
-            //if (GetUpdateScreenPosition())
-            //{
-            //	Width(GetGraphicsForm()->Width());
-            //	Height(GetGraphicsForm()->Height());
-            //}
+            try
+            {
+                if (!_generated)
+                {
+                    _generated = true;
 
-            //if (IOSystem != null)
-            //{
-            //	IOSystem.UpdateInput();
-            //}
+                    _spriteData = new SpriteData("spriteData");
+                    _spriteDataEditor = new SpriteDataEditor(_spriteData);
 
-            EditorGUI.UpdateLoop();
-            UIManager.Update();
-            ProjectEditor.Update();
+                    _spritePartNames = GetSpritePartsList();
 
-            //if (GetUpdateScreenPosition())
-            //{
-            //	_gameDomain->Width(_editorGUI->GetInGameScreen()->Width());
-            //	_gameDomain->Height(_editorGUI->GetInGameScreen()->Height());
-            //	_gameDomain->Position(_editorGUI->GetInGameScreen()->ScreenX(), _editorGUI->GetInGameScreen()->ScreenY());
-            //}
+                    string[] categories = GetCategories(_spritePartNames);
+
+                    foreach (var categoryName in categories)
+                    {
+                        string[] currentSpriteParts = GetSpritePartOfCategories(_spritePartNames, categoryName);
+
+                        SpriteCategory category = _spriteDataEditor.AddNewSpriteCategory(categoryName);
+
+                        foreach (var spritePartName in currentSpriteParts)
+                        {
+                            SpritePart spritePart = _spriteDataEditor.AddSpritePart(category, spritePartName);
+                            _spriteDataEditor.GenerateSpriteFromSpritePart(spritePart);
+                        }
+                    }
+
+                    _spriteDataEditor.GenerateSpriteSheets();
+                }
+                else
+                {
+                    Environment.Exit(0);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.Log("Exception: " + e);
+
+                Environment.Exit(-1);
+            }
         }
 
-        [DomainMessageHandler(MessageType = typeof(RenderMessage))]
-        public void Render(Message message)
+        private string[] GetFiles(string path, string postfix)
         {
-            RenderMessage renderMessage = message as RenderMessage;
-            RenderContext renderContext = renderMessage.RenderContext;
+            string fullPath = Resources.ResourcesPath + @"\" + path + @"\";
 
-            UIManager.Render(renderContext);
+            string[] files = Directory.GetFiles(fullPath, "*." + postfix, SearchOption.AllDirectories);
+
+            for (int i = 0; i < files.Length; i++)
+            {
+                string result = files[i];
+
+                result = result.Substring(fullPath.Length);
+                result = result.Substring(0, result.Length - postfix.Length - 1);
+
+                files[i] = result;
+            }
+
+            return files;
+        }
+
+        private string[] GetSpritePartsList()
+        {
+            string[] spriteBmpPartsList = GetFiles("SpriteParts", "bmp");
+            string[] spritePngPartsList = GetFiles("SpriteParts", "png");
+
+            List<string> spritePartsList = new List<string>();
+            spritePartsList.AddRange(spriteBmpPartsList);
+            spritePartsList.AddRange(spritePngPartsList);
+
+            return spritePartsList.ToArray();
+        }
+
+        private string GetCategoryOf(string spritePartName)
+        {
+            int index = spritePartName.IndexOf(@"\");
+
+            string category = "Default";
+
+            if (index > 0)
+            {
+                category = spritePartName.Substring(0, index);
+            }
+
+            return category;
+        }
+
+        private string GetPureNameOf(string spritePartName)
+        {
+            string result = spritePartName;
+
+            int index = spritePartName.IndexOf("\\");
+
+            if (index > 0)
+            {
+                result = spritePartName.Substring(index + 1);
+            }
+
+            return result;
+        }
+
+        private string[] GetCategories(string[] spriteParts)
+        {
+            List<string> categories = new List<string>();
+
+            foreach (var spritePart in spriteParts)
+            {
+                string categorty = GetCategoryOf(spritePart);
+
+                if (!categories.Contains(categorty))
+                {
+                    categories.Add(categorty);
+                }
+
+            }
+
+            return categories.ToArray();
+        }
+
+        private string[] GetSpritePartOfCategories(string[] allSpriteParts, string category)
+        {
+            List<string> result = new List<string>();
+
+            foreach (var spritePart in allSpriteParts)
+            {
+                string currentCategory = GetCategoryOf(spritePart);
+
+                if (currentCategory == category)
+                {
+                    string pureName = GetPureNameOf(spritePart);
+
+                    result.Add(pureName);
+                }
+            }
+
+            return result.ToArray();
         }
     }
 }

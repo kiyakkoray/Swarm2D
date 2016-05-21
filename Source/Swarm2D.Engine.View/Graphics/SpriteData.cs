@@ -40,8 +40,6 @@ namespace Swarm2D.Engine.View
         public Dictionary<string, Sprite> SpriteNames { get; private set; }
         public Dictionary<string, SpriteCategory> SpriteCategories { get; private set; }
 
-        private string _resourcesName;
-
         public string Name { get; private set; }
         public string ResourcesName
         {
@@ -56,6 +54,7 @@ namespace Swarm2D.Engine.View
             }
         }
 
+        private string _resourcesName;
         private bool _useCustomResources = false;
 
         public SpriteData(string name)
@@ -83,115 +82,6 @@ namespace Swarm2D.Engine.View
             return null;
         }
 
-        private void LoadFromBinary()
-        {
-            byte[] spriteData = Resources.LoadBinaryData(Name);
-            DataReader reader = new DataReader(spriteData);
-
-            int spriteCategoryCount = reader.ReadInt32();
-
-            for (int i = 0; i < spriteCategoryCount; i++)
-            {
-                SpriteCategory spriteCategory = new SpriteCategory(this);
-
-                spriteCategory.Name = reader.ReadUnicodeString();
-                spriteCategory.SheetCount = reader.ReadInt32();
-
-                SpriteCategories.Add(spriteCategory.Name, spriteCategory);
-            }
-
-            int spritePartCount = reader.ReadInt32();
-
-            for (int j = 0; j < spritePartCount; j++)
-            {
-                SpritePart spritePart = new SpritePart();
-
-                spritePart.SheetID = reader.ReadInt32();
-                spritePart.Name = reader.ReadUnicodeString();
-
-                spritePart.Width = reader.ReadInt32();
-                spritePart.Height = reader.ReadInt32();
-
-                spritePart.MinX = reader.ReadInt32();
-                spritePart.MaxX = reader.ReadInt32();
-                spritePart.MinY = reader.ReadInt32();
-                spritePart.MaxY = reader.ReadInt32();
-
-                spritePart.SheetX = reader.ReadInt32();
-                spritePart.SheetY = reader.ReadInt32();
-                spritePart.Rotated = reader.ReadBool();
-
-                int spriteCategoryCountofSprite = reader.ReadInt32();
-
-                for (int k = 0; k < spriteCategoryCountofSprite; k++)
-                {
-                    string spriteCategoryName = reader.ReadUnicodeString();
-                    SpriteCategory spriteCategory = SpriteCategories[spriteCategoryName];
-                    spritePart.Categories.Add(spriteCategory);
-                    spriteCategory.SpriteParts.Add(spritePart);
-                }
-
-                SpritePartNames.Add(spritePart.Name, spritePart);
-                spritePart.Initialize();
-            }
-
-            int spriteCount = reader.ReadInt32();
-
-            for (int i = 0; i < spriteCount; i++)
-            {
-                string spriteName = reader.ReadUnicodeString();
-
-                SpriteGeneric sprite = new SpriteGeneric(spriteName);
-
-                sprite.Width = reader.ReadInt32();
-                sprite.Height = reader.ReadInt32();
-
-                string spritePartName = reader.ReadUnicodeString();
-                sprite.SpritePart = SpritePartNames[spritePartName];
-
-                //int spritePartInfoCount = reader.ReadInt32();
-                //
-                //for (int j = 0; j < spritePartInfoCount; j++)
-                //{
-                //	SpritePartInfo* spritePartInfo = new SpritePartInfo();
-                //
-                //	spritePartInfo.X = reader.ReadFloat();
-                //	spritePartInfo.Y = reader.ReadFloat();
-                //
-                //	if (_spritePartNames.ContainsKey(spritePartName))
-                //	{
-                //		spritePartInfo.SpritePart = _spritePartNames.GetValue(spritePartName);
-                //	}
-                //
-                //	//sprite.SpriteParts.Add(spritePartInfo);
-                //	
-                //}
-
-                if (!SpriteNames.ContainsKey(sprite.Name))
-                {
-                    SpriteNames.Add(sprite.Name, sprite);
-                }
-            }
-
-            /*foreach (SpritePart spritePart in SpritePartNames.Values)
-            {
-                Sprite sprite = new Sprite();
-
-                sprite.Name = spritePart.Name;
-                sprite.Width = spritePart.Width;
-                sprite.Height = spritePart.Height;
-
-                SpritePartInfo spritePartInfo = new SpritePartInfo();
-
-                spritePartInfo.SpritePart = spritePart;
-                spritePartInfo.X = spritePart.Width / 2;
-                spritePartInfo.Y = spritePart.Height / 2;
-
-                sprite.SpriteParts.Add(spritePartInfo);
-                SpriteNames.Add(spritePart.Name, sprite);
-            }*/
-        }
-
         private void LoadFromXml()
         {
             XmlDocument spriteData = Resources.LoadXmlData(ResourcesName, Name);
@@ -214,7 +104,18 @@ namespace Swarm2D.Engine.View
 
             foreach (XmlNode spritePartNode in spritePartsNode)
             {
-                SpritePart spritePart = new SpritePart();
+                XmlNode spritePartCategoriesNode = spritePartNode["SpritePartCategories"];
+
+                SpriteCategory spriteCategory = null;
+                
+                //TODO
+                foreach (XmlNode spritePartCategoryNode in spritePartCategoriesNode)
+                {
+                    string spriteCategoryName = spritePartCategoryNode.InnerText;
+                    spriteCategory = SpriteCategories[spriteCategoryName];
+                }
+
+                SpritePart spritePart = new SpritePart(spriteCategory);
 
                 spritePart.SheetID = Convert.ToInt32(spritePartNode["SheetID"].InnerText);
                 spritePart.Name = spritePartNode["Name"].InnerText;
@@ -230,16 +131,6 @@ namespace Swarm2D.Engine.View
                 spritePart.SheetX = Convert.ToInt32(spritePartNode["SheetX"].InnerText);
                 spritePart.SheetY = Convert.ToInt32(spritePartNode["SheetY"].InnerText);
                 spritePart.Rotated = Convert.ToBoolean(spritePartNode["Rotated"].InnerText);
-
-                XmlNode spritePartCategoriesNode = spritePartNode["SpritePartCategories"];
-
-                foreach (XmlNode spritePartCategoryNode in spritePartCategoriesNode)
-                {
-                    string spriteCategoryName = spritePartCategoryNode.InnerText;
-                    SpriteCategory spriteCategory = SpriteCategories[spriteCategoryName];
-                    spritePart.Categories.Add(spriteCategory);
-                    spriteCategory.SpriteParts.Add(spritePart);
-                }
 
                 SpritePartNames.Add(spritePart.Name, spritePart);
                 spritePart.Initialize();
@@ -299,7 +190,6 @@ namespace Swarm2D.Engine.View
 
         public void Load()
         {
-            //LoadFromBinary();
             LoadFromXml();
         }
     }

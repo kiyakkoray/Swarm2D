@@ -214,10 +214,10 @@ namespace Swarm2D.SpriteEditor
 
             foreach (KeyValuePair<SpritePart, SpriteSheetRect> sheetSprite in _sheetSprites)
             {
-                SpritePart spriteInfo = sheetSprite.Key;
+                SpritePart spritaPart = sheetSprite.Key;
                 SpriteSheetRect spriteRect = sheetSprite.Value;
 
-                Bitmap spriteBitmap = _spriteDataEditor.GetSpritePartBitmap(spriteInfo.Name);
+                Bitmap spriteBitmap = _spriteDataEditor.GetSpritePartBitmap(spritaPart);
 
                 DrawBitmapToBitmap(spriteBitmap, sheetBitmap, spriteRect.X, spriteRect.Y, spriteRect.Rotated, sheetSprite.Key, graphics);
                 //DrawBitmapEdgesToBitmap(spriteBitmap, sheetBitmap, spriteRect.X, spriteRect.Y, spriteRect.Rotated, sheetSprite.Key, graphics);

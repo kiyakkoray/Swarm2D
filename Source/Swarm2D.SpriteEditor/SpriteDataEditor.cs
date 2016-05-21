@@ -56,7 +56,6 @@ namespace Swarm2D.SpriteEditor
             spriteCategory.Name = categoryName;
 
             SpriteData.SpriteCategories.Add(categoryName, spriteCategory);
-            spriteCategory.ID = SpriteData.SpriteCategories.Count;
 
             return spriteCategory;
         }
@@ -71,10 +70,13 @@ namespace Swarm2D.SpriteEditor
             return null;
         }
 
-        public Bitmap GetSpritePartBitmap(string name)
+        public Bitmap GetSpritePartBitmap(SpritePart spritePart)
         {
-            string path1 = Resources.ResourcesPath + @"\SpriteParts\" + name + ".bmp";
-            string path2 = Resources.ResourcesPath + @"\SpriteParts\" + name + ".png";
+            string name = spritePart.Name;
+            string categoryName = spritePart.Category.Name;
+
+            string path1 = Resources.ResourcesPath + @"\SpriteParts\" + categoryName + @"\" + name + ".bmp";
+            string path2 = Resources.ResourcesPath + @"\SpriteParts\" + categoryName + @"\" + name + ".png";
 
             if (File.Exists(path1))
             {
@@ -88,9 +90,9 @@ namespace Swarm2D.SpriteEditor
             return null;
         }
 
-        public void AddSpritePart(string name)
+        public SpritePart AddSpritePart(SpriteCategory category, string name)
         {
-            string spritePartsPath = @"SpriteParts\";
+            string spritePartsPath = @"SpriteParts\" + category.Name + @"\";
 
             string bitmapBmpName = Resources.ResourcesPath + @"\" + spritePartsPath + name + ".bmp";
             string bitmapPngName = Resources.ResourcesPath + @"\" + spritePartsPath + name + ".png";
@@ -106,10 +108,7 @@ namespace Swarm2D.SpriteEditor
                 bitmap = Bitmap.FromFile(bitmapPngName) as Bitmap;
             }
 
-            //Debug.Log("Importing sprite: " + name);
-            //Bitmap bmp = GetSpriteBitmap(name);
-
-            SpritePart spritePart = new SpritePart();
+            SpritePart spritePart = new SpritePart(category);
 
             spritePart.SheetID = -1;
             spritePart.Width = bitmap.Width;
@@ -121,32 +120,26 @@ namespace Swarm2D.SpriteEditor
             spritePart.MinY = BitmapOperations.FindMinY(bitmap);
             spritePart.MaxY = BitmapOperations.FindMaxY(bitmap);
 
-            //spriteInfo.Categories.Add(Project.SpriteCategories["Other"]);
-            //bmp.Dispose();
             SpriteData.SpritePartNames.Add(spritePart.Name, spritePart);
+
+            return spritePart;
         }
 
-        public void GenerateSpriteFromSpritePart(string spritePartName)
+        public void GenerateSpriteFromSpritePart(SpritePart spritePart)
         {
-            if (SpriteData.SpritePartNames.ContainsKey(spritePartName))
-            {
-                SpritePart spritePart = SpriteData.SpritePartNames[spritePartName];
+            SpriteGeneric sprite = new SpriteGeneric(spritePart.Name);
 
-                SpriteGeneric sprite = new SpriteGeneric(spritePartName);
+            sprite.Width = spritePart.Width;
+            sprite.Height = spritePart.Height;
 
-                sprite.Width = spritePart.Width;
-                sprite.Height = spritePart.Height;
+            SpritePartInfo spritePartInfo = new SpritePartInfo();
+            spritePartInfo.SpritePart = spritePart;
+            spritePartInfo.X = spritePart.Width / 2;
+            spritePartInfo.Y = spritePart.Height / 2;
 
-                SpritePartInfo spritePartInfo = new SpritePartInfo();
-                spritePartInfo.SpritePart = spritePart;
-                spritePartInfo.X = spritePart.Width / 2;
-                spritePartInfo.Y = spritePart.Height / 2;
+            sprite.SpritePart = spritePart;
 
-                //sprite->SpriteParts->Add(spritePartInfo);
-                sprite.SpritePart = spritePart;
-
-                SpriteData.SpriteNames.Add(sprite.Name, sprite);
-            }
+            SpriteData.SpriteNames.Add(sprite.Name, sprite);
         }
 
         public bool IsSpritePartImported(string name)
@@ -163,7 +156,6 @@ namespace Swarm2D.SpriteEditor
 
         public void CalculateSpriteSheets()
         {
-            //TODO: do not forget to delete objects
             _allSpriteSheets.Clear();
 
             string spritePath = Resources.ResourcesPath + @"\SpriteSheets";
@@ -243,83 +235,7 @@ namespace Swarm2D.SpriteEditor
 
         public void SaveSpriteSheetData()
         {
-            //SaveSpriteSheetDataAsBinary();
             SaveSpriteSheetDataAsXml();
-        }
-
-        private void SaveSpriteSheetDataAsBinary()
-        {
-            DataWriter dataWriter = new DataWriter();
-
-            dataWriter.WriteInt32(SpriteData.SpriteCategories.Count);
-
-            foreach (SpriteCategory spriteCategory in SpriteData.SpriteCategories.Values)
-            {
-                dataWriter.WriteUnicodeString(spriteCategory.Name);
-                dataWriter.WriteInt32(spriteCategory.SpriteSheetCount);
-            }
-
-            dataWriter.WriteInt32(SpriteData.SpritePartNames.Count);
-
-            foreach (SpritePart spritePart in SpriteData.SpritePartNames.Values)
-            {
-                dataWriter.WriteInt32(spritePart.SheetID);
-                dataWriter.WriteUnicodeString(spritePart.Name);
-
-                dataWriter.WriteInt32(spritePart.Width);
-                dataWriter.WriteInt32(spritePart.Height);
-
-                dataWriter.WriteInt32(spritePart.MinX);
-                dataWriter.WriteInt32(spritePart.MaxX);
-                dataWriter.WriteInt32(spritePart.MinY);
-                dataWriter.WriteInt32(spritePart.MaxY);
-
-                dataWriter.WriteInt32(spritePart.SheetX);
-                dataWriter.WriteInt32(spritePart.SheetY);
-
-                dataWriter.WriteBool(spritePart.Rotated);
-
-                dataWriter.WriteInt32(spritePart.Categories.Count);
-
-                for (int j = 0; j < spritePart.Categories.Count; j++)
-                {
-                    SpriteCategory spriteCategory = spritePart.Categories[j];
-
-                    dataWriter.WriteUnicodeString(spriteCategory.Name);
-                }
-            }
-
-            dataWriter.WriteInt32(SpriteData.SpriteNames.Count);
-
-            foreach (Sprite sprite in SpriteData.SpriteNames.Values)
-            {
-                dataWriter.WriteUnicodeString(sprite.Name);
-
-                dataWriter.WriteInt32(sprite.Width);
-                dataWriter.WriteInt32(sprite.Height);
-
-                dataWriter.WriteUnicodeString(((SpriteGeneric)sprite).SpritePart.Name);
-
-                //dataWriter.WriteInt32(sprite->SpriteParts->Count());
-                //
-                //for (int j = 0; j < sprite->SpriteParts->Count(); j++)
-                //{
-                //	Sx2d::SpritePartInfo* spritePartInfo = sprite->SpriteParts->GetItemAt(j);
-                //
-                //	dataWriter.WriteString(spritePartInfo->SpritePart->Name);
-                //	dataWriter.WriteFloat(spritePartInfo->X);
-                //	dataWriter.WriteFloat(spritePartInfo->Y);
-                //}
-            }
-
-            //SxBase::File spriteDataFile(SxFramework::Resources::GetResourcesPath() + L"spriteData.bytes");
-            //
-            //spriteDataFile.OpenBinaryWrite();
-            //spriteDataFile.WriteBytes(dataWriter.GetData(),dataWriter.GetLength());
-            //
-            //spriteDataFile.Close();
-
-            Resources.SaveBinaryData(SpriteData.Name, dataWriter.GetData());
         }
 
         private void SaveSpriteSheetDataAsXml()
@@ -404,9 +320,9 @@ namespace Swarm2D.SpriteEditor
                 XmlNode spritePartCategoriesNode = doc.CreateElement("SpritePartCategories");
                 spritePartNode.AppendChild(spritePartCategoriesNode);
 
-                for (int j = 0; j < spritePart.Categories.Count; j++)
+                //TODO
                 {
-                    SpriteCategory spriteCategory = spritePart.Categories[j];
+                    SpriteCategory spriteCategory = spritePart.Category;
 
                     XmlNode categoryNameNode = doc.CreateElement("CategoryName");
                     categoryNameNode.InnerText = spriteCategory.Name;

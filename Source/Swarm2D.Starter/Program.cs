@@ -35,10 +35,7 @@ using Swarm2D.Engine.View;
 using Swarm2D.Game;
 using Swarm2D.Engine.Logic;
 using Swarm2D.SceneEditor;
-using Swarm2D.Network;
-using System.Threading;
 using Swarm2D.Library;
-using Swarm2D.SpriteEditor;
 using Swarm2D.WindowsDebugger;
 using Swarm2D.WindowsFramework;
 
@@ -52,7 +49,6 @@ namespace Swarm2D.Starter
             Debug.Log("Welcome to Sx Testbed");
             Debug.Log("1. Testbed");
             Debug.Log("2. Scene Editor");
-            Debug.Log("3. Sprite Editor");
 
             int selection = 0;
 
@@ -92,14 +88,6 @@ namespace Swarm2D.Starter
                 rootEntity.AddComponent<DebugSpriteLoader>();
                 rootEntity.AddComponent<SceneEditorDomain>(); 
                 rootEntity.AddComponent<DebugPanel>();
-            }
-            else if (selection == 3)
-            {
-                name = SelectProject();
-
-                rootEntity.AddComponent<IOSystem>();
-                rootEntity.AddComponent<DebugSpriteLoader>();
-                rootEntity.AddComponent<SpriteEditorDomain>();
             }
 
             engine.Start();

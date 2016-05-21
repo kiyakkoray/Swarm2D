@@ -213,9 +213,10 @@ namespace Swarm2D.Engine.View
         public int RelativeWidth;
         public int RelativeHeight;
 
-        public SpritePart()
+        public SpritePart(SpriteCategory category)
         {
-            Categories = new List<SpriteCategory>();
+            _category = category;
+            _category.SpriteParts.Add(this);
         }
 
         public void Initialize()
@@ -260,29 +261,33 @@ namespace Swarm2D.Engine.View
         {
             get
             {
-                if (Categories.Count > 0)
+                if (_category != null)
                 {
-                    for (int i = 0; i < Categories.Count; i++)
+                    if (_category.IsLoaded)
                     {
-                        SpriteCategory currentCategory = Categories[i];
-                        if (currentCategory.IsLoaded)
+                        if (_category.SpriteSheets != null)
                         {
-                            if (currentCategory.SpriteSheets != null)
+                            if (_category.SpriteSheets.Count >= SheetID)
                             {
-                                if (currentCategory.SpriteSheets.Count >= SheetID)
-                                {
-                                    return currentCategory.SpriteSheets[SheetID - 1];
-                                }
+                                return _category.SpriteSheets[SheetID - 1]; 
                             }
                         }
                     }
                 }
-                //Debug.Log("bulamadik " + ImageID + " in " + Category.Name);
+
                 return null;
             }
         }
 
-        public List<SpriteCategory> Categories;
+        public SpriteCategory Category
+        {
+            get
+            {
+                return _category;
+            }
+        }
+
+        private SpriteCategory _category;
     }
 
     public class SpriteCategory
@@ -304,12 +309,10 @@ namespace Swarm2D.Engine.View
         {
             if (!IsLoaded)
             {
-                //string resourcesName = Resources.GetResourcesNameOf(SpriteData.Name);
                 string resourcesName = SpriteData.ResourcesName;
 
                 IsLoaded = true;
-                //SpriteSheets = new SxBase::List<SxFramework::Texture*>(SheetCount); //TODO: dafuq?
-
+  
                 for (int i = 1; i <= SheetCount; i++)
                 {
                     Texture spriteSheet = IOSystem.Current.LoadTexture(resourcesName, @"SpriteSheets/" + Name + @"/sheet" + i);
@@ -322,14 +325,7 @@ namespace Swarm2D.Engine.View
         {
             if (IsLoaded)
             {
-                for (int i = 0; i < SpriteSheets.Count; i++)
-                {
-                    //SpriteSheets[i].Delete();
-                }
-
                 SpriteSheets.Clear();
-                //SpriteSheets = null;
-                //isLoaded = false;
             }
         }
 
@@ -367,8 +363,6 @@ namespace Swarm2D.Engine.View
         public int SpriteSheetCount;
 
         public string Name;
-
-        public int ID;
 
         public int SheetCount;
 

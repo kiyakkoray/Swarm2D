@@ -50,10 +50,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Swarm2D.SpriteEditor\Swarm2D.SpriteEditor.csproj">
-      <Project>{640E5C47-C2DF-44C9-8F2F-937D6C90B68A}</Project>
-      <Name>Swarm2D.SpriteEditor</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Swarm2D.Engine.Core\Swarm2D.Engine.Core.csproj">
       <Project>{00E94D79-DD7A-4DD9-85F8-AD2BFE20C42B}</Project>
       <Name>Swarm2D.Engine.Core</Name>
