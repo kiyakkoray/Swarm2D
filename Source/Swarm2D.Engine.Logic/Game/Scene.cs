@@ -127,6 +127,8 @@ namespace Swarm2D.Engine.Logic
         [DomainMessageHandler(MessageType = typeof(UpdateMessage))]
         private void OnUpdate(Message message)
         {
+            UpdateMessage updateMessage = (UpdateMessage)message;
+
             if (IsRunning)
             {
                 CurrentFrame++;
@@ -134,8 +136,8 @@ namespace Swarm2D.Engine.Logic
                 _entityDomain.InitializeNonInitializedEntityComponents();
                 _entityDomain.StartNotStartedEntityComponents();
 
-                _updateMessage.Dt = (message as UpdateMessage).Dt;
-
+                _updateMessage.Dt = updateMessage.Dt;
+                _sceneControllerUpdateMessage.Dt = updateMessage.Dt; 
                 Entity.SendMessage(_sceneControllerUpdateMessage);
                 SendMessage(_updateMessage);
             }
@@ -432,6 +434,6 @@ namespace Swarm2D.Engine.Logic
 
     public class SceneControllerUpdateMessage : EntityMessage
     {
-
+        public float Dt { get; internal set; }
     }
 }
