@@ -247,14 +247,15 @@ namespace Swarm2D.Engine.Core
             Components.Remove(component);
         }
 
+        [Obsolete]
         public void SendMessage(string message, object data)
         {
             for (int i = 0; i < Components.Count; i++)
             {
                 Component component = Components[i];
 
-                MethodInfo messageMethod = component.GetType().GetMethod
-                    (message, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { data.GetType() }, null);
+                Type componentType = component.GetType();
+                MethodInfo messageMethod = PlatformHelper.GetMethod(componentType, message, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, new Type[] { data.GetType() });
 
                 if (messageMethod != null)
                 {

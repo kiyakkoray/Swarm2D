@@ -26,7 +26,6 @@ SOFTWARE.
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting;
 using System.Text;
 using System.Reflection;
 using Swarm2D.Library;
@@ -114,7 +113,7 @@ namespace Swarm2D.Engine.Core
 
         private static void CollectComponentInformations()
         {
-            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            Assembly[] assemblies = PlatformHelper.GetGameAssemblies();
 
             foreach (Assembly assembly in assemblies)
             {
@@ -122,7 +121,7 @@ namespace Swarm2D.Engine.Core
 
                 foreach (Type type in types)
                 {
-                    if (type.IsSubclassOf(typeof(Component)) && !type.IsAbstract)
+                    if (PlatformHelper.IsSubclassOf(type, typeof(Component)) && !PlatformHelper.IsAbstract(type))
                     {
                         if (GetComponentInfoWithoutCollectingAgain(type) == null)
                         {
@@ -140,7 +139,7 @@ namespace Swarm2D.Engine.Core
 
         internal void FillInformationsFromComponent(Type type)
         {
-            if (type.IsSubclassOf(typeof(Component)) && !type.IsAbstract)
+            if (PlatformHelper.IsSubclassOf(type, typeof(Component)) && !PlatformHelper.IsAbstract(type))
             {
                 ComponentType = type;
                 Debug.Log("Component Info Collecting: " + type.ToString());
@@ -150,9 +149,9 @@ namespace Swarm2D.Engine.Core
                 _componentConstructor = type.GetConstructor(new Type[] { });
 
                 {
-                    object[] poolableAttributes = type.GetCustomAttributes(typeof (PoolableComponent), true);
+                    object[] poolableAttributes = PlatformHelper.GetCustomAttributes(type, typeof(PoolableComponent), true);
                     
-                    if (poolableAttributes != null && poolableAttributes.Length > 0)
+                    if (poolableAttributes.Length > 0)
                     {
                         Poolable = true;
                     }
@@ -162,7 +161,7 @@ namespace Swarm2D.Engine.Core
 
                 foreach (PropertyInfo propertyInfo in propertyInfos)
                 {
-                    object[] attributes = propertyInfo.GetCustomAttributes(typeof(ComponentProperty), true);
+                    var attributes = propertyInfo.GetCustomAttributes(typeof(ComponentProperty), true).ToArray();
 
                     if (attributes.Length == 1)
                     {
@@ -175,7 +174,7 @@ namespace Swarm2D.Engine.Core
 
                 foreach (MethodInfo methodInfo in methodInfos)
                 {
-                    object[] entityMessageAttributes = methodInfo.GetCustomAttributes(typeof(EntityMessageHandler), true);
+                    var entityMessageAttributes = methodInfo.GetCustomAttributes(typeof(EntityMessageHandler), true).ToArray();
 
                     if (entityMessageAttributes.Length == 1)
                     {
@@ -185,7 +184,7 @@ namespace Swarm2D.Engine.Core
                         AddEntityMessage(entityMessageHandler.MessageType, methodInfo);
                     }
 
-                    object[] domainMessageAttributes = methodInfo.GetCustomAttributes(typeof(DomainMessageHandler), true);
+                    var domainMessageAttributes = methodInfo.GetCustomAttributes(typeof(DomainMessageHandler), true).ToArray();
 
                     if (domainMessageAttributes.Length == 1)
                     {
@@ -195,7 +194,7 @@ namespace Swarm2D.Engine.Core
                         AddDomainMessage(domainMessageHandler.MessageType, methodInfo);
                     }
 
-                    object[] globalMessageAttributes = methodInfo.GetCustomAttributes(typeof(GlobalMessageHandler), true);
+                    var globalMessageAttributes = methodInfo.GetCustomAttributes(typeof(GlobalMessageHandler), true).ToArray();
 
                     if (globalMessageAttributes.Length == 1)
                     {
@@ -232,7 +231,7 @@ namespace Swarm2D.Engine.Core
                 Type globalMessageType = globalMessageHandler.Key;
                 MethodInfo globalMessageHandlerMethod = globalMessageHandler.Value;
 
-                MessageHandlerDelegate messageHandler = (MessageHandlerDelegate)Delegate.CreateDelegate(typeof(MessageHandlerDelegate), component, globalMessageHandlerMethod);
+                MessageHandlerDelegate messageHandler = (MessageHandlerDelegate)PlatformHelper.CreateDelegate(typeof(MessageHandlerDelegate), component, globalMessageHandlerMethod);
 
                 int globalMessageId = Message.GetMessageId(globalMessageType);
 
@@ -260,7 +259,7 @@ namespace Swarm2D.Engine.Core
                 Type domainMessageType = domainMessageHandler.Key;
                 MethodInfo domainMessageHandlerMethod = domainMessageHandler.Value;
 
-                MessageHandlerDelegate messageHandler = (MessageHandlerDelegate)Delegate.CreateDelegate(typeof(MessageHandlerDelegate), component, domainMessageHandlerMethod);
+                MessageHandlerDelegate messageHandler = (MessageHandlerDelegate)PlatformHelper.CreateDelegate(typeof(MessageHandlerDelegate), component, domainMessageHandlerMethod);
 
                 int entityMessageId = Message.GetMessageId(domainMessageType);
 
@@ -279,7 +278,7 @@ namespace Swarm2D.Engine.Core
                 Type entityMessageType = entityMessageHandler.Key;
                 MethodInfo entityMessageHandlerMethod = entityMessageHandler.Value;
 
-                MessageHandlerDelegate messageHandler = (MessageHandlerDelegate)Delegate.CreateDelegate(typeof(MessageHandlerDelegate), component, entityMessageHandlerMethod);
+                MessageHandlerDelegate messageHandler = (MessageHandlerDelegate)PlatformHelper.CreateDelegate(typeof(MessageHandlerDelegate), component, entityMessageHandlerMethod);
 
                 int entityMessageId = Message.GetMessageId(entityMessageType);
 
@@ -335,7 +334,7 @@ namespace Swarm2D.Engine.Core
             {
                 componentPropertyInfo.PropertyType = ComponentPropertyType.Int;
             }
-            else if (propertyInfo.PropertyType.IsEnum)
+            else if (PlatformHelper.IsEnum(propertyInfo.PropertyType))
             {
                 componentPropertyInfo.PropertyType = ComponentPropertyType.Enumerator;
             }

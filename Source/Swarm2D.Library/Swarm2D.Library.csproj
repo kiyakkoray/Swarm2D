@@ -51,8 +51,10 @@
     <Compile Include="Mathf.cs" />
     <Compile Include="Matrix4x4.cs" />
     <Compile Include="Model.cs" />
+    <Compile Include="PlatformHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Random.cs" />
+    <Compile Include="Thread.cs" />
     <Compile Include="Tree.cs" />
     <Compile Include="Vector2.cs" />
   </ItemGroup>

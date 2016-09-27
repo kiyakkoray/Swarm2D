@@ -26,9 +26,7 @@ SOFTWARE.
 using System;
 using System.Collections.Generic;
 using Swarm2D.Library;
-using System.Reflection;
 using System.Linq;
-using System.Threading;
 
 namespace Swarm2D.Engine.Core
 {

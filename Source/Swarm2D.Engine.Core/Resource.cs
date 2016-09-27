@@ -26,7 +26,9 @@ SOFTWARE.
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
+using Swarm2D.Library;
 
 namespace Swarm2D.Engine.Core
 {
@@ -58,9 +60,9 @@ namespace Swarm2D.Engine.Core
                 _resourcesWithTypes[type].Add(resource.Name, resource);
             }
 
-            if (typeof(Resource) != type && typeof(Resource).IsAssignableFrom(type.BaseType))
+            if (typeof(Resource) != type && typeof(Resource).IsAssignableFrom(PlatformHelper.GetBaseType(type)))
             {
-                AddResource(type.BaseType, resource);
+                AddResource(PlatformHelper.GetBaseType(type), resource);
             }
         }
 

@@ -25,6 +25,7 @@ SOFTWARE.
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Swarm2D.Engine.Core;
@@ -170,8 +171,11 @@ namespace Swarm2D.Engine.View.GUI
 
         public static UIWidget CreateFromXmlFile(string fileName, UIWidget parent)
         {
+            byte[] fileData = File.ReadAllBytes(fileName);
+            MemoryStream memoryStream = new MemoryStream(fileData);
+
             XmlDocument xmlDocument = new XmlDocument();
-            xmlDocument.Load(fileName);
+            xmlDocument.Load(memoryStream);
             //xmlDocument->DebugPrint();
 
             UIWidget widget = CreateFromXmlElement(xmlDocument.ChildNodes[0], parent);
@@ -183,8 +187,11 @@ namespace Swarm2D.Engine.View.GUI
 
         public static void FillFromXmlFile(string fileName, UIWidget existingWidget)
         {
+            byte[] fileData = File.ReadAllBytes(fileName);
+            MemoryStream memoryStream = new MemoryStream(fileData);
+
             XmlDocument xmlDocument = new XmlDocument();
-            xmlDocument.Load(fileName);
+            xmlDocument.Load(memoryStream);
             //xmlDocument->DebugPrint();
 
             UIWidget widget = CreateFromXmlElement(xmlDocument.ChildNodes[0], existingWidget.Owner, true, existingWidget);
@@ -235,7 +242,7 @@ namespace Swarm2D.Engine.View.GUI
 
                     ApplyUIFrameAttributesFromXmlAttributes(widget, xmlNode.Attributes);
 
-                    XmlNode dataNode = xmlNode.SelectSingleNode("Data");
+                    XmlNode dataNode = PlatformHelper.SelectSingleNode(xmlNode, "Data");
 
                     if (dataNode != null)
                     {
@@ -346,7 +353,7 @@ namespace Swarm2D.Engine.View.GUI
 
         private static void FillPositionParametersFromXml(UIWidget frame, XmlNode xmlElement, UIWidget createdRoot)
         {
-            XmlNode parametersNode = xmlElement.SelectSingleNode("Parameters");
+            XmlNode parametersNode = PlatformHelper.SelectSingleNode(xmlElement, "Parameters");
             //wprintf(L"applying parameters to %s\n", frame->Name().GetText());
 
             for (int i = 0; i < parametersNode.ChildNodes.Count; i++)
@@ -354,7 +361,7 @@ namespace Swarm2D.Engine.View.GUI
                 AddParameterToFrameFromXmlElement(frame, parametersNode.ChildNodes[i], createdRoot);
             }
 
-            XmlNode childrenNode = xmlElement.SelectSingleNode("Children");
+            XmlNode childrenNode = PlatformHelper.SelectSingleNode(xmlElement, "Children");
 
             if (childrenNode != null)
             {

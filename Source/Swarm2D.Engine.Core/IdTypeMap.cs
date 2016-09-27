@@ -56,7 +56,7 @@ namespace Swarm2D.Engine.Core
             _idsOfTypes = new Dictionary<Type, short>();
             _typesOfIds = new Dictionary<short, Type>();
 
-            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            Assembly[] assemblies = PlatformHelper.GetGameAssemblies();
 
             List<Type> messageTypes = new List<Type>();
 
@@ -68,7 +68,7 @@ namespace Swarm2D.Engine.Core
 
                 foreach (Type type in types)
                 {
-                    if (!type.IsAbstract)
+                    if (!PlatformHelper.IsAbstract(type))
                     {
                         if (Type.IsAssignableFrom(type))
                         {

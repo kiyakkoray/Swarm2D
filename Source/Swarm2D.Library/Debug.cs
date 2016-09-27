@@ -45,9 +45,7 @@ namespace Swarm2D.Library
         {
             if (_debug == null)
             {
-#if !WINDOWS_UWP
-                Console.WriteLine(log);
-#endif
+                PlatformHelper.WriteLine(log);
             }
             else
             {

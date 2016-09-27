@@ -25,7 +25,6 @@ SOFTWARE.
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using Swarm2D.Engine.Core;
 using Swarm2D.Engine.Logic;
 using Swarm2D.Library;
