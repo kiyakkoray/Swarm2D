@@ -68,6 +68,10 @@
       <Project>{20a34109-df7f-4948-aa14-2741efff47a8}</Project>
       <Name>Swarm2D.Engine.Multiplayer.Scene</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Engine.Multiplayer\Swarm2D.Engine.Multiplayer.csproj">
+      <Project>{c1e17deb-2bba-4647-9175-431d5db319a3}</Project>
+      <Name>Swarm2D.Engine.Multiplayer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Swarm2D.Library\Swarm2D.Library.csproj">
       <Project>{6c71fc43-48a5-49e5-a551-dd2613c6e6ab}</Project>
       <Name>Swarm2D.Library</Name>
