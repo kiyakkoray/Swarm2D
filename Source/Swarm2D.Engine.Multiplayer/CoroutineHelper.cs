@@ -27,10 +27,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Swarm2D.Engine.Logic;
 
-namespace Swarm2D.Engine.Logic
+
+namespace Swarm2D.Engine.Multiplayer
 {
-    public class RPCMethod : Attribute
+    public static class NetworkViewCoroutineHelper
     {
+        public static NetworkEntityMessageTask CreateNetworkEntityMessageTask(this Coroutine coroutine,
+            NetworkEntityMessage requestMessage, IMultiplayerNode targetNode, NetworkView targetNetworkView)
+        {
+            NetworkEntityMessageTask task = coroutine.AddComponent<NetworkEntityMessageTask>();
+            task.Initialize(requestMessage, targetNode, targetNetworkView);
+
+            return task;
+        }
     }
 }

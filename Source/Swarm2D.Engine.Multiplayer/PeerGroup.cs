@@ -27,14 +27,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Swarm2D.Engine.Core;
+using Swarm2D.Library;
 
-namespace Swarm2D.Engine.Logic
+namespace Swarm2D.Engine.Multiplayer
 {
-    public interface IMultiplayerNode
+    public class PeerGroup
     {
-        void AddNetworkEntityMessageEvent(NetworkID networkId, NetworkEntityMessage message);
-        void AddNetworkEntityMessageEvent(NetworkID networkId, Entity requester, NetworkEntityMessage message);
-        void ResponseNetworkEntityMessageEvent(NetworkEntityMessage requestMessage, ResponseData responseData);
+        public List<Peer> Peers { get; private set; }
+
+        public PeerGroup()
+        {
+            Peers = new List<Peer>();
+        }
     }
 }

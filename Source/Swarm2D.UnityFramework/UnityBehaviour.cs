@@ -28,6 +28,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Swarm2D.Engine.Core;
 using Swarm2D.Engine.Logic;
+using Swarm2D.Engine.Multiplayer;
 using Swarm2D.Engine.View;
 using Swarm2D.Unity.Logic;
 using UnityEngine;
@@ -54,7 +55,7 @@ namespace Swarm2D.UnityFramework
             rootEntity.AddComponent<DebugSpriteLoader>();
             //rootEntity.AddComponent<JamController>();
             rootEntity.AddComponent<NetworkController>();
-            rootEntity.AddComponent<Swarm2D.Engine.Logic.NetworkView>();
+            rootEntity.AddComponent<Swarm2D.Engine.Multiplayer.NetworkView>();
             //rootEntity.AddComponent<JamMainClientGUI>();
 
             _engine.Start();

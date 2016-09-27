@@ -32,6 +32,7 @@ using Swarm2D.Engine.Logic;
 using Swarm2D.Library;
 using Swarm2D.Network;
 using System.IO;
+using Swarm2D.Engine.Multiplayer;
 
 namespace Swarm2D.Game.Components
 {

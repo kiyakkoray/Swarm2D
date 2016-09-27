@@ -24,6 +24,7 @@ SOFTWARE.
 ******************************************************************************/
 
 using Swarm2D.Engine.Logic;
+using Swarm2D.Engine.Multiplayer;
 
 namespace Swarm2D.Cluster
 {

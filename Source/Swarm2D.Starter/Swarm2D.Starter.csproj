@@ -54,6 +54,10 @@
       <Project>{00E94D79-DD7A-4DD9-85F8-AD2BFE20C42B}</Project>
       <Name>Swarm2D.Engine.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Engine.Multiplayer\Swarm2D.Engine.Multiplayer.csproj">
+      <Project>{c1e17deb-2bba-4647-9175-431d5db319a3}</Project>
+      <Name>Swarm2D.Engine.Multiplayer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Swarm2D.Engine.View\Swarm2D.Engine.View.csproj">
       <Project>{83245878-19B2-4889-B168-64EE10A74448}</Project>
       <Name>Swarm2D.Engine.View</Name>

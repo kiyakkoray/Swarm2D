@@ -29,6 +29,7 @@ using System.Linq;
 using System.Text;
 using Swarm2D.Engine.Core;
 using Swarm2D.Engine.Logic;
+using Swarm2D.Engine.Multiplayer;
 
 namespace Swarm2D.Cluster.Tasks
 {

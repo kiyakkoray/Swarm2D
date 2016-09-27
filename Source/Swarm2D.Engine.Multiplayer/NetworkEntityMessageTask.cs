@@ -28,9 +28,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Swarm2D.Engine.Core;
+using Swarm2D.Engine.Logic;
 using Swarm2D.Library;
 
-namespace Swarm2D.Engine.Logic
+namespace Swarm2D.Engine.Multiplayer
 {
     public class NetworkEntityMessageTask : CoroutineTask
     {
@@ -44,7 +45,7 @@ namespace Swarm2D.Engine.Logic
 
         private bool _isFinished = false;
 
-        protected internal override void DoTask()
+        protected override void DoTask()
         {
             base.DoTask();
 

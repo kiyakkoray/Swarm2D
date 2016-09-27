@@ -34,7 +34,7 @@ using System.IO;
 using Swarm2D.Network;
 using Debug = Swarm2D.Library.Debug;
 
-namespace Swarm2D.Engine.Logic
+namespace Swarm2D.Engine.Multiplayer
 {
     static class NetworkMessageDataHelper
     {

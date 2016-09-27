@@ -29,19 +29,12 @@ using System.Linq;
 using System.Text;
 using Swarm2D.Engine.Core;
 
-namespace Swarm2D.Engine.Logic
+namespace Swarm2D.Engine.Multiplayer
 {
-    public class PeerComponent : Component
+    public interface IMultiplayerNode
     {
-        public Peer Peer { get; private set; }
-        public NetworkController NetworkController { get; private set; }
-
-        protected override void OnAdded()
-        {
-            base.OnAdded();
-
-            Peer = GetComponent<Peer>();
-            NetworkController = Engine.RootEntity.GetComponent<NetworkController>();
-        }
+        void AddNetworkEntityMessageEvent(NetworkID networkId, NetworkEntityMessage message);
+        void AddNetworkEntityMessageEvent(NetworkID networkId, Entity requester, NetworkEntityMessage message);
+        void ResponseNetworkEntityMessageEvent(NetworkEntityMessage requestMessage, ResponseData responseData);
     }
 }

@@ -24,6 +24,7 @@ SOFTWARE.
 ******************************************************************************/
 
 using Swarm2D.Engine.Logic;
+using Swarm2D.Engine.Multiplayer;
 using Swarm2D.Library;
 
 namespace Swarm2D.Online.PlayerAccountServer

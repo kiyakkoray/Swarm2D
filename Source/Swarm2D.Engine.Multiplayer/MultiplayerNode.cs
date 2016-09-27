@@ -30,7 +30,7 @@ using System.Text;
 using Swarm2D.Library;
 using Swarm2D.Network;
 
-namespace Swarm2D.Engine.Logic
+namespace Swarm2D.Engine.Multiplayer
 {
     internal class MultiplayerNode
     {

@@ -32,6 +32,7 @@ using Swarm2D.Cluster;
 using Swarm2D.Cluster.Tasks;
 using Swarm2D.Engine.Core;
 using Swarm2D.Engine.Logic;
+using Swarm2D.Engine.Multiplayer;
 using Debug = Swarm2D.Library.Debug;
 
 namespace Swarm2D.Online.GameSchedulerServer

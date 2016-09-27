@@ -1,18 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{466195D8-09E4-475F-B45F-730839F477DF}</ProjectGuid>
+    <ProjectGuid>{C1E17DEB-2BBA-4647-9175-431D5DB319A3}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Swarm2D.Game</RootNamespace>
-    <AssemblyName>Swarm2D.Game</AssemblyName>
+    <RootNamespace>Swarm2D.Engine.Multiplayer</RootNamespace>
+    <AssemblyName>Swarm2D.Engine.Multiplayer</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -40,41 +38,46 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Components\Character.cs" />
-    <Compile Include="Components\CharacterCamera.cs" />
-    <Compile Include="Components\CharacterController.cs" />
-    <Compile Include="Components\Dungeon.cs" />
-    <Compile Include="Components\NPC.cs" />
-    <Compile Include="Components\ObjectRotater.cs" />
-    <Compile Include="Components\RigidBodySynchronizer.cs" />
-    <Compile Include="Components\Testbed.cs" />
+    <Compile Include="CoroutineHelper.cs" />
+    <Compile Include="IMultiplayerNode.cs" />
+    <Compile Include="Messages.cs" />
+    <Compile Include="MultiplayerClientSession.cs" />
+    <Compile Include="MultiplayerNode.cs" />
+    <Compile Include="MultiplayerServerSession.cs" />
+    <Compile Include="MultiplayerSession.cs" />
+    <Compile Include="NetworkController.cs" />
+    <Compile Include="NetworkEntityMessageTask.cs" />
+    <Compile Include="NetworkMessageHelper.cs" />
+    <Compile Include="NetworkReference.cs" />
+    <Compile Include="NetworkView.cs" />
+    <Compile Include="Peer.cs" />
+    <Compile Include="PeerComponent.cs" />
+    <Compile Include="PeerGroup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SceneExtensions.cs" />
+    <Compile Include="ResponseData.cs" />
+    <Compile Include="RPCMethod.cs" />
+    <Compile Include="ViewID.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Swarm2D.Engine.Core\Swarm2D.Engine.Core.csproj">
-      <Project>{00E94D79-DD7A-4DD9-85F8-AD2BFE20C42B}</Project>
+      <Project>{00e94d79-dd7a-4dd9-85f8-ad2bfe20c42b}</Project>
       <Name>Swarm2D.Engine.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Swarm2D.Engine.Multiplayer\Swarm2D.Engine.Multiplayer.csproj">
-      <Project>{c1e17deb-2bba-4647-9175-431d5db319a3}</Project>
-      <Name>Swarm2D.Engine.Multiplayer</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Swarm2D.Engine.View\Swarm2D.Engine.View.csproj">
-      <Project>{83245878-19B2-4889-B168-64EE10A74448}</Project>
-      <Name>Swarm2D.Engine.View</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Swarm2D.Engine.Logic\Swarm2D.Engine.Logic.csproj">
-      <Project>{D4BE5483-B175-42AF-BC61-11F69B7FF33A}</Project>
+      <Project>{d4be5483-b175-42af-bc61-11f69b7ff33a}</Project>
       <Name>Swarm2D.Engine.Logic</Name>
     </ProjectReference>
     <ProjectReference Include="..\Swarm2D.Library\Swarm2D.Library.csproj">
-      <Project>{6C71FC43-48A5-49E5-A551-DD2613C6E6AB}</Project>
+      <Project>{6c71fc43-48a5-49e5-a551-dd2613c6e6ab}</Project>
       <Name>Swarm2D.Library</Name>
     </ProjectReference>
     <ProjectReference Include="..\Swarm2D.Network.TCPDriver\Swarm2D.Network.TCPDriver.csproj">
-      <Project>{6597A877-2990-448C-B055-B445A9063041}</Project>
+      <Project>{6597a877-2990-448c-b055-b445a9063041}</Project>
       <Name>Swarm2D.Network.TCPDriver</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Network\Swarm2D.Network.csproj">
+      <Project>{5b906af9-46f8-4179-af2c-c93b631d41a8}</Project>
+      <Name>Swarm2D.Network</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

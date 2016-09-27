@@ -32,7 +32,7 @@ using System.Text;
 using Swarm2D.Engine.Core;
 using Swarm2D.Library;
 
-namespace Swarm2D.Engine.Logic
+namespace Swarm2D.Engine.Multiplayer
 {
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class NetworkMessageHandler : Attribute

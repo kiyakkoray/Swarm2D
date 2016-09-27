@@ -45,7 +45,9 @@ namespace Swarm2D.Library
         {
             if (_debug == null)
             {
+#if !WINDOWS_UWP
                 Console.WriteLine(log);
+#endif
             }
             else
             {
@@ -60,7 +62,9 @@ namespace Swarm2D.Library
             {
                 if (_debug == null)
                 {
+#if !WINDOWS_UWP
                     Console.WriteLine(message);
+#endif
                 }
                 else
                 {

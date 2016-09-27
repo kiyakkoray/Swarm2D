@@ -34,6 +34,7 @@ using Swarm2D.Engine.Core;
 using Swarm2D.Engine.View;
 using Swarm2D.Game;
 using Swarm2D.Engine.Logic;
+using Swarm2D.Engine.Multiplayer;
 using Swarm2D.SceneEditor;
 using Swarm2D.Library;
 using Swarm2D.WindowsDebugger;

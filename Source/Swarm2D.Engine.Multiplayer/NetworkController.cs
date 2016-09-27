@@ -32,7 +32,7 @@ using System.Diagnostics;
 using Swarm2D.Network;
 using Swarm2D.Network.TCPDriver;
 
-namespace Swarm2D.Engine.Logic
+namespace Swarm2D.Engine.Multiplayer
 {
     public class NetworkController : EngineComponent
     {

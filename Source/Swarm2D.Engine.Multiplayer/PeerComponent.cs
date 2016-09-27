@@ -27,17 +27,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Swarm2D.Library;
+using Swarm2D.Engine.Core;
 
-namespace Swarm2D.Engine.Logic
+namespace Swarm2D.Engine.Multiplayer
 {
-    public class PeerGroup
+    public class PeerComponent : Component
     {
-        public List<Peer> Peers { get; private set; }
+        public Peer Peer { get; private set; }
+        public NetworkController NetworkController { get; private set; }
 
-        public PeerGroup()
+        protected override void OnAdded()
         {
-            Peers = new List<Peer>();
+            base.OnAdded();
+
+            Peer = GetComponent<Peer>();
+            NetworkController = Engine.RootEntity.GetComponent<NetworkController>();
         }
     }
 }

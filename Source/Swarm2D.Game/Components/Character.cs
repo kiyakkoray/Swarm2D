@@ -29,6 +29,7 @@ using System.Linq;
 using System.Text;
 using Swarm2D.Engine.Core;
 using Swarm2D.Engine.Logic;
+using Swarm2D.Engine.Multiplayer;
 using Swarm2D.Library;
 
 namespace Swarm2D.Game

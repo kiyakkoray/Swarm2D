@@ -77,6 +77,10 @@
       <Project>{D4BE5483-B175-42AF-BC61-11F69B7FF33A}</Project>
       <Name>Swarm2D.Engine.Logic</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.Engine.Multiplayer\Swarm2D.Engine.Multiplayer.csproj">
+      <Project>{c1e17deb-2bba-4647-9175-431d5db319a3}</Project>
+      <Name>Swarm2D.Engine.Multiplayer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Swarm2D.Library\Swarm2D.Library.csproj">
       <Project>{6C71FC43-48A5-49E5-A551-DD2613C6E6AB}</Project>
       <Name>Swarm2D.Library</Name>

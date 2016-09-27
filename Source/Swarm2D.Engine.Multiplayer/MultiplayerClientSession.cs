@@ -32,7 +32,7 @@ using Swarm2D.Engine.Core;
 using Swarm2D.Library;
 using Swarm2D.Network;
 
-namespace Swarm2D.Engine.Logic
+namespace Swarm2D.Engine.Multiplayer
 {
     public class MultiplayerClientSession : MultiplayerSession, IClientSessionHandler, IMultiplayerNode
     {

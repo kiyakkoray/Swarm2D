@@ -50,9 +50,6 @@
     <Compile Include="Game\Physics\PhysicsWorldGrid.cs" />
     <Compile Include="Game\Physics\PhysicsWorldGridCell.cs" />
     <Compile Include="Game\Physics\ShapeFilter.cs" />
-    <Compile Include="Multiplayer\CoroutineHelper.cs" />
-    <Compile Include="Multiplayer\NetworkReference.cs" />
-    <Compile Include="Multiplayer\NetworkView.cs" />
     <Compile Include="Game\PhysicsWorld.cs" />
     <Compile Include="Game\PhysicsObject.cs" />
     <Compile Include="Game\SceneController.cs" />
@@ -61,23 +58,10 @@
     <Compile Include="Coroutine\Coroutine.cs" />
     <Compile Include="Coroutine\CoroutineManager.cs" />
     <Compile Include="Coroutine\CoroutineTask.cs" />
-    <Compile Include="Coroutine\NetworkEntityMessageTask.cs" />
     <Compile Include="DataSynchronizer.cs" />
     <Compile Include="Game\GameSystem.cs" />
-    <Compile Include="EngineComponents\NetworkController.cs" />
     <Compile Include="Grid2D.cs" />
     <Compile Include="LineSegment.cs" />
-    <Compile Include="Messages.cs" />
-    <Compile Include="Multiplayer\MultiplayerNode.cs" />
-    <Compile Include="Multiplayer\IMultiplayerNode.cs" />
-    <Compile Include="Multiplayer\PeerComponent.cs" />
-    <Compile Include="Multiplayer\PeerGroup.cs" />
-    <Compile Include="Multiplayer\NetworkMessageHelper.cs" />
-    <Compile Include="Multiplayer\MultiplayerClientSession.cs" />
-    <Compile Include="Multiplayer\MultiplayerServerSession.cs" />
-    <Compile Include="Multiplayer\MultiplayerSession.cs" />
-    <Compile Include="Multiplayer\Peer.cs" />
-    <Compile Include="Multiplayer\ResponseData.cs" />
     <Compile Include="Game\Physics\Circle.cs" />
     <Compile Include="Game\Physics\Collision.cs" />
     <Compile Include="Game\Physics\IntersectionTests.cs" />
@@ -85,13 +69,11 @@
     <Compile Include="Game\Physics\Polygon.cs" />
     <Compile Include="Game\Physics\Ray.cs" />
     <Compile Include="Game\Physics\RaycastHit.cs" />
-    <Compile Include="Multiplayer\RPCMethod.cs" />
     <Compile Include="Game\Physics\Shape.cs" />
     <Compile Include="Game\SceneEntity.cs" />
     <Compile Include="Game\GameLogic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Game\Scene.cs" />
-    <Compile Include="Multiplayer\ViewID.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Swarm2D.Engine.Core\Swarm2D.Engine.Core.csproj">
@@ -111,7 +93,10 @@
       <Name>Swarm2D.Network.TCPDriver</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="EngineComponents\" />
+    <Folder Include="Multiplayer\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
