@@ -33,22 +33,15 @@ namespace Swarm2D.Engine.View
 {
     public static class Graphics2D
     {
-        public static void DrawSprite(float mapX, float mapY, Sprite sprite, bool horizontalCenter = false, bool verticalCenter = false, float scale = 1.0f, bool flipped = false, float rotation = 0.0f)
+        public static void GetSpriteArrays(float mapX, float mapY, Sprite sprite, bool horizontalCenter, bool verticalCenter, float scale, bool flipped, float rotation, float customWidth, float customHeight, out Texture texture, out float[] outVertices, out float[] outUvs)
         {
-            DrawSprite(mapX, mapY, sprite, horizontalCenter, verticalCenter, scale, flipped, rotation, sprite.Width, sprite.Height);
+            texture = null;
+            outVertices = null;
+            outUvs = null;
 
-            //for(int i = 0; i < sprite.SpriteParts.Count(); i++)
-            //{
-            //	SpritePartInfo* spritePartInfo = (*sprite.SpriteParts)[i];
-            //	Sx2d::Graphics2D::DrawSpritePart(mapX, mapY, spritePartInfo.SpritePart, horizontalCenter, verticalCenter, scale, flipped, rotation);
-            //}
-        }
-
-        public static void DrawSprite(float mapX, float mapY, Sprite sprite, bool horizontalCenter, bool verticalCenter, float scale, bool flipped, float rotation, float customWidth, float customHeight)
-        {
             if (sprite != null)
             {
-                sprite.DrawToScreen(mapX, mapY, horizontalCenter, verticalCenter, scale, flipped, rotation, customWidth, customHeight);
+                sprite.GetArrays(mapX, mapY, horizontalCenter, verticalCenter, scale, flipped, rotation, customWidth, customHeight, out texture, out outVertices, out outUvs);
             }
         }
 

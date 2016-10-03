@@ -26,6 +26,7 @@ SOFTWARE.
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Xml;
 using Swarm2D.Engine.Core;
@@ -71,6 +72,20 @@ namespace Swarm2D.Engine.Core
         public abstract string[] GetFilesInFolder(String path, ResourceFileType fileType);
 
         public abstract string GetResourcesNameOf(string fileName);
+
+        #endregion
+
+        #region Platform Helpers
+
+        public abstract Assembly[] GetGameAssemblies();
+        public abstract Type GetBaseType(Type type);
+        public abstract bool IsAbstract(Type type);
+        public abstract bool IsEnum(Type type);
+        public abstract bool IsSubclassOf(Type type, Type otherType);
+        public abstract Delegate CreateDelegate(Type delegateType, object target, MethodInfo methodInfo);
+        public abstract MethodInfo GetMethod(Type type, string name, BindingFlags bindingAttr, Type[] types);
+        public abstract object[] GetCustomAttributes(Type type, Type attributeType, bool inherit);
+        public abstract XmlNode SelectSingleNode(XmlNode node, string xpath);
 
         #endregion
 

@@ -5,6 +5,8 @@ using System.Text;
 
 #if WINDOWS_UWP
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Core;
+using Windows.UI.Core;
 #endif
 
 namespace Swarm2D.Library
@@ -45,6 +47,7 @@ namespace Swarm2D.Library
 
 #else
         private ThreadStart _threadStart;
+        private Task _task;
 
         public string Name{ get; set; }
 
@@ -55,6 +58,13 @@ namespace Swarm2D.Library
 
         public void Start()
         {
+            _task = new Task(ThreadMain, TaskCreationOptions.LongRunning);
+            _task.Start();
+        }
+
+        private void ThreadMain()
+        {
+            _threadStart();
         }
 
         public static void Sleep(int miliSeconds)

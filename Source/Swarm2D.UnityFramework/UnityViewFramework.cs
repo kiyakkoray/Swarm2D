@@ -367,9 +367,14 @@ namespace Swarm2D.UnityFramework
         {
         }
 
+        public override void DrawArrays(Texture texture, float[] vertices, float[] uvs, int vertexCount)
+        {
+            _renderer.DrawArrays(0, 0, (UnityTexture)texture, vertices, uvs, vertexCount);
+        }
+
         public override void DrawArrays(float x, float y, Texture texture, float[] vertices, float[] uvs, int vertexCount)
         {
-            _renderer.DrawArrays(x, y, texture as UnityTexture, vertices, uvs, vertexCount);
+            _renderer.DrawArrays(x, y, (UnityTexture)texture, vertices, uvs, vertexCount);
         }
 
         public override void DrawTextureOnScreen(float x, float y, float width, float height, Texture texture)

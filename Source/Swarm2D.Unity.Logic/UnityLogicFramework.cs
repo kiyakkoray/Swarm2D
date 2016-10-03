@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -176,6 +177,56 @@ namespace Swarm2D.Unity.Logic
         public override string GetResourcesNameOf(string fileName)
         {
             return _resourcesPath;
+        }
+
+        #endregion
+
+        #region Platform Helpers
+
+
+        public override Assembly[] GetGameAssemblies()
+        {
+            return UnityPlatformHelper.GetGameAssemblies();
+        }
+
+        public override Type GetBaseType(Type type)
+        {
+            return UnityPlatformHelper.GetBaseType(type);
+        }
+
+        public override bool IsAbstract(Type type)
+        {
+            return UnityPlatformHelper.IsAbstract(type);
+        }
+
+        public override bool IsEnum(Type type)
+        {
+            return UnityPlatformHelper.IsEnum(type);
+        }
+
+        public override bool IsSubclassOf(Type type, Type otherType)
+        {
+            return UnityPlatformHelper.IsSubclassOf(type, otherType);
+        }
+
+        public override Delegate CreateDelegate(Type delegateType, object target, MethodInfo methodInfo)
+        {
+            return UnityPlatformHelper.CreateDelegate(delegateType, target, methodInfo);
+        }
+
+        public override MethodInfo GetMethod(Type type, string name, BindingFlags bindingAttr, Type[] types)
+        {
+            return UnityPlatformHelper.GetMethod(type, name, bindingAttr, types);
+        }
+
+        public override object[] GetCustomAttributes(Type type, Type attributeType, bool inherit)
+        {
+            return UnityPlatformHelper.GetCustomAttributes(type, attributeType, inherit);
+        }
+
+        public override XmlNode SelectSingleNode(XmlNode node, string xpath)
+        {
+            return UnityPlatformHelper.SelectSingleNode(node, xpath);
         }
 
         #endregion

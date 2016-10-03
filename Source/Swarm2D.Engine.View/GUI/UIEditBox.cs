@@ -138,7 +138,6 @@ namespace Swarm2D.Engine.View.GUI
             currentSprite = _mouseDownSprite;
 
             renderContext.AddGraphicsCommand(new CommandDrawSprite(X, Y, currentSprite, false, false, 1.0f, false, 0.0f, Width, Height));
-            //Graphics2D.DrawSprite(X, Y, currentSprite,  false, false, 1.0f, false, 0.0f, Width, Height);
 
             _textRenderer.Update(X, Y, Text);
             _textRenderer.Render(renderContext, X, Y);

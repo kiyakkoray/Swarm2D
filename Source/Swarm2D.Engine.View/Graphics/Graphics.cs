@@ -72,6 +72,16 @@ namespace Swarm2D.Engine.View
             Framework.Current.PopScissor();
         }
 
+        public static void DrawArrays(Texture texture, float[] vertices, float[] uvs)
+        {
+            Framework.Current.DrawArrays(texture, vertices, uvs, vertices.Length / 2);
+        }
+
+        public static void DrawArrays(Texture texture, float[] vertices, float[] uvs, int vertexCount)
+        {
+            Framework.Current.DrawArrays(texture, vertices, uvs, vertexCount);
+        }
+
         public static void DrawArrays(float x, float y, Texture texture, float[] vertices, float[] uvs)
         {
             DrawArrays(x, y, texture, vertices, uvs, vertices.Length / 2);

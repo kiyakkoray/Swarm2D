@@ -78,6 +78,17 @@ namespace Swarm2D.Library
             Identity = identity;
         }
 
+        public bool IsIdentity
+        {
+            get
+            {
+                return Mathf.IsZero(M00 - 1) && Mathf.IsZero(M01) && Mathf.IsZero(M02) && Mathf.IsZero(M03) &&
+                       Mathf.IsZero(M10) && Mathf.IsZero(M11 - 1) && Mathf.IsZero(M12) && Mathf.IsZero(M13) &&
+                       Mathf.IsZero(M20) && Mathf.IsZero(M21) && Mathf.IsZero(M22 - 1) && Mathf.IsZero(M23) &&
+                       Mathf.IsZero(M30) && Mathf.IsZero(M31) && Mathf.IsZero(M32) && Mathf.IsZero(M33 - 1);
+            }
+        }
+
         public static Matrix4x4 OrthographicProjection(float left, float right, float bottom, float top)
         {
             const float far = 1;

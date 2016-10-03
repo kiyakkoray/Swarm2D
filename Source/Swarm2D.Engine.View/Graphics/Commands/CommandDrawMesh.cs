@@ -44,7 +44,7 @@ namespace Swarm2D.Engine.View
 
         internal override void DoJob()
         {
-            Graphics.DrawArrays(0, 0, _texture, _mesh.Vertices, _mesh.TextureCoordinates, _mesh.VertexCount);
+            Graphics.DrawArrays(_texture, _mesh.Vertices, _mesh.TextureCoordinates, _mesh.VertexCount);
         }
     }
 }

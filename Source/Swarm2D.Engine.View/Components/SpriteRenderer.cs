@@ -116,15 +116,15 @@ namespace Swarm2D.Engine.View
             }
             else
             {
-                renderContext.AddGraphicsCommand(new CommandSetWorldMatrix(SceneEntity.TransformMatrix));
+                if (!SceneEntity.TransformMatrix.IsIdentity)
+                {
+                    renderContext.AddGraphicsCommand(new CommandSetWorldMatrix(SceneEntity.TransformMatrix));
+                }
             }
-
-            //graphicsContext.WorldMatrix = Transform.TransformMatrix;
 
             if (Sprite != null)
             {
                 renderContext.AddGraphicsCommand(new CommandDrawSprite(-Sprite.Width / 2, -Sprite.Height / 2, Sprite));
-                //Graphics2D.DrawSprite(-Sprite.Width / 2, -Sprite.Height / 2, Sprite);
             }
         }
     }

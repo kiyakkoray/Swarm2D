@@ -158,8 +158,6 @@ namespace Swarm2D.Engine.View.GUI
             {
                 renderContext.AddGraphicsCommand(new CommandDrawSprite(X, Y, currentSprite, false, false, 1.0f, false, 0.0f, Width, Height));
             }
-
-            //Graphics2D.DrawSprite(X, Y, currentSprite, false, false, 1.0f, false, 0.0f, Width, Height);
         }
 
         protected internal override void OnTextChange()

@@ -220,6 +220,11 @@ namespace Swarm2D.WindowsFramework
             _graphicsContext.PopScissor();
         }
 
+        public override void DrawArrays(Texture texture, float[] vertices, float[] uvs, int vertexCount)
+        {
+            _graphicsContext.DrawArrays(0, 0, texture as OpenGLTexture, vertices, uvs, vertexCount);
+        }
+
         public override void DrawArrays(float x, float y, Texture texture, float[] vertices, float[] uvs, int vertexCount)
         {
             _graphicsContext.DrawArrays(x, y, texture as OpenGLTexture, vertices, uvs, vertexCount);

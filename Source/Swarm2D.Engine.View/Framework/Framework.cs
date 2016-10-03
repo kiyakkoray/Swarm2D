@@ -121,6 +121,8 @@ namespace Swarm2D.Engine.View
 
         public abstract void PopScissor();
 
+        public abstract void DrawArrays(Texture texture, float[] vertices, float[] uvs, int vertexCount);
+
         public abstract void DrawArrays(float x, float y, Texture texture, float[] vertices, float[] uvs, int vertexCount);
 
         public abstract void DrawTextureOnScreen(float x, float y, float width, float height, Texture texture);

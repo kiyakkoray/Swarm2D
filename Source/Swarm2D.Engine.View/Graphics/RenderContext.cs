@@ -57,10 +57,45 @@ namespace Swarm2D.Engine.View
 
         internal void Render()
         {
+            GraphicsCommand lastBatchedCommand = null;
+
             for (int i = 0; i < _graphicsCommands.Count; i++)
             {
                 GraphicsCommand graphicsCommand = _graphicsCommands[i];
-                graphicsCommand.DoJob();
+
+                if (lastBatchedCommand == null && graphicsCommand.Batchable)
+                {
+                    lastBatchedCommand = graphicsCommand;
+                    graphicsCommand.DoJob();
+                }
+                else
+                {
+                    if (lastBatchedCommand != null)
+                    {
+                        if (!graphicsCommand.Batchable || !lastBatchedCommand.TryBatch(graphicsCommand))
+                        {
+                            lastBatchedCommand.DoBatchedJob();
+                            lastBatchedCommand = null;
+
+                            graphicsCommand.DoJob();
+                            graphicsCommand.DoBatchedJob();
+                        }
+                        else
+                        {
+                            graphicsCommand.DoJob();
+                        }
+                    }
+                    else
+                    {
+                        graphicsCommand.DoJob();
+                        graphicsCommand.DoBatchedJob();
+                    }
+                }
+            }
+
+            if (lastBatchedCommand != null)
+            {
+                lastBatchedCommand.DoBatchedJob();
             }
 
             for (int i = 0; i < _renderContexts.Count; i++)

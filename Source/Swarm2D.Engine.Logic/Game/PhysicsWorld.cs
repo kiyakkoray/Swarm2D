@@ -119,9 +119,20 @@ namespace Swarm2D.Engine.Logic
             }
         }
 
+        private TriggerEnterMessage _triggerEnterMessage;
+        private TriggerExitMessage _triggerExitMessage;
+
+        private CollisionEnterMessage _collisionEnterMessage;
+        private CollisionExitMessage _collisionExitMessage;
+
         protected override void OnAdded()
         {
             base.OnAdded();
+
+            _triggerEnterMessage = new TriggerEnterMessage();
+            _triggerExitMessage = new TriggerExitMessage();
+            _collisionEnterMessage = new CollisionEnterMessage();
+            _collisionExitMessage = new CollisionExitMessage();
 
             _checkCircle = new Circle("checkCircle");
             _checkCircleData = new CircleInstance(_checkCircle);
@@ -1067,7 +1078,9 @@ namespace Swarm2D.Engine.Logic
 
                 if (collision.PhysicsObjectB.Type == PhysicsObject.PhysicsType.Trigger)
                 {
-                    collision.PhysicsObjectB.Entity.SendMessage("OnTriggerExit", collision.PhysicsObjectA);
+                    _triggerExitMessage.Initialize(collision.PhysicsObjectA);
+                    collision.PhysicsObjectB.Entity.SendMessage(_triggerExitMessage);
+                    _triggerExitMessage.Clear();
                 }
                 else
                 {
@@ -1078,7 +1091,9 @@ namespace Swarm2D.Engine.Logic
                         collisionInfo.Normal = collision.Normal;
                         collisionInfo.IntersectionPoint = collision.IntersectionPoint;
 
-                        collision.PhysicsObjectA.Entity.SendMessage("OnCollisionExit", collisionInfo);
+                        _collisionExitMessage.Initialize(collisionInfo);
+                        collision.PhysicsObjectA.Entity.SendMessage(_collisionExitMessage);
+                        _collisionExitMessage.Clear();
                     }
 
                     {
@@ -1088,7 +1103,9 @@ namespace Swarm2D.Engine.Logic
                         collisionInfo.Normal = collision.Normal;
                         collisionInfo.IntersectionPoint = collision.IntersectionPoint;
 
-                        collision.PhysicsObjectB.Entity.SendMessage("OnCollisionExit", collisionInfo);
+                        _collisionExitMessage.Initialize(collisionInfo);
+                        collision.PhysicsObjectB.Entity.SendMessage(_collisionExitMessage);
+                        _collisionExitMessage.Clear();
                     }
                 }
             }
@@ -1099,7 +1116,9 @@ namespace Swarm2D.Engine.Logic
 
                 if (collision.PhysicsObjectB.Type == PhysicsObject.PhysicsType.Trigger)
                 {
-                    collision.PhysicsObjectB.Entity.SendMessage("OnTriggerEnter", collision.PhysicsObjectA);
+                    _triggerEnterMessage.Initialize(collision.PhysicsObjectA);
+                    collision.PhysicsObjectB.Entity.SendMessage(_triggerEnterMessage);
+                    _triggerEnterMessage.Clear();
                 }
                 else
                 {
@@ -1110,7 +1129,9 @@ namespace Swarm2D.Engine.Logic
                         collisionInfo.Normal = collision.Normal;
                         collisionInfo.IntersectionPoint = collision.IntersectionPoint;
 
-                        collision.PhysicsObjectA.Entity.SendMessage("OnCollisionEnter", collisionInfo);
+                        _collisionEnterMessage.Initialize(collisionInfo);
+                        collision.PhysicsObjectA.Entity.SendMessage(_collisionEnterMessage);
+                        _collisionEnterMessage.Clear();
                     }
 
                     {
@@ -1120,7 +1141,9 @@ namespace Swarm2D.Engine.Logic
                         collisionInfo.Normal = collision.Normal;
                         collisionInfo.IntersectionPoint = collision.IntersectionPoint;
 
-                        collision.PhysicsObjectB.Entity.SendMessage("OnCollisionEnter", collisionInfo);
+                        _collisionEnterMessage.Initialize(collisionInfo);
+                        collision.PhysicsObjectB.Entity.SendMessage(_collisionEnterMessage);
+                        _collisionEnterMessage.Clear();
                     }
                 }
             }
@@ -1153,6 +1176,66 @@ namespace Swarm2D.Engine.Logic
         {
             _freeLinkedListNodesForDirtyTransform.Add(physicsObject.NodeOnDirtyTransformList);
             _physicsObjectsWithDirtyTransform.Remove(physicsObject.NodeOnDirtyTransformList);
+        }
+    }
+
+    public class TriggerEnterMessage : EntityMessage
+    {
+        public PhysicsObject PhysicsObject { get; private set; }
+
+        internal void Initialize(PhysicsObject physicsObject)
+        {
+            PhysicsObject = physicsObject;
+        }
+
+        internal void Clear()
+        {
+            PhysicsObject = null;
+        }
+    }
+
+    public class TriggerExitMessage : EntityMessage
+    {
+        public PhysicsObject PhysicsObject { get; private set; }
+
+        internal void Initialize(PhysicsObject physicsObject)
+        {
+            PhysicsObject = physicsObject;
+        }
+
+        internal void Clear()
+        {
+            PhysicsObject = null;
+        }
+    }
+
+    public class CollisionEnterMessage : EntityMessage
+    {
+        public CollisionInfo CollisionInfo { get; private set; }
+
+        internal void Initialize(CollisionInfo collisionInfo)
+        {
+            CollisionInfo = collisionInfo;
+        }
+
+        internal void Clear()
+        {
+            CollisionInfo = new CollisionInfo();
+        }
+    }
+
+    public class CollisionExitMessage : EntityMessage
+    {
+        public CollisionInfo CollisionInfo { get; private set; }
+
+        internal void Initialize(CollisionInfo collisionInfo)
+        {
+            CollisionInfo = collisionInfo;
+        }
+
+        internal void Clear()
+        {
+            CollisionInfo = new CollisionInfo();
         }
     }
 }

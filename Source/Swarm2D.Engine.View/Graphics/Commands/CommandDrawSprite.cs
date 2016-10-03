@@ -45,6 +45,14 @@ namespace Swarm2D.Engine.View
         private float _width;
         private float _height;
 
+        private Texture _texture;
+        private float[] _vertices;
+        private float[] _uvs;
+
+        internal override bool Batchable { get { return true; } }
+
+        private BatchedDrawTextureContext _batchedDrawSpriteContext;
+
         internal CommandDrawSprite(float mapX, float mapY, Sprite sprite, bool horizontalCenter = false,
             bool verticalCenter = false, float scale = 1.0f, bool flipped = false, float rotation = 0.0f)
             : this(mapX, mapY, sprite, horizontalCenter, verticalCenter, scale, flipped, rotation, sprite.Width, sprite.Height)
@@ -69,7 +77,74 @@ namespace Swarm2D.Engine.View
 
         internal override void DoJob()
         {
-            Graphics2D.DrawSprite(_mapX, _mapY, _sprite, _horizontalCenter, _verticalCenter, _scale, _flipped, _rotation, _width, _height);
+            float[] vertices;
+            float[] uvs;
+
+            Graphics2D.GetSpriteArrays(_mapX, _mapY, _sprite, _horizontalCenter, _verticalCenter, _scale, _flipped, _rotation, _width, _height, out _texture, out vertices, out uvs);
+
+            _vertices = new List<float>(vertices).ToArray();
+            _uvs = new List<float>(uvs).ToArray();
+        }
+
+        internal override void DoBatchedJob()
+        {
+            if (_batchedDrawSpriteContext != null)
+            {
+                Graphics.DrawArrays(_texture, _batchedDrawSpriteContext.Vertices.ToArray(), _batchedDrawSpriteContext.Uvs.ToArray());
+            }
+            else if (_texture != null && _vertices != null && _uvs != null)
+            {
+                Graphics.DrawArrays(_texture, _vertices, _uvs);
+            }
+        }
+
+        internal override bool TryBatch(GraphicsCommand command)
+        {
+            if (_texture != null && _vertices != null && _uvs != null)
+            {
+                if (command is CommandDrawSprite)
+                {
+                    CommandDrawSprite nextCommand = (CommandDrawSprite)command;
+
+                    if (nextCommand._texture == _texture)
+                    {
+                        if (_batchedDrawSpriteContext == null)
+                        {
+                            _batchedDrawSpriteContext = new BatchedDrawTextureContext(_texture);
+
+                            _batchedDrawSpriteContext.AddRange(_vertices, _uvs);
+                        }
+
+                        _batchedDrawSpriteContext.AddRange(nextCommand._vertices, nextCommand._uvs);
+
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+    }
+
+    class BatchedDrawTextureContext
+    {
+        internal Texture Texture { get; private set; }
+
+        internal List<float> Vertices { get; private set; }
+        internal List<float> Uvs { get; private set; }
+
+        internal BatchedDrawTextureContext(Texture texture)
+        {
+            Texture = texture;
+
+            Vertices = new List<float>(2048);
+            Uvs = new List<float>(2048);
+        }
+
+        internal void AddRange(float[] vertices, float[] uvs)
+        {
+            Vertices.AddRange(vertices);
+            Uvs.AddRange(uvs);
         }
     }
 }

@@ -44,7 +44,7 @@ namespace Swarm2D.Engine.View
 
         }
 
-        internal abstract void DrawToScreen(float mapX, float mapY, bool horizontalCenter, bool verticalCenter, float scale, bool flipped, float rotation, float width, float height);
+        internal abstract void GetArrays(float mapX, float mapY, bool horizontalCenter, bool verticalCenter, float scale, bool flipped, float rotation, float width, float height, out Texture texture, out float[] outVertices, out float[] outUvs);
     }
 
     public class SpriteGeneric : Sprite
@@ -60,11 +60,13 @@ namespace Swarm2D.Engine.View
 
         }
 
-        internal override void DrawToScreen(float mapX, float mapY, bool horizontalCenter, bool verticalCenter, float scale, bool flipped, float rotation, float width, float height)
+        internal override void GetArrays(float mapX, float mapY, bool horizontalCenter, bool verticalCenter, float scale, bool flipped, float rotation, float width, float height, out Texture texture, out float[] outVertices, out float[] outUvs)
         {
             Graphics2D.DrawSpritePart(SpritePart, mapX, mapY, vertices, uvs, 0, 0, rotation, horizontalCenter, verticalCenter, scale, flipped, width, height);
 
-            Graphics.DrawArrays(0, 0, SpritePart.Texture, vertices, uvs);
+            texture = SpritePart.Texture;
+            outVertices = vertices;
+            outUvs = uvs;
         }
     }
 
@@ -99,14 +101,16 @@ namespace Swarm2D.Engine.View
         public SpritePart CenterSprite { get; set; }
 
         Dictionary<int, SpriteNineRegionValue> PrecalculatedValues { get; set; }
+        private float[] _vertices;
 
         public SpriteNineRegion(string name)
             : base(name)
         {
             PrecalculatedValues = new Dictionary<int, SpriteNineRegionValue>();
+            _vertices = new float[72];
         }
 
-        internal override void DrawToScreen(float mapX, float mapY, bool horizontalCenter, bool verticalCenter, float scale, bool flipped, float rotation, float customWidth, float customHeight)
+        internal override void GetArrays(float mapX, float mapY, bool horizontalCenter, bool verticalCenter, float scale, bool flipped, float rotation, float customWidth, float customHeight, out Texture texture, out float[] outVertices, out float[] outUvs)
         {
             //TODO: do not generate this every frame
             //TODO: clear non used pre calculated values
@@ -160,7 +164,15 @@ namespace Swarm2D.Engine.View
                 currentValue = PrecalculatedValues[widthHeight];
             }
 
-            Graphics.DrawArrays(mapX, mapY, CenterSprite.Texture, currentValue.Vertices, currentValue.Uvs);
+            for (int i = 0; i < 36; i++)
+            {
+                _vertices[2 * i] = currentValue.Vertices[2 * i] + mapX;
+                _vertices[2 * i + 1] = currentValue.Vertices[2 * i + 1] + mapY;
+            }
+
+            texture = CenterSprite.Texture;
+            outVertices = _vertices;
+            outUvs = currentValue.Uvs;
         }
     }
 
@@ -174,9 +186,11 @@ namespace Swarm2D.Engine.View
             SpriteParts = new List<SpritePartInfo>();
         }
 
-        internal override void DrawToScreen(float mapX, float mapY, bool horizontalCenter, bool verticalCenter, float scale, bool flipped, float rotation, float width, float height)
+        internal override void GetArrays(float mapX, float mapY, bool horizontalCenter, bool verticalCenter, float scale, bool flipped, float rotation, float width, float height, out Texture texture, out float[] outVertices, out float[] outUvs)
         {
-
+            texture = null;
+            outVertices = null;
+            outUvs = null;
         }
     }
 

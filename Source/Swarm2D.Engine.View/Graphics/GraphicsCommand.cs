@@ -37,7 +37,17 @@ namespace Swarm2D.Engine.View
         //internal GraphicsWindow GraphicsWindow;
         internal IOSystem IOSystem { get; set; }
         internal Framework Framework { get; set; }
-
+        internal virtual bool Batchable { get { return false; } }
         internal abstract void DoJob();
+
+        internal virtual void DoBatchedJob()
+        {
+            
+        }
+
+        internal virtual bool TryBatch(GraphicsCommand command)
+        {
+            return false;
+        }
     }
 }

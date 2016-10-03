@@ -25,9 +25,11 @@ SOFTWARE.
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Swarm2D.Engine.Core;
 using Swarm2D.Engine.Logic;
 using Swarm2D.Library;
+using Thread = Swarm2D.Library.Thread;
 
 namespace Swarm2D.Engine.View
 {
@@ -53,8 +55,6 @@ namespace Swarm2D.Engine.View
     public class IOSystem : EngineComponent, IIOSystem
     {
         private Thread _renderThread;
-        private const bool _useSeparateRenderingThread = true;
-
         private bool _doNotRender = false;
 
         private RenderContext _currentRootRenderContext;
@@ -62,10 +62,13 @@ namespace Swarm2D.Engine.View
 
         private Framework _framework;
 
+        private ManualResetEvent _renderThreadEvent;
+
         protected override void OnInitialize()
         {
             base.OnInitialize();
 
+            _renderThreadEvent = new ManualResetEvent(false);
             _framework = Framework.Current;
             _currentRootRenderContext = null;
              _nextRootRenderContext = new RenderContext(this, _framework);
@@ -103,9 +106,10 @@ namespace Swarm2D.Engine.View
 
         private void WaitPreviousRenderFrame()
         {
-            while (_currentRootRenderContext != null)
+            if (_currentRootRenderContext != null)
             {
-                Thread.Sleep(1);
+                _renderThreadEvent.WaitOne();
+                _renderThreadEvent.Reset();
             }
         }
 
@@ -132,6 +136,15 @@ namespace Swarm2D.Engine.View
             }
         }
 
+        [EntityMessageHandler(MessageType = typeof(LastUpdateMessage))]
+        private void OnLastUpdate(Message message)
+        {
+            if (!_framework.SupportSeperatedRenderThread)
+            {
+                DoRenderJob();
+            }
+        }
+
         [EntityMessageHandler(MessageType = typeof(OnGameFrameUpdate))]
         private void HanldeOnGameFrameUpdateMessage(Message message)
         {
@@ -144,23 +157,29 @@ namespace Swarm2D.Engine.View
             //_graphicsForm.UpdateInput();
         }
 
+        private void DoRenderJob()
+        {
+            if (_doNotRender)
+            {
+                AddGraphicsCommand(new CommandBeginFrame());
+                AddGraphicsCommand(new CommandSwapBuffers());
+            }
+
+            if (_currentRootRenderContext != null)
+            {
+                var renderContext = _currentRootRenderContext;
+                _currentRootRenderContext = null;
+                _renderThreadEvent.Set();
+
+                renderContext.Render();
+            }
+        }
+
         private void RenderThreadLoop()
         {
             while (true)
             {
-                if (_doNotRender)
-                {
-                    AddGraphicsCommand(new CommandBeginFrame());
-                    AddGraphicsCommand(new CommandSwapBuffers());
-                }
-
-                if (_currentRootRenderContext != null)
-                {
-                    var renderContext = _currentRootRenderContext;
-                    _currentRootRenderContext = null;
-
-                    renderContext.Render();
-                }
+                DoRenderJob();
             }
         }
 

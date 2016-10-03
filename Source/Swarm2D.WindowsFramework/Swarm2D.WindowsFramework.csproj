@@ -51,6 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="WindowsPlatformHelper.cs" />
     <Compile Include="WindowsDedicatedServerFramework.cs" />
     <Compile Include="WindowsDebug.cs" />
     <Compile Include="DebugRender.cs" />

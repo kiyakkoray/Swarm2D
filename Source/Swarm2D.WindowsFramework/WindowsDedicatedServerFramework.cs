@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -147,6 +148,55 @@ namespace Swarm2D.WindowsFramework
         public override string GetResourcesNameOf(string fileName)
         {
             return Resources.GetResourcesNameOf(fileName);
+        }
+
+        #endregion
+
+        #region Platform Helpers
+
+        public override Assembly[] GetGameAssemblies()
+        {
+            return WindowsPlatformHelper.GetGameAssemblies();
+        }
+
+        public override Type GetBaseType(Type type)
+        {
+            return WindowsPlatformHelper.GetBaseType(type);
+        }
+
+        public override bool IsAbstract(Type type)
+        {
+            return WindowsPlatformHelper.IsAbstract(type);
+        }
+
+        public override bool IsEnum(Type type)
+        {
+            return WindowsPlatformHelper.IsEnum(type);
+        }
+
+        public override bool IsSubclassOf(Type type, Type otherType)
+        {
+            return WindowsPlatformHelper.IsSubclassOf(type, otherType);
+        }
+
+        public override Delegate CreateDelegate(Type delegateType, object target, MethodInfo methodInfo)
+        {
+            return WindowsPlatformHelper.CreateDelegate(delegateType, target, methodInfo);
+        }
+
+        public override MethodInfo GetMethod(Type type, string name, BindingFlags bindingAttr, Type[] types)
+        {
+            return WindowsPlatformHelper.GetMethod(type, name, bindingAttr, types);
+        }
+
+        public override object[] GetCustomAttributes(Type type, Type attributeType, bool inherit)
+        {
+            return WindowsPlatformHelper.GetCustomAttributes(type, attributeType, inherit);
+        }
+
+        public override XmlNode SelectSingleNode(XmlNode node, string xpath)
+        {
+            return WindowsPlatformHelper.SelectSingleNode(node, xpath);
         }
 
         #endregion

@@ -74,16 +74,24 @@ namespace Swarm2D.Game
             }
         }
 
-        void OnCollisionEnter(CollisionInfo collision)
+        [EntityMessageHandler(MessageType = typeof(CollisionEnterMessage))]
+        private void OnCollisionEnter(Message message)
         {
-            Debug.Log("Character collided with: " + collision.CollidedBody.Entity.Name);
+            CollisionEnterMessage collisionEnterMessage = (CollisionEnterMessage)message;
+            CollisionInfo collisionInfo = collisionEnterMessage.CollisionInfo;
+
+            Debug.Log("Character collided with: " + collisionInfo.CollidedBody.Entity.Name);
 
             //collision.CollidedBody.Entity.Destroy();
         }
 
-        void OnCollisionExit(CollisionInfo collision)
+        [EntityMessageHandler(MessageType = typeof(CollisionExitMessage))]
+        private void OnCollisionExit(Message message)
         {
-            Debug.Log("Character removed with: " + collision.CollidedBody.Entity.Name);
+            CollisionExitMessage collisionExitMessage = (CollisionExitMessage)message;
+            CollisionInfo collisionInfo = collisionExitMessage.CollisionInfo;
+
+            Debug.Log("Character removed with: " + collisionInfo.CollidedBody.Entity.Name);
         }
     }
 }

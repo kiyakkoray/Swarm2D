@@ -25,8 +25,11 @@ SOFTWARE.
 
 using System;
 using System.Collections.Generic;
-using Swarm2D.Library;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
+using Debug = Swarm2D.Library.Debug;
+using Thread = Swarm2D.Library.Thread;
 
 namespace Swarm2D.Engine.Core
 {
@@ -41,6 +44,18 @@ namespace Swarm2D.Engine.Core
         private Entity _rootEntity;
 
         private bool _currentFrameHadJob = false;
+
+        public int UpdatePerSecond { get; private set; }
+        public int UpdateMessageTimePerSecond { get; private set; }
+        public int LateUpdateMessageTimePerSecond { get; private set; }
+        public int LastUpdateMessageTimePerSecond { get; private set; }
+
+        private long _lastCountedElapsedTicksForUpdatePerSecond;
+        private long _lastCountedElapsedTicksForLateUpdatePerSecond;
+        private long _lastCountedElapsedTicksForLastUpdatePerSecond;
+
+        private int _countedUpdateLastSecond;
+        private Stopwatch _timer;
 
         public Entity RootEntity
         {
@@ -85,6 +100,9 @@ namespace Swarm2D.Engine.Core
             InitializePrefabManager();
 
             CreateRootEntity();
+
+            _timer = new Stopwatch();
+            _timer.Start();
         }
 
         private void CreateRootEntity()
@@ -107,15 +125,48 @@ namespace Swarm2D.Engine.Core
                 _currentFrameHadJob = true;
             }
 
+            long elapsedTickBeforeUpdate = _timer.ElapsedTicks;
+
             SendMessage(new UpdateMessage());
+
+            long elapsedTickBeforeLateUpdate = _timer.ElapsedTicks;
+
             _rootEntity.SendMessage(new LateUpdateMessage());
+
+            long elapsedTickAfterLateUpdate = _timer.ElapsedTicks;
+
+            _rootEntity.SendMessage(new LastUpdateMessage());
+
+            long elapsedTickAfterLastUpdate = _timer.ElapsedTicks;
+
+            _lastCountedElapsedTicksForUpdatePerSecond += elapsedTickBeforeLateUpdate - elapsedTickBeforeUpdate;
+            _lastCountedElapsedTicksForLateUpdatePerSecond += elapsedTickAfterLateUpdate - elapsedTickBeforeLateUpdate;
+            _lastCountedElapsedTicksForLastUpdatePerSecond += elapsedTickAfterLastUpdate - elapsedTickAfterLateUpdate;
 
             if (!_currentFrameHadJob)
             {
                 Thread.Sleep(1);
             }
 
+            _countedUpdateLastSecond++;
             CurrentFrame++;
+
+            if (_timer.ElapsedMilliseconds >= 1000)
+            {
+                _timer.Reset();
+                _timer.Start();
+
+                UpdatePerSecond = _countedUpdateLastSecond;
+                _countedUpdateLastSecond = 0;
+
+                UpdateMessageTimePerSecond = (int)((1000 * _lastCountedElapsedTicksForUpdatePerSecond) / Stopwatch.Frequency);
+                LateUpdateMessageTimePerSecond = (int)((1000 * _lastCountedElapsedTicksForLateUpdatePerSecond) / Stopwatch.Frequency);
+                LastUpdateMessageTimePerSecond = (int)((1000 * _lastCountedElapsedTicksForLastUpdatePerSecond) / Stopwatch.Frequency);
+
+                _lastCountedElapsedTicksForUpdatePerSecond = 0;
+                _lastCountedElapsedTicksForLateUpdatePerSecond = 0;
+                _lastCountedElapsedTicksForLastUpdatePerSecond = 0;
+            }
         }
 
         public override void Destroy()
@@ -311,5 +362,10 @@ namespace Swarm2D.Engine.Core
     public class LateUpdateMessage : EntityMessage
     {
         
+    }
+
+    public class LastUpdateMessage : EntityMessage
+    {
+
     }
 }
