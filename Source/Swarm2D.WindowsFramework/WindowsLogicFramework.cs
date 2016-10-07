@@ -227,47 +227,47 @@ namespace Swarm2D.WindowsFramework
 
         public override Assembly[] GetGameAssemblies()
         {
-            return PlatformHelper.GetGameAssemblies();
+            return LogicFramework.PlatformHelper.GetGameAssemblies();
         }
 
         public override Type GetBaseType(Type type)
         {
-            return PlatformHelper.GetBaseType(type);
+            return LogicFramework.PlatformHelper.GetBaseType(type);
         }
 
         public override bool IsAbstract(Type type)
         {
-            return PlatformHelper.IsAbstract(type);
+            return LogicFramework.PlatformHelper.IsAbstract(type);
         }
 
         public override bool IsEnum(Type type)
         {
-            return PlatformHelper.IsEnum(type);
+            return LogicFramework.PlatformHelper.IsEnum(type);
         }
 
         public override bool IsSubclassOf(Type type, Type otherType)
         {
-            return PlatformHelper.IsSubclassOf(type, otherType);
+            return LogicFramework.PlatformHelper.IsSubclassOf(type, otherType);
         }
 
         public override Delegate CreateDelegate(Type delegateType, object target, MethodInfo methodInfo)
         {
-            return PlatformHelper.CreateDelegate(delegateType, target, methodInfo);
+            return LogicFramework.PlatformHelper.CreateDelegate(delegateType, target, methodInfo);
         }
 
         public override MethodInfo GetMethod(Type type, string name, BindingFlags bindingAttr, Type[] types)
         {
-            return PlatformHelper.GetMethod(type, name, bindingAttr, types);
+            return LogicFramework.PlatformHelper.GetMethod(type, name, bindingAttr, types);
         }
 
         public override object[] GetCustomAttributes(Type type, Type attributeType, bool inherit)
         {
-            return PlatformHelper.GetCustomAttributes(type, attributeType, inherit);
+            return LogicFramework.PlatformHelper.GetCustomAttributes(type, attributeType, inherit);
         }
 
         public override XmlNode SelectSingleNode(XmlNode node, string xpath)
         {
-            return PlatformHelper.SelectSingleNode(node, xpath);
+            return LogicFramework.PlatformHelper.SelectSingleNode(node, xpath);
         }
 
         #endregion
