@@ -277,14 +277,27 @@ void Framework::DrawPolygon(float vertices[], int vertexCount, unsigned char red
 	{
 		auto context = m_deviceResources->GetD3DDeviceContext();
 
+		const float byteToFloatCoeff = 1.0f / 255.0f;
+
+		float r = ((float)red) * byteToFloatCoeff;
+		float g = ((float)green) * byteToFloatCoeff;
+		float b = ((float)blue) * byteToFloatCoeff;
+		float a = ((float)alpha) * byteToFloatCoeff;
+
 		m_constantBufferData.view = _viewMatrix;
 		m_constantBufferData.model = _modelMatrix;
 		m_constantBufferData.projection = _projectionMatrix;
 
-		VertexPosition verticesToSend[2048];
+		{
+			m_constantBufferData.test1 = r;
+			m_constantBufferData.test2 = g;
+			m_constantBufferData.test3 = b;
+			m_constantBufferData.test4 = a;
 
-		// Prepare the constant buffer to send it to the graphics device.
-		context->UpdateSubresource1(m_constantBuffer.Get(), 0, NULL, &m_constantBufferData, 0, 0, 0);
+			context->UpdateSubresource1(m_constantBuffer.Get(), 0, NULL, &m_constantBufferData, 0, 0, 0);
+		}
+
+		VertexPosition verticesToSend[2048];
 
 		{
 			int indexCount = 3 * (vertexCount - 2);
@@ -318,6 +331,15 @@ void Framework::DrawPolygon(float vertices[], int vertexCount, unsigned char red
 
 			_currentVertexBuffer++;
 			if (_currentVertexBuffer >= VertexBufferCount) _currentVertexBuffer = 0;
+		}
+
+		{
+			m_constantBufferData.test1 = 0.5f;
+			m_constantBufferData.test2 = 1.0f;
+			m_constantBufferData.test3 = 0.0f;
+			m_constantBufferData.test4 = 0.5f;
+
+			context->UpdateSubresource1(m_constantBuffer.Get(), 0, NULL, &m_constantBufferData, 0, 0, 0);
 		}
 
 		{

@@ -26,10 +26,10 @@ SOFTWARE.
 struct PixelShaderInput
 {
 	float4 pos : SV_POSITION;
+	float4 color : COLOR;
 };
 
 float4 main(PixelShaderInput input) : SV_TARGET
 {
-	float4 color = float4(0.5f, 0.5f, 0.5f, 0.5f);
-	return color;
+	return input.color;
 }
