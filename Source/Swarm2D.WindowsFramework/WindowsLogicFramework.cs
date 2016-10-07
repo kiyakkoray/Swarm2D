@@ -36,8 +36,10 @@ using System.Xml;
 using Swarm2D.Engine.Core;
 using Swarm2D.Engine.Logic;
 using Swarm2D.Engine.View;
+using Swarm2D.Library;
 using Swarm2D.WindowsFramework.Native.Windows;
 using Debug = Swarm2D.Library.Debug;
+using Thread = System.Threading.Thread;
 
 namespace Swarm2D.WindowsFramework
 {
@@ -213,49 +215,59 @@ namespace Swarm2D.WindowsFramework
 
         #region Platform Helpers
 
+        public override IThread CreateThread(Engine.Core.ThreadStart threadStart)
+        {
+            return new LogicFramework.Thread(threadStart);
+        }
+
+        public override void Sleep(int miliSeconds)
+        {
+            Thread.Sleep(1);
+        }
+
         public override Assembly[] GetGameAssemblies()
         {
-            return WindowsPlatformHelper.GetGameAssemblies();
+            return PlatformHelper.GetGameAssemblies();
         }
 
         public override Type GetBaseType(Type type)
         {
-            return WindowsPlatformHelper.GetBaseType(type);
+            return PlatformHelper.GetBaseType(type);
         }
 
         public override bool IsAbstract(Type type)
         {
-            return WindowsPlatformHelper.IsAbstract(type);
+            return PlatformHelper.IsAbstract(type);
         }
 
         public override bool IsEnum(Type type)
         {
-            return WindowsPlatformHelper.IsEnum(type);
+            return PlatformHelper.IsEnum(type);
         }
 
         public override bool IsSubclassOf(Type type, Type otherType)
         {
-            return WindowsPlatformHelper.IsSubclassOf(type, otherType);
+            return PlatformHelper.IsSubclassOf(type, otherType);
         }
 
         public override Delegate CreateDelegate(Type delegateType, object target, MethodInfo methodInfo)
         {
-            return WindowsPlatformHelper.CreateDelegate(delegateType, target, methodInfo);
+            return PlatformHelper.CreateDelegate(delegateType, target, methodInfo);
         }
 
         public override MethodInfo GetMethod(Type type, string name, BindingFlags bindingAttr, Type[] types)
         {
-            return WindowsPlatformHelper.GetMethod(type, name, bindingAttr, types);
+            return PlatformHelper.GetMethod(type, name, bindingAttr, types);
         }
 
         public override object[] GetCustomAttributes(Type type, Type attributeType, bool inherit)
         {
-            return WindowsPlatformHelper.GetCustomAttributes(type, attributeType, inherit);
+            return PlatformHelper.GetCustomAttributes(type, attributeType, inherit);
         }
 
         public override XmlNode SelectSingleNode(XmlNode node, string xpath)
         {
-            return WindowsPlatformHelper.SelectSingleNode(node, xpath);
+            return PlatformHelper.SelectSingleNode(node, xpath);
         }
 
         #endregion

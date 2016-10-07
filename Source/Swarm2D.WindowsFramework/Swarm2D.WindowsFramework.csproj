@@ -51,7 +51,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="WindowsPlatformHelper.cs" />
     <Compile Include="WindowsDedicatedServerFramework.cs" />
     <Compile Include="WindowsDebug.cs" />
     <Compile Include="DebugRender.cs" />
@@ -110,6 +109,10 @@
     <ProjectReference Include="..\Swarm2D.Library\Swarm2D.Library.csproj">
       <Project>{6C71FC43-48A5-49E5-A551-DD2613C6E6AB}</Project>
       <Name>Swarm2D.Library</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.LogicFramework\Swarm2D.LogicFramework.csproj">
+      <Project>{101fede4-b29b-4811-85f6-dc1f94b114fd}</Project>
+      <Name>Swarm2D.LogicFramework</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

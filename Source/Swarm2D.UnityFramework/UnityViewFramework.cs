@@ -102,6 +102,11 @@ namespace Swarm2D.UnityFramework
             return new Vector2(mousePosition.x, Height - mousePosition.y);
         }
 
+        public override GamepadData GamepadData
+        {
+            get { return new GamepadData(); }
+        }
+
         public override void FillInputData(InputData inputData)
         {
             Vector2 mousePosition = MousePosition();

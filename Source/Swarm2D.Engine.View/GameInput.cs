@@ -102,6 +102,19 @@ namespace Swarm2D.Engine.View
             }
         }
 
+        public static GamepadData GamepadData
+        {
+            get
+            {
+                if (_gameRenderer != null)
+                {
+                    return _gameRenderer.GamepadData;
+                }
+                
+                return new GamepadData();
+            }
+        }
+
         public static bool GetKeyDown(KeyCode keyCode)
         {
             return _gameRenderer != null && _gameRenderer.GetKeyDown(keyCode);

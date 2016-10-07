@@ -46,7 +46,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnityDebug.cs" />
     <Compile Include="UnityLogicFramework.cs" />
-    <Compile Include="UnityPlatformHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Swarm2D.Engine.Core\Swarm2D.Engine.Core.csproj">
@@ -60,6 +59,10 @@
     <ProjectReference Include="..\Swarm2D.Library\Swarm2D.Library.csproj">
       <Project>{6C71FC43-48A5-49E5-A551-DD2613C6E6AB}</Project>
       <Name>Swarm2D.Library</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.LogicFramework\Swarm2D.LogicFramework.csproj">
+      <Project>{101fede4-b29b-4811-85f6-dc1f94b114fd}</Project>
+      <Name>Swarm2D.LogicFramework</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

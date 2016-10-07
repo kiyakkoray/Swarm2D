@@ -54,6 +54,7 @@
     <Compile Include="EngineComponents\GameUI.cs" />
     <Compile Include="EngineComponents\IOSystem.cs" />
     <Compile Include="GameInput.cs" />
+    <Compile Include="GamepadData.cs" />
     <Compile Include="GameScreen.cs" />
     <Compile Include="Graphics\Commands\CommandBeginFrame.cs" />
     <Compile Include="Graphics\Commands\CommandCreateAndLoadTexture.cs" />

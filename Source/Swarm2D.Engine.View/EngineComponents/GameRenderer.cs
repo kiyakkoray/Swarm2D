@@ -307,5 +307,18 @@ namespace Swarm2D.Engine.View
         {
             return InputEnabled && !_currentInputData.KeyData[(int)keyCode] && _oldInputData.KeyData[(int)keyCode];
         }
+
+        GamepadData IIOSystem.GamepadData
+        {
+            get
+            {
+                if (InputEnabled)
+                {
+                    return _currentInputData.GamepadData;
+                }
+
+                return new GamepadData();
+            }
+        }
     }
 }

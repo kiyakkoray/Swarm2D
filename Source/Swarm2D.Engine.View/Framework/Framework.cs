@@ -65,6 +65,8 @@ namespace Swarm2D.Engine.View
 
         public abstract Vector2 MousePosition();
 
+        public abstract GamepadData GamepadData { get; }
+
         public abstract void FillInputData(InputData inputData);
 
         #endregion

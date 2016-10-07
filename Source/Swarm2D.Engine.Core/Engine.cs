@@ -29,7 +29,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using Debug = Swarm2D.Library.Debug;
-using Thread = Swarm2D.Library.Thread;
 
 namespace Swarm2D.Engine.Core
 {
@@ -145,7 +144,7 @@ namespace Swarm2D.Engine.Core
 
             if (!_currentFrameHadJob)
             {
-                Thread.Sleep(1);
+                Framework.Current.Sleep(1);
             }
 
             _countedUpdateLastSecond++;

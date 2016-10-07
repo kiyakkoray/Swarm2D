@@ -53,6 +53,7 @@
     <Compile Include="Framework\ResourceFileType.cs" />
     <Compile Include="Framework\Resources.cs" />
     <Compile Include="IdTypeMap.cs" />
+    <Compile Include="IThread.cs" />
     <Compile Include="Messages.cs" />
     <Compile Include="PlatformHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

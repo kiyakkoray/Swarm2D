@@ -95,6 +95,11 @@ namespace Swarm2D.WindowsFramework
             return _graphicsForm.MousePosition();
         }
 
+        public override GamepadData GamepadData
+        {
+            get { return new GamepadData(); }
+        }
+
         public override void FillInputData(InputData inputData)
         {
             _graphicsForm.FillInputDataFromCurrent(inputData);

@@ -32,6 +32,7 @@ namespace Swarm2D.Engine.View
 {
     public class InputData
     {
+        public GamepadData GamepadData { get; set; }
         public bool[] KeyData { get; set; }
         public bool LeftMouse { get; set; }
         public bool RightMouse { get; set; }
@@ -40,6 +41,7 @@ namespace Swarm2D.Engine.View
 
         public InputData()
         {
+            GamepadData = new GamepadData();
             KeyData = new bool[256];
             CursorX = 0;
             CursorY = 0;
@@ -54,6 +56,7 @@ namespace Swarm2D.Engine.View
 
         public void FillFrom(InputData inputData)
         {
+            GamepadData.FillFrom(inputData.GamepadData);
             CursorX = inputData.CursorX;
             CursorY = inputData.CursorY;
             LeftMouse = inputData.LeftMouse;

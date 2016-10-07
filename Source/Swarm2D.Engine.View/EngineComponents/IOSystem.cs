@@ -29,7 +29,6 @@ using System.Threading;
 using Swarm2D.Engine.Core;
 using Swarm2D.Engine.Logic;
 using Swarm2D.Library;
-using Thread = Swarm2D.Library.Thread;
 
 namespace Swarm2D.Engine.View
 {
@@ -49,12 +48,12 @@ namespace Swarm2D.Engine.View
         bool RightMouseUp { get; }
         Vector2 MousePosition { get; }
 
-        //void FillInputData(InputData inputData);
+        GamepadData GamepadData { get; }
     }
 
     public class IOSystem : EngineComponent, IIOSystem
     {
-        private Thread _renderThread;
+        private IThread _renderThread;
         private bool _doNotRender = false;
 
         private RenderContext _currentRootRenderContext;
@@ -67,7 +66,7 @@ namespace Swarm2D.Engine.View
         protected override void OnInitialize()
         {
             base.OnInitialize();
-
+            
             _renderThreadEvent = new ManualResetEvent(false);
             _framework = Framework.Current;
             _currentRootRenderContext = null;
@@ -76,7 +75,7 @@ namespace Swarm2D.Engine.View
 
             if (_framework.SupportSeperatedRenderThread)
             {
-                _renderThread = new Thread(RenderThreadLoop);
+                _renderThread = Core.Framework.Current.CreateThread(RenderThreadLoop);
                 _renderThread.Name = "RenderThread";
                 _renderThread.Start();
             }
@@ -305,6 +304,11 @@ namespace Swarm2D.Engine.View
                 return _framework.MousePosition();
                 //return _graphicsForm.MousePosition();
             }
+        }
+
+        public GamepadData GamepadData
+        {
+            get { return _framework.GamepadData; }
         }
 
         public void FillInputData(InputData inputData)

@@ -77,6 +77,8 @@ namespace Swarm2D.Engine.Core
 
         #region Platform Helpers
 
+        public abstract IThread CreateThread(ThreadStart threadStart);
+        public abstract void Sleep(int miliSeconds);
         public abstract Assembly[] GetGameAssemblies();
         public abstract Type GetBaseType(Type type);
         public abstract bool IsAbstract(Type type);
