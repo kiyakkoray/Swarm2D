@@ -156,7 +156,7 @@ void Framework::DrawQuadArrays(float vertices[], float uvs[], int vertexCount, D
 		m_constantBufferData.model = _modelMatrix;
 		m_constantBufferData.projection = _projectionMatrix;
 
-		VertexPositionColor verticesToSend[2048];
+		VertexPositionColor verticesToSend[4096];
 
 		for (int i = 0; i < vertexCount; i++)
 		{
@@ -222,7 +222,7 @@ void Framework::DrawQuadArrays(float x, float y, float vertices[], float uvs[], 
 		m_constantBufferData.model = _modelMatrix;
 		m_constantBufferData.projection = _projectionMatrix;
 
-		VertexPositionColor verticesToSend[2048];
+		VertexPositionColor verticesToSend[4096];
 
 		for (int i = 0; i < vertexCount; i++)
 		{
@@ -474,11 +474,11 @@ void Framework::CreateDeviceDependentResources()
 	// Once both shaders are loaded, create the mesh.
 	auto createCubeTask = (createPSTask && createVSTask && createPolygonVSTask && createPolygonPSTask).then([this]()
 	{
-		int quadCount = 512;
-		int vertexCount = 4 * quadCount; // 2048
-		int indexCount = quadCount * 6; //3072
+		int quadCount = 1024;
+		int vertexCount = 4 * quadCount; // 4096
+		int indexCount = quadCount * 6; //6144
 
-		VertexPositionColor vertices[2048];		
+		VertexPositionColor vertices[4096];		
 
 		for (int i = 0; i < VertexBufferCount; i++)
 		{
@@ -498,7 +498,7 @@ void Framework::CreateDeviceDependentResources()
 		}
 
 		{
-			unsigned short indices[3072];
+			unsigned short indices[6144];
 
 			for (int i = 0; i < quadCount; i++)
 			{
@@ -520,9 +520,9 @@ void Framework::CreateDeviceDependentResources()
 		}
 
 		{
-			unsigned short indices[3072];
+			unsigned short indices[6144];
 
-			for (int i = 0; i < 1024; i++)
+			for (int i = 0; i < indexCount / 3; i++)
 			{
 				indices[3 * i] = 0;
 				indices[3 * i + 1] = i + 1;
@@ -538,9 +538,9 @@ void Framework::CreateDeviceDependentResources()
 		}
 
 		{
-			unsigned short indices[3072];
+			unsigned short indices[6144];
 
-			for (int i = 0; i < 3072; i++)
+			for (int i = 0; i < 6144; i++)
 			{
 				indices[i] = i;
 			}

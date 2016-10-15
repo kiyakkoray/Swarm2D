@@ -86,6 +86,7 @@ namespace Swarm2D.Engine.View
         protected override void OnStart()
         {
             AddGraphicsCommand(new CommandInitializeGraphicsContext());
+            _framework.InitializeAudioContext();
         }
 
         [DomainMessageHandler(MessageType = typeof(UpdateMessage))]
@@ -184,9 +185,6 @@ namespace Swarm2D.Engine.View
 
         public Texture LoadTexture(string resourcesName, string name)
         {
-            //string textureName = Resources.MainPath + @"\" + resourcesName + @"\" + name;
-            //string textureName = name;
-
             Texture texture = Graphics.GetTexture(resourcesName, name);
 
             if (texture == null)
@@ -325,6 +323,35 @@ namespace Swarm2D.Engine.View
         {
             this.AddGraphicsCommand(new CommandDrawDebugLine(pointA, pointB));
         }
+
+        #region Audio
+
+        public AudioClip LoadAudioClip(string name)
+        {
+            return _framework.LoadAudioClip(name);
+        }
+
+        public IAudioJob PlayOneShotAudio(AudioClip audioClip)
+        {
+            return _framework.PlayOneShotAudio(audioClip);
+        }
+
+        public IAudioJob PlayOneShotAudio(AudioClip audioClip, Vector2 position)
+        {
+            return _framework.PlayOneShotAudio(audioClip, position);
+        }
+
+        public void StopAllAudio()
+        {
+            _framework.StopAllAudio();
+        }
+
+        public IAudioJob PlayAudio(AudioClip audioClip)
+        {
+            return _framework.PlayAudio(audioClip);
+        }
+
+        #endregion
     }
 
     public class RenderMessage : DomainMessage

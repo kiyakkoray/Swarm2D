@@ -61,7 +61,7 @@ namespace Swarm2D.WindowsFramework.Native.Windows
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool PeekMessage(out NativeMessage lpMsg, [In] IntPtr hWnd, [In] uint wMsgFilterMin, [In]  uint wMsgFilterMax, [In]  uint wRemoveMsg);
+        public static extern bool PeekMessage(out NativeMessage lpMsg, [In] IntPtr hWnd, [In] uint wMsgFilterMin, [In] uint wMsgFilterMax, [In] uint wRemoveMsg);
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]

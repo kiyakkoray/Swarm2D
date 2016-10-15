@@ -36,10 +36,7 @@ namespace Swarm2D.Engine.View
         private float _mapX;
         private float _mapY;
         private Sprite _sprite;
-        private bool _horizontalCenter = false;
-        private bool _verticalCenter = false;
         private float _scale = 1.0f;
-        private bool _flipped = false;
         private float _rotation = 0.0f;
 
         private float _width;
@@ -53,40 +50,34 @@ namespace Swarm2D.Engine.View
 
         private BatchedDrawTextureContext _batchedDrawSpriteContext;
 
-        internal CommandDrawSprite(float mapX, float mapY, Sprite sprite, bool horizontalCenter = false,
-            bool verticalCenter = false, float scale = 1.0f, bool flipped = false, float rotation = 0.0f)
-            : this(mapX, mapY, sprite, horizontalCenter, verticalCenter, scale, flipped, rotation, sprite.Width, sprite.Height)
+        internal CommandDrawSprite(float mapX, float mapY, Sprite sprite, float scale = 1.0f)
+            : this(mapX, mapY, sprite, scale, sprite.Width, sprite.Height)
         {
         }
 
-        internal CommandDrawSprite(float mapX, float mapY, Sprite sprite, bool horizontalCenter,
-            bool verticalCenter, float scale, bool flipped, float rotation, float width, float height)
+        internal CommandDrawSprite(float mapX, float mapY, Sprite sprite, float scale, float width, float height)
         {
             _mapX = mapX;
             _mapY = mapY;
             _sprite = sprite;
-            _horizontalCenter = horizontalCenter;
-            _verticalCenter = verticalCenter;
             _scale = scale;
-            _flipped = flipped;
-            _rotation = rotation;
 
             _width = width;
             _height = height;
         }
 
-        internal override void DoJob()
+        internal override void PrepareJob()
         {
             float[] vertices;
             float[] uvs;
 
-            Graphics2D.GetSpriteArrays(_mapX, _mapY, _sprite, _horizontalCenter, _verticalCenter, _scale, _flipped, _rotation, _width, _height, out _texture, out vertices, out uvs);
+            _sprite.GetArrays(_mapX, _mapY, _scale, _width, _height, out _texture, out vertices, out uvs);
 
             _vertices = new List<float>(vertices).ToArray();
             _uvs = new List<float>(uvs).ToArray();
         }
 
-        internal override void DoBatchedJob()
+        internal override void DoJob()
         {
             if (_batchedDrawSpriteContext != null)
             {
@@ -111,7 +102,6 @@ namespace Swarm2D.Engine.View
                         if (_batchedDrawSpriteContext == null)
                         {
                             _batchedDrawSpriteContext = new BatchedDrawTextureContext(_texture);
-
                             _batchedDrawSpriteContext.AddRange(_vertices, _uvs);
                         }
 
@@ -137,8 +127,8 @@ namespace Swarm2D.Engine.View
         {
             Texture = texture;
 
-            Vertices = new List<float>(2048);
-            Uvs = new List<float>(2048);
+            Vertices = new List<float>(8192);
+            Uvs = new List<float>(8192);
         }
 
         internal void AddRange(float[] vertices, float[] uvs)

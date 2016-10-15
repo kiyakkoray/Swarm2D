@@ -43,7 +43,7 @@ namespace Swarm2D.Engine.View.GUI
         {
             if (Sprite != null)
             {
-                renderContext.AddGraphicsCommand(new CommandDrawSprite(Math.Abs(X), Math.Abs(Y), Sprite, false, false, 1.0f, false, 0.0f, Math.Abs(Width), Math.Abs(Height)));
+                renderContext.AddGraphicsCommand(new CommandDrawSprite(Math.Abs(X), Math.Abs(Y), Sprite, 1.0f, Math.Abs(Width), Math.Abs(Height)));
             }
             else
             {

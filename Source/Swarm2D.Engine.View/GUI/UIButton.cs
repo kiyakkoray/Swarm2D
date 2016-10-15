@@ -156,7 +156,7 @@ namespace Swarm2D.Engine.View.GUI
 
             foreach (Sprite currentSprite in currentSprites)
             {
-                renderContext.AddGraphicsCommand(new CommandDrawSprite(X, Y, currentSprite, false, false, 1.0f, false, 0.0f, Width, Height));
+                renderContext.AddGraphicsCommand(new CommandDrawSprite(X, Y, currentSprite, 1.0f, Width, Height));
             }
         }
 

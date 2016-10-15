@@ -1,5 +1,5 @@
 ﻿/******************************************************************************
-Copyright (c) 2015 Koray Kiyakoglu
+Copyright (c) 2016 Koray Kiyakoglu
 
 http://www.swarm2d.com
 
@@ -31,23 +31,15 @@ using Swarm2D.Library;
 
 namespace Swarm2D.Engine.View
 {
-    public abstract class GraphicsCommand
+    public class CommandSetWorldMatrixAsIdentity : GraphicsCommand
     {
-        //internal GraphicsContext GraphicsContext;
-        //internal GraphicsWindow GraphicsWindow;
-        internal IOSystem IOSystem { get; set; }
-        internal Framework Framework { get; set; }
-        internal virtual bool Batchable { get { return false; } }
-        internal abstract void DoJob();
-
-        internal virtual void PrepareJob()
+        public CommandSetWorldMatrixAsIdentity()
         {
-            
         }
 
-        internal virtual bool TryBatch(GraphicsCommand command)
+        internal override void DoJob()
         {
-            return false;
+            Graphics.WorldMatrix = Matrix4x4.Identity;
         }
     }
 }

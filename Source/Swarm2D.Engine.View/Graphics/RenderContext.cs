@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Swarm2D.Library;
 
 namespace Swarm2D.Engine.View
 {
@@ -66,36 +67,32 @@ namespace Swarm2D.Engine.View
                 if (lastBatchedCommand == null && graphicsCommand.Batchable)
                 {
                     lastBatchedCommand = graphicsCommand;
-                    graphicsCommand.DoJob();
+                    graphicsCommand.PrepareJob();
                 }
                 else
                 {
+                    graphicsCommand.PrepareJob();
+
                     if (lastBatchedCommand != null)
                     {
                         if (!graphicsCommand.Batchable || !lastBatchedCommand.TryBatch(graphicsCommand))
                         {
-                            lastBatchedCommand.DoBatchedJob();
+                            lastBatchedCommand.DoJob();
                             lastBatchedCommand = null;
-
-                            graphicsCommand.DoJob();
-                            graphicsCommand.DoBatchedJob();
-                        }
-                        else
-                        {
+                            
                             graphicsCommand.DoJob();
                         }
                     }
                     else
                     {
                         graphicsCommand.DoJob();
-                        graphicsCommand.DoBatchedJob();
                     }
                 }
             }
 
             if (lastBatchedCommand != null)
             {
-                lastBatchedCommand.DoBatchedJob();
+                lastBatchedCommand.DoJob();
             }
 
             for (int i = 0; i < _renderContexts.Count; i++)

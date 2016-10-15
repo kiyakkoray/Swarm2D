@@ -1,5 +1,5 @@
 ﻿/******************************************************************************
-Copyright (c) 2015 Koray Kiyakoglu
+Copyright (c) 2016 Koray Kiyakoglu
 
 http://www.swarm2d.com
 
@@ -27,24 +27,35 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Swarm2D.Engine.Core;
-using Swarm2D.Engine.Logic;
-using Swarm2D.Library;
+using System.Threading.Tasks;
 
-namespace Swarm2D.Engine.View
+namespace Swarm2D.WindowsFramework.Native.OpenAL
 {
-    public abstract class Sprite : Resource
+    class ALCDefinitions
     {
-        public int Width { get; private set; }
-        public int Height { get; private set; }
+        public const int Invalid = 0;
+        public const int False = 0;
+        public const int True = 1;
+        public const int NoError = False;
 
-        protected Sprite(string name, int width, int height)
-            : base(name)
-        {
-            Width = width;
-            Height = height;
-        }
+        public const int Frequency = 0x1007;
+        public const int Refresh = 0x1008;
+        public const int Sync = 0x1009;
 
-        internal abstract void GetArrays(float mapX, float mapY, float scale, float width, float height, out Texture texture, out float[] outVertices, out float[] outUvs);
+        public const int InvalidDevice = 0xA001;
+        public const int InvalidContext = 0xA002;
+        public const int InvalidEnum = 0xA003;
+        public const int InvalidValue = 0xA004;
+        public const int OutOfMemory = 0xA005;
+
+        public const int DefaultDeviceSpecifier = 0x1004;
+        public const int DeviceSpecifier = 0x1005;
+        public const int Extensions = 0x1006;
+
+        public const int MajorVersion = 0x1000;
+        public const int MinotVersion = 0x1001;
+
+        public const int AttributesSize = 0x1002;
+        public const int AllAttributes = 0x1003;
     }
 }

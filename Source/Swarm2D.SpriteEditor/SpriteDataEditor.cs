@@ -52,9 +52,7 @@ namespace Swarm2D.SpriteEditor
 
         public SpriteCategory AddNewSpriteCategory(string categoryName)
         {
-            SpriteCategory spriteCategory = new SpriteCategory(SpriteData);
-            spriteCategory.Name = categoryName;
-
+            SpriteCategory spriteCategory = new SpriteCategory(categoryName, SpriteData, 0);
             SpriteData.SpriteCategories.Add(categoryName, spriteCategory);
 
             return spriteCategory;
@@ -75,83 +73,69 @@ namespace Swarm2D.SpriteEditor
             string name = spritePart.Name;
             string categoryName = spritePart.Category.Name;
 
-            string path1 = Resources.ResourcesPath + @"\SpriteParts\" + categoryName + @"\" + name + ".bmp";
-            string path2 = Resources.ResourcesPath + @"\SpriteParts\" + categoryName + @"\" + name + ".png";
+            string path = Resources.ResourcesPath + @"\SpriteParts\" + categoryName + @"\" + name + ".png";
 
-            if (File.Exists(path1))
+            if (File.Exists(path))
             {
-                return Bitmap.FromFile(path1) as Bitmap;
-            }
-            else if (File.Exists(path2))
-            {
-                return Bitmap.FromFile(path2) as Bitmap;
+                return Bitmap.FromFile(path) as Bitmap;
             }
 
             return null;
         }
 
-        public SpritePart AddSpritePart(SpriteCategory category, string name)
+        public SpritePart AddSpritePart(SpriteCategory category, string name, bool disableEmptyRegionPrunning)
         {
             string spritePartsPath = @"SpriteParts\" + category.Name + @"\";
-
-            string bitmapBmpName = Resources.ResourcesPath + @"\" + spritePartsPath + name + ".bmp";
             string bitmapPngName = Resources.ResourcesPath + @"\" + spritePartsPath + name + ".png";
 
-            Bitmap bitmap = null;
+            Bitmap bitmap = (Bitmap)Image.FromFile(bitmapPngName);
 
-            if (File.Exists(bitmapBmpName))
+            SpritePart spritePart = new SpritePart(name, category, bitmap.Width, bitmap.Height);
+
+            spritePart.SheetID = -1;
+
+            if (disableEmptyRegionPrunning)
             {
-                bitmap = Bitmap.FromFile(bitmapBmpName) as Bitmap;
+                spritePart.MinX = 0;
+                spritePart.MaxX = bitmap.Width - 1;
+                spritePart.MinY = 0;
+                spritePart.MaxY = bitmap.Height - 1;
             }
             else
             {
-                bitmap = Bitmap.FromFile(bitmapPngName) as Bitmap;
+                spritePart.MinX = BitmapOperations.FindMinX(bitmap);
+                spritePart.MaxX = BitmapOperations.FindMaxX(bitmap);
+                spritePart.MinY = BitmapOperations.FindMinY(bitmap);
+                spritePart.MaxY = BitmapOperations.FindMaxY(bitmap);
             }
-
-            SpritePart spritePart = new SpritePart(category);
-
-            spritePart.SheetID = -1;
-            spritePart.Width = bitmap.Width;
-            spritePart.Height = bitmap.Height;
-            spritePart.Name = name;
-
-            spritePart.MinX = BitmapOperations.FindMinX(bitmap);
-            spritePart.MaxX = BitmapOperations.FindMaxX(bitmap);
-            spritePart.MinY = BitmapOperations.FindMinY(bitmap);
-            spritePart.MaxY = BitmapOperations.FindMaxY(bitmap);
 
             SpriteData.SpritePartNames.Add(spritePart.Name, spritePart);
 
             return spritePart;
         }
 
+        public void GenerateNineRegionSpriteFromSpritePart(SpritePart spritePart, NineRegionSpriteParameters nineRegionSpriteParameters)
+        {
+            string name = nineRegionSpriteParameters.Name;
+            int leftWidth = nineRegionSpriteParameters.LeftWidth;
+            int rightWidth = nineRegionSpriteParameters.RightWidth;
+            int topHeight = nineRegionSpriteParameters.TopHeight;
+            int bottomHeight = nineRegionSpriteParameters.BottomHeight;
+         
+            SpriteNineRegion sprite = new SpriteNineRegion(name, spritePart, leftWidth, rightWidth, topHeight, bottomHeight);
+
+            SpriteData.SpriteNames.Add(sprite.Name, sprite);
+        }
+
         public void GenerateSpriteFromSpritePart(SpritePart spritePart)
         {
-            SpriteGeneric sprite = new SpriteGeneric(spritePart.Name);
-
-            sprite.Width = spritePart.Width;
-            sprite.Height = spritePart.Height;
-
-            SpritePartInfo spritePartInfo = new SpritePartInfo();
-            spritePartInfo.SpritePart = spritePart;
-            spritePartInfo.X = spritePart.Width / 2;
-            spritePartInfo.Y = spritePart.Height / 2;
-
-            sprite.SpritePart = spritePart;
-
+            SpriteGeneric sprite = new SpriteGeneric(spritePart.Name, spritePart);
             SpriteData.SpriteNames.Add(sprite.Name, sprite);
         }
 
         public bool IsSpritePartImported(string name)
         {
             return SpriteData.SpritePartNames.ContainsKey(name);
-        }
-
-        public void GenerateSpriteSheets()
-        {
-            CalculateSpriteSheets();
-            SaveSpriteSheetData();
-            SaveSpriteSheets();
         }
 
         public void CalculateSpriteSheets()
@@ -317,17 +301,9 @@ namespace Swarm2D.SpriteEditor
                 rotatedNode.InnerText = spritePart.Rotated.ToString();
                 spritePartNode.AppendChild(rotatedNode);
 
-                XmlNode spritePartCategoriesNode = doc.CreateElement("SpritePartCategories");
-                spritePartNode.AppendChild(spritePartCategoriesNode);
-
-                //TODO
-                {
-                    SpriteCategory spriteCategory = spritePart.Category;
-
-                    XmlNode categoryNameNode = doc.CreateElement("CategoryName");
-                    categoryNameNode.InnerText = spriteCategory.Name;
-                    spritePartCategoriesNode.AppendChild(categoryNameNode);
-                }
+                XmlNode categoryNameNode = doc.CreateElement("CategoryName");
+                categoryNameNode.InnerText = spritePart.Category.Name;
+                spritePartNode.AppendChild(categoryNameNode);
             }
 
             XmlNode spritesNode = doc.CreateElement("Sprites");
@@ -344,14 +320,6 @@ namespace Swarm2D.SpriteEditor
                     nameNode.InnerText = sprite.Name;
                     genericSpriteNode.AppendChild(nameNode);
 
-                    XmlNode widthNode = doc.CreateElement("Width");
-                    widthNode.InnerText = sprite.Width.ToString();
-                    genericSpriteNode.AppendChild(widthNode);
-
-                    XmlNode heightNode = doc.CreateElement("Height");
-                    heightNode.InnerText = sprite.Height.ToString();
-                    genericSpriteNode.AppendChild(heightNode);
-
                     XmlNode spritePartName = doc.CreateElement("SpritePartName");
                     spritePartName.InnerText = ((SpriteGeneric)sprite).SpritePart.Name;
                     genericSpriteNode.AppendChild(spritePartName);
@@ -365,66 +333,34 @@ namespace Swarm2D.SpriteEditor
                     nameNode.InnerText = sprite.Name;
                     nineRegionSpriteNode.AppendChild(nameNode);
 
-                    XmlNode widthNode = doc.CreateElement("Width");
-                    widthNode.InnerText = sprite.Width.ToString();
-                    nineRegionSpriteNode.AppendChild(widthNode);
-
-                    XmlNode heightNode = doc.CreateElement("Height");
-                    heightNode.InnerText = sprite.Height.ToString();
-                    nineRegionSpriteNode.AppendChild(heightNode);
-
                     {
-                        XmlNode spritePartName = doc.CreateElement("TopLeftSpritePartName");
-                        spritePartName.InnerText = ((SpriteNineRegion)sprite).TopLeftSprite.Name;
+                        XmlNode spritePartName = doc.CreateElement("SpritePartName");
+                        spritePartName.InnerText = ((SpriteNineRegion)sprite).BaseSprite.Name;
                         nineRegionSpriteNode.AppendChild(spritePartName);
                     }
 
                     {
-                        XmlNode spritePartName = doc.CreateElement("TopSpritePartName");
-                        spritePartName.InnerText = ((SpriteNineRegion)sprite).TopSprite.Name;
-                        nineRegionSpriteNode.AppendChild(spritePartName);
+                        XmlNode valueNode = doc.CreateElement("LeftWidth");
+                        valueNode.InnerText = ((SpriteNineRegion)sprite).LeftWidth.ToString();
+                        nineRegionSpriteNode.AppendChild(valueNode);
                     }
 
                     {
-                        XmlNode spritePartName = doc.CreateElement("TopRightSpritePartName");
-                        spritePartName.InnerText = ((SpriteNineRegion)sprite).TopRightSprite.Name;
-                        nineRegionSpriteNode.AppendChild(spritePartName);
+                        XmlNode valueNode = doc.CreateElement("RightWidth");
+                        valueNode.InnerText = ((SpriteNineRegion)sprite).RightWidth.ToString();
+                        nineRegionSpriteNode.AppendChild(valueNode);
                     }
 
                     {
-                        XmlNode spritePartName = doc.CreateElement("LeftSpritePartName");
-                        spritePartName.InnerText = ((SpriteNineRegion)sprite).LeftSprite.Name;
-                        nineRegionSpriteNode.AppendChild(spritePartName);
+                        XmlNode valueNode = doc.CreateElement("TopHeight");
+                        valueNode.InnerText = ((SpriteNineRegion)sprite).TopHeight.ToString();
+                        nineRegionSpriteNode.AppendChild(valueNode);
                     }
 
                     {
-                        XmlNode spritePartName = doc.CreateElement("RightSpritePartName");
-                        spritePartName.InnerText = ((SpriteNineRegion)sprite).RightSprite.Name;
-                        nineRegionSpriteNode.AppendChild(spritePartName);
-                    }
-
-                    {
-                        XmlNode spritePartName = doc.CreateElement("BottomLeftSpritePartName");
-                        spritePartName.InnerText = ((SpriteNineRegion)sprite).BottomLeftSprite.Name;
-                        nineRegionSpriteNode.AppendChild(spritePartName);
-                    }
-
-                    {
-                        XmlNode spritePartName = doc.CreateElement("BottomSpritePartName");
-                        spritePartName.InnerText = ((SpriteNineRegion)sprite).BottomSprite.Name;
-                        nineRegionSpriteNode.AppendChild(spritePartName);
-                    }
-
-                    {
-                        XmlNode spritePartName = doc.CreateElement("BottomRightSpritePartName");
-                        spritePartName.InnerText = ((SpriteNineRegion)sprite).BottomRightSprite.Name;
-                        nineRegionSpriteNode.AppendChild(spritePartName);
-                    }
-
-                    {
-                        XmlNode spritePartName = doc.CreateElement("CenterSprite");
-                        spritePartName.InnerText = ((SpriteNineRegion)sprite).CenterSprite.Name;
-                        nineRegionSpriteNode.AppendChild(spritePartName);
+                        XmlNode valueNode = doc.CreateElement("BottomHeight");
+                        valueNode.InnerText = ((SpriteNineRegion)sprite).BottomHeight.ToString();
+                        nineRegionSpriteNode.AppendChild(valueNode);
                     }
                 }
             }

@@ -51,6 +51,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AudioContext.cs" />
+    <Compile Include="Native\AutoPinner.cs" />
+    <Compile Include="Native\OpenAL\ALCDefinitions.cs" />
+    <Compile Include="Native\OpenAL\ALDefinitions.cs" />
+    <Compile Include="OggAudioClip.cs" />
+    <Compile Include="AudioJob.cs" />
+    <Compile Include="AudioSource.cs" />
+    <Compile Include="Native\OggVorbis\CallBacks.cs" />
+    <Compile Include="Native\OggVorbis\OggStream.cs" />
+    <Compile Include="Native\OggVorbis\VorbisFile.cs" />
+    <Compile Include="Native\OggVorbis\VorbisInfo.cs" />
+    <Compile Include="Native\OpenAL\AL.cs" />
+    <Compile Include="Native\OpenAL\ALC.cs" />
     <Compile Include="WindowsDedicatedServerFramework.cs" />
     <Compile Include="WindowsDebug.cs" />
     <Compile Include="DebugRender.cs" />

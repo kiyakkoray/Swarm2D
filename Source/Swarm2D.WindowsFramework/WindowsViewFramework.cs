@@ -38,6 +38,8 @@ namespace Swarm2D.WindowsFramework
         private GraphicsWindow _graphicsForm;
         private GraphicsContext _graphicsContext;
 
+        private AudioContext _audioContext;
+
         #region Input
 
         public override void UpdateInput()
@@ -227,22 +229,17 @@ namespace Swarm2D.WindowsFramework
 
         public override void DrawArrays(Texture texture, float[] vertices, float[] uvs, int vertexCount)
         {
-            _graphicsContext.DrawArrays(0, 0, texture as OpenGLTexture, vertices, uvs, vertexCount);
+            _graphicsContext.DrawArrays((OpenGLTexture)texture, vertices, uvs, vertexCount);
         }
 
         public override void DrawArrays(float x, float y, Texture texture, float[] vertices, float[] uvs, int vertexCount)
         {
-            _graphicsContext.DrawArrays(x, y, texture as OpenGLTexture, vertices, uvs, vertexCount);
-        }
-
-        public override void DrawTextureOnScreen(float x, float y, float width, float height, Texture texture)
-        {
-            _graphicsContext.DrawTextureOnScreen(x, y, width, height, texture as OpenGLTexture);
+            _graphicsContext.DrawArrays(x, y, (OpenGLTexture)texture, vertices, uvs, vertexCount);
         }
 
         public override void LoadTextureUsing(Texture texture, string resourcesName, string name)
         {
-            _graphicsContext.LoadTextureUsing(texture as OpenGLTexture, resourcesName, name);
+            _graphicsContext.LoadTextureUsing((OpenGLTexture)texture, resourcesName, name);
         }
 
         public override Texture LoadTexture(string name)
@@ -270,6 +267,41 @@ namespace Swarm2D.WindowsFramework
         public override Texture CreateTexture()
         {
             return new OpenGLTexture();
+        }
+
+        #endregion
+
+        #region Audio
+
+        public override void InitializeAudioContext()
+        {
+            _audioContext = new AudioContext();
+            _audioContext.Start();
+        }
+
+        public override AudioClip LoadAudioClip(string name)
+        {
+            return new OggAudioClip(name);
+        }
+
+        public override IAudioJob PlayOneShotAudio(AudioClip audioClip)
+        {
+            return _audioContext.PlayOneShotAudio((OggAudioClip)audioClip);
+        }
+
+        public override IAudioJob PlayOneShotAudio(AudioClip audioClip, Vector2 position)
+        {
+            return _audioContext.PlayOneShotAudio((OggAudioClip)audioClip, position);
+        }
+
+        public override void StopAllAudio()
+        {
+            _audioContext.StopAllAudio();
+        }
+
+        public override IAudioJob PlayAudio(AudioClip audioClip)
+        {
+            return _audioContext.PlayAudio((OggAudioClip)audioClip);
         }
 
         #endregion

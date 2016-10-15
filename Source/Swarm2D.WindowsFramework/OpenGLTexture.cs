@@ -115,10 +115,6 @@ namespace Swarm2D.WindowsFramework
             {
                 bmp = Bitmap.FromFile(fileName + ".png") as Bitmap;
             }
-            else if (File.Exists(fileName + ".bmp"))
-            {
-                bmp = Bitmap.FromFile(fileName + ".bmp") as Bitmap;
-            }
 
             if (bmp != null)
             {

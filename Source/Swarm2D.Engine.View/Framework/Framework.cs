@@ -127,8 +127,6 @@ namespace Swarm2D.Engine.View
 
         public abstract void DrawArrays(float x, float y, Texture texture, float[] vertices, float[] uvs, int vertexCount);
 
-        public abstract void DrawTextureOnScreen(float x, float y, float width, float height, Texture texture);
-
         public abstract void LoadTextureUsing(Texture texture, string resourcesName, string name);
 
         public abstract Texture LoadTexture(string name);
@@ -140,6 +138,22 @@ namespace Swarm2D.Engine.View
         public abstract Texture GetTexture(string resourcesName, string name);
 
         public abstract Texture CreateTexture();
+
+        #endregion
+
+        #region Audio
+
+        public abstract void InitializeAudioContext();
+
+        public abstract AudioClip LoadAudioClip(string name);
+
+        public abstract IAudioJob PlayOneShotAudio(AudioClip audioClip);
+
+        public abstract IAudioJob PlayOneShotAudio(AudioClip audioClip, Vector2 position);
+
+        public abstract void StopAllAudio();
+
+        public abstract IAudioJob PlayAudio(AudioClip audioClip);
 
         #endregion
     }

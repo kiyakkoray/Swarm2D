@@ -33,7 +33,9 @@ namespace Swarm2D.Engine.View.GUI
 {
     public class UIEditBox : UIFrame
     {
-        protected UIEditBoxRenderState _renderState;
+        public event Action TextChanged;
+
+        private UIEditBoxRenderState _renderState;
 
         private bool _isEditing;
 
@@ -137,7 +139,7 @@ namespace Swarm2D.Engine.View.GUI
 
             currentSprite = _mouseDownSprite;
 
-            renderContext.AddGraphicsCommand(new CommandDrawSprite(X, Y, currentSprite, false, false, 1.0f, false, 0.0f, Width, Height));
+            renderContext.AddGraphicsCommand(new CommandDrawSprite(X, Y, currentSprite, 1.0f, Width, Height));
 
             _textRenderer.Update(X, Y, Text);
             _textRenderer.Render(renderContext, X, Y);
@@ -216,6 +218,14 @@ namespace Swarm2D.Engine.View.GUI
             }
         }
 
+        protected internal override void OnTextChange()
+        {
+            if (TextChanged != null)
+            {
+                TextChanged();
+            }
+        }
+
         private void HandleKeyDown(KeyCode keyCode)
         {
             string currentText = Text;
@@ -252,7 +262,17 @@ namespace Swarm2D.Engine.View.GUI
             else
             {
                 char c = (char)keyCode;
-                currentText = currentText.Insert(_cursorPosition, c.ToString().ToLower());
+
+                if (IOSystem.GetKey(KeyCode.KeyShift))
+                {
+                    c = Char.ToUpper(c);
+                }
+                else
+                {
+                    c = Char.ToLower(c);
+                }
+
+                currentText = currentText.Insert(_cursorPosition, c.ToString());
                 //currentText.AddCharacter((wchar_t)keyCode, _cursorPosition);
                 _cursorPosition++;
             }

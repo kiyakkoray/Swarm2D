@@ -74,7 +74,7 @@ namespace Swarm2D.Engine.View
 
         public static void DrawArrays(Texture texture, float[] vertices, float[] uvs)
         {
-            Framework.Current.DrawArrays(texture, vertices, uvs, vertices.Length / 2);
+            DrawArrays(texture, vertices, uvs, vertices.Length / 2);
         }
 
         public static void DrawArrays(Texture texture, float[] vertices, float[] uvs, int vertexCount)
@@ -90,11 +90,6 @@ namespace Swarm2D.Engine.View
         public static void DrawArrays(float x, float y, Texture texture, float[] vertices, float[] uvs, int vertexCount)
         {
             Framework.Current.DrawArrays(x, y, texture, vertices, uvs, vertexCount);
-        }
-
-        public static void DrawTextureOnScreen(float x, float y, float width, float height, Texture texture)
-        {
-            Framework.Current.DrawTextureOnScreen(x, y, width, height, texture);
         }
 
         public static void LoadTextureUsing(Texture texture, string resourcesName, string name)

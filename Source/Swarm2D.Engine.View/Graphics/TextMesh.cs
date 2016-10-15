@@ -51,7 +51,9 @@ namespace Swarm2D.Engine.View
         private bool _renderCursor;
         private int _renderCursorPosition;
 
-        const float textureSize = 512.0f; //TODO:read it from texture
+        const float TextureSize = 512.0f; //TODO:read it from texture
+        const float InverseTextureSize = 1.0f / TextureSize;
+        const float ExtraPadding = 0.0f;
 
         public TextMesh(Font labelFont)
         {
@@ -134,15 +136,15 @@ namespace Swarm2D.Engine.View
 
         private void AddCharacterToMesh(float x, float y, FontCharacter fontCharacter)
         {
-            float u0 = ((float)fontCharacter.X) / textureSize;
-            float v0 = ((float)fontCharacter.Y) / textureSize;
-            float u1 = u0 + (((float)fontCharacter.Width) / textureSize);
-            float v1 = v0 + (((float)fontCharacter.Height) / textureSize);
+            float u0 = fontCharacter.X * InverseTextureSize;
+            float v0 = fontCharacter.Y * InverseTextureSize;
+            float u1 = u0 + fontCharacter.Width * InverseTextureSize;
+            float v1 = v0 + fontCharacter.Height * InverseTextureSize;
             //v0 = /*1.0f - */v0;
             //v1 = /*1.0f - */v1;
 
-            float width = ((float)fontCharacter.Width) * _scaleValue;
-            float height = ((float)fontCharacter.Height) * _scaleValue;
+            float width = fontCharacter.Width * _scaleValue;
+            float height = fontCharacter.Height * _scaleValue;
 
             TextureCoordinates[8 * _textMeshCharacterCount + 0] = u0;
             TextureCoordinates[8 * _textMeshCharacterCount + 1] = v0;
@@ -205,8 +207,8 @@ namespace Swarm2D.Engine.View
             _scaleValue = FontHeight / LabelFont.LineHeight;
             _scaleValue = 1.0f;
 
-            float currentWidth = 8.0f;
-            float currentHeight = 8 + LabelFont.Base * _scaleValue - LabelFont.LineHeight * _scaleValue;
+            double currentWidth = 8.0f;
+            double currentHeight = 8 + LabelFont.Base * _scaleValue - LabelFont.LineHeight * _scaleValue;
 
             for (int i = 0; i < newText.Length; i++)
             {
@@ -216,7 +218,7 @@ namespace Swarm2D.Engine.View
                 if (character == '\n')
                 {
                     currentWidth = 8.0f;
-                    currentHeight += ((float)LabelFont.Base) * _scaleValue;
+                    currentHeight += LabelFont.Base * (double)_scaleValue;
                 }
                 else if (LabelFont.Characters.ContainsKey(characterData))
                 {
@@ -225,12 +227,12 @@ namespace Swarm2D.Engine.View
                     if (fontCharacter.Width * _scaleValue + currentWidth > newWidth && !_singleLine)
                     {
                         currentWidth = 0;
-                        currentHeight += ((float)LabelFont.Base) * _scaleValue;
+                        currentHeight += LabelFont.Base * (double)_scaleValue;
                     }
 
                     {
-                        float x = currentWidth + ((float)fontCharacter.XOffset) * _scaleValue;
-                        float y = currentHeight + ((float)fontCharacter.YOffset) * _scaleValue;
+                        float x = (float)(currentWidth + fontCharacter.XOffset * (double)_scaleValue);
+                        float y = (float)(currentHeight + fontCharacter.YOffset * (double)_scaleValue);
 
                         AddCharacterToMesh(x, y, fontCharacter);
                     }
@@ -239,20 +241,22 @@ namespace Swarm2D.Engine.View
                     {
                         FontCharacter cursorCharacter = LabelFont.Characters['|'];
 
-                        float x = currentWidth + ((float)cursorCharacter.XOffset) * _scaleValue;
-                        float y = currentHeight + ((float)cursorCharacter.YOffset) * _scaleValue;
+                        float x = (float)(currentWidth + cursorCharacter.XOffset * (double)_scaleValue);
+                        float y = (float)(currentHeight + cursorCharacter.YOffset * (double)_scaleValue);
 
                         AddCharacterToMesh(x, y, cursorCharacter);
                     }
 
-                    currentWidth += ((float)fontCharacter.XAdvance) * _scaleValue;
+                    currentWidth += ((double)fontCharacter.XAdvance + ExtraPadding) * _scaleValue;
                 }
             }
+
+            _meshNeedUpdate = false;
         }
 
         private bool TextMeshOutdated(float newWidth, float newHeight, string newText)
         {
-            return _meshNeedUpdate || Vertices == null || TextureCoordinates == null || _lastWidth != newWidth || _lastHeight != newHeight || _lastFontHeight != FontHeight || !(_lastText == newText);
+            return _meshNeedUpdate || Vertices == null || TextureCoordinates == null || _lastWidth != newWidth || _lastHeight != newHeight || _lastFontHeight != FontHeight || _lastText != newText;
         }
     }
 }

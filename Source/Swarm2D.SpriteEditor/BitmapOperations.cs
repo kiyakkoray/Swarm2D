@@ -23,9 +23,11 @@ SOFTWARE.
 
 ******************************************************************************/
 
+using System;
 using System.Drawing;
 using Swarm2D.Engine.Logic;
 using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 using Swarm2D.Engine.View;
 
 namespace Swarm2D.SpriteEditor
@@ -127,6 +129,32 @@ namespace Swarm2D.SpriteEditor
             }
 
             return 0;
+        }
+
+        public static byte[] ConvertBitmapToInternalFormat(Bitmap bitmap)
+        {
+            BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+            
+            byte[] bitmapAsSwarmFormat = new byte[bitmap.Width * bitmap.Height * 4 + sizeof(int) * 2];
+
+            byte[] widthBytes = BitConverter.GetBytes(bitmap.Width);
+            byte[] heightBytes = BitConverter.GetBytes(bitmap.Height);
+
+            bitmapAsSwarmFormat[0] = widthBytes[0];
+            bitmapAsSwarmFormat[1] = widthBytes[1];
+            bitmapAsSwarmFormat[2] = widthBytes[2];
+            bitmapAsSwarmFormat[3] = widthBytes[3];
+
+            bitmapAsSwarmFormat[4] = heightBytes[0];
+            bitmapAsSwarmFormat[5] = heightBytes[1];
+            bitmapAsSwarmFormat[6] = heightBytes[2];
+            bitmapAsSwarmFormat[7] = heightBytes[3];
+
+            Marshal.Copy(bitmapData.Scan0, bitmapAsSwarmFormat, 8, bitmap.Width * bitmap.Height * 4);
+
+            bitmap.UnlockBits(bitmapData);
+
+            return bitmapAsSwarmFormat;
         }
     }
 }

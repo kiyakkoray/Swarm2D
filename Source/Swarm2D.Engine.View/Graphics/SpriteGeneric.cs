@@ -1,5 +1,5 @@
 ﻿/******************************************************************************
-Copyright (c) 2015 Koray Kiyakoglu
+Copyright (c) 2016 Koray Kiyakoglu
 
 http://www.swarm2d.com
 
@@ -27,24 +27,32 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Swarm2D.Engine.Core;
-using Swarm2D.Engine.Logic;
-using Swarm2D.Library;
 
 namespace Swarm2D.Engine.View
 {
-    public abstract class Sprite : Resource
+    public class SpriteGeneric : Sprite
     {
-        public int Width { get; private set; }
-        public int Height { get; private set; }
+        public SpritePart SpritePart { get; private set; }
 
-        protected Sprite(string name, int width, int height)
-            : base(name)
+        private float[] _vertices;
+        private float[] _uvs;
+
+        public SpriteGeneric(string name, SpritePart spritePart)
+            : base(name, spritePart.Width, spritePart.Height)
         {
-            Width = width;
-            Height = height;
+            SpritePart = spritePart;
+
+            _vertices = new float[8];
+            _uvs = new float[8];
         }
 
-        internal abstract void GetArrays(float mapX, float mapY, float scale, float width, float height, out Texture texture, out float[] outVertices, out float[] outUvs);
+        internal override void GetArrays(float mapX, float mapY, float scale, float width, float height, out Texture texture, out float[] outVertices, out float[] outUvs)
+        {
+            SpritePart.DrawSpritePart(mapX, mapY, _vertices, _uvs, 0, 0, scale, width, height);
+
+            texture = SpritePart.Texture;
+            outVertices = _vertices;
+            outUvs = _uvs;
+        }
     }
 }

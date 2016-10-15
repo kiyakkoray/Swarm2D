@@ -79,6 +79,7 @@ namespace Swarm2D.Engine.View
             {
                 return SpriteNames[name];
             }
+
             return null;
         }
 
@@ -89,39 +90,30 @@ namespace Swarm2D.Engine.View
             XmlNode spriteDataNode = spriteData["SpriteData"];
 
             XmlNode spriteCategoriesNode = spriteDataNode["SpriteCategories"];
+            XmlNode spritePartsNode = spriteDataNode["SpriteParts"];
+            XmlNode spritesNode = spriteDataNode["Sprites"];
 
             foreach (XmlNode spriteCategoryNode in spriteCategoriesNode)
             {
-                SpriteCategory spriteCategory = new SpriteCategory(this);
-
-                spriteCategory.Name = spriteCategoryNode["Name"].InnerText;
-                spriteCategory.SheetCount = Convert.ToInt32(spriteCategoryNode["SpriteSheetCount"].InnerText);
+                string name = spriteCategoryNode["Name"].InnerText;
+                int spriteSheetCount = Convert.ToInt32(spriteCategoryNode["SpriteSheetCount"].InnerText);
+                SpriteCategory spriteCategory = new SpriteCategory(name, this, spriteSheetCount);
 
                 SpriteCategories.Add(spriteCategory.Name, spriteCategory);
             }
 
-            XmlNode spritePartsNode = spriteDataNode["SpriteParts"];
-
             foreach (XmlNode spritePartNode in spritePartsNode)
             {
-                XmlNode spritePartCategoriesNode = spritePartNode["SpritePartCategories"];
+                string name = spritePartNode["Name"].InnerText;
+                int width = Convert.ToInt32(spritePartNode["Width"].InnerText);
+                int height = Convert.ToInt32(spritePartNode["Height"].InnerText);
 
-                SpriteCategory spriteCategory = null;
-                
-                //TODO
-                foreach (XmlNode spritePartCategoryNode in spritePartCategoriesNode)
-                {
-                    string spriteCategoryName = spritePartCategoryNode.InnerText;
-                    spriteCategory = SpriteCategories[spriteCategoryName];
-                }
+                string categoryName = spritePartNode["CategoryName"].InnerText;
+                SpriteCategory spriteCategory = SpriteCategories[categoryName];
 
-                SpritePart spritePart = new SpritePart(spriteCategory);
+                SpritePart spritePart = new SpritePart(name, spriteCategory, width, height);
 
                 spritePart.SheetID = Convert.ToInt32(spritePartNode["SheetID"].InnerText);
-                spritePart.Name = spritePartNode["Name"].InnerText;
-
-                spritePart.Width = Convert.ToInt32(spritePartNode["Width"].InnerText);
-                spritePart.Height = Convert.ToInt32(spritePartNode["Height"].InnerText);
 
                 spritePart.MinX = Convert.ToInt32(spritePartNode["MinX"].InnerText);
                 spritePart.MaxX = Convert.ToInt32(spritePartNode["MaxX"].InnerText);
@@ -136,8 +128,6 @@ namespace Swarm2D.Engine.View
                 spritePart.Initialize();
             }
 
-            XmlNode spritesNode = spriteDataNode["Sprites"];
-
             foreach (XmlNode spriteNode in spritesNode)
             {
                 Sprite sprite = null;
@@ -146,37 +136,23 @@ namespace Swarm2D.Engine.View
                 {
                     string spriteGenericName = spriteNode["Name"].InnerText;
 
-                    SpriteGeneric spriteGeneric = new SpriteGeneric(spriteGenericName);
-
-                    spriteGeneric.Width = Convert.ToInt32(spriteNode["Width"].InnerText);
-                    spriteGeneric.Height = Convert.ToInt32(spriteNode["Height"].InnerText);
-
                     string spritePartName = spriteNode["SpritePartName"].InnerText;
-                    spriteGeneric.SpritePart = SpritePartNames[spritePartName];
+                    SpritePart spritePart = SpritePartNames[spritePartName];
+
+                    SpriteGeneric spriteGeneric = new SpriteGeneric(spriteGenericName, spritePart);
 
                     sprite = spriteGeneric;
                 }
                 else if (spriteNode.Name == "NineRegionSprite")
                 {
                     string spriteNineRegionName = spriteNode["Name"].InnerText;
+                    string spritePartName = spriteNode["SpritePartName"].InnerText;
+                    int leftWidth = Convert.ToInt32(spriteNode["LeftWidth"].InnerText);
+                    int rightWidth = Convert.ToInt32(spriteNode["RightWidth"].InnerText);
+                    int topHeight = Convert.ToInt32(spriteNode["TopHeight"].InnerText);
+                    int bottomHeight = Convert.ToInt32(spriteNode["BottomHeight"].InnerText);
 
-                    SpriteNineRegion spriteNineRegion = new SpriteNineRegion(spriteNineRegionName);
-
-                    spriteNineRegion.Width = Convert.ToInt32(spriteNode["Width"].InnerText);
-                    spriteNineRegion.Height = Convert.ToInt32(spriteNode["Height"].InnerText);
-
-                    spriteNineRegion.TopLeftSprite = SpritePartNames[spriteNode["TopLeftSpritePartName"].InnerText];
-                    spriteNineRegion.TopSprite = SpritePartNames[spriteNode["TopSpritePartName"].InnerText];
-                    spriteNineRegion.TopRightSprite = SpritePartNames[spriteNode["TopRightSpritePartName"].InnerText];
-
-                    spriteNineRegion.LeftSprite = SpritePartNames[spriteNode["LeftSpritePartName"].InnerText];
-                    spriteNineRegion.RightSprite = SpritePartNames[spriteNode["RightSpritePartName"].InnerText];
-
-                    spriteNineRegion.BottomLeftSprite = SpritePartNames[spriteNode["BottomLeftSpritePartName"].InnerText];
-                    spriteNineRegion.BottomSprite = SpritePartNames[spriteNode["BottomSpritePartName"].InnerText];
-                    spriteNineRegion.BottomRightSprite = SpritePartNames[spriteNode["BottomRightSpritePartName"].InnerText];
-
-                    spriteNineRegion.CenterSprite = SpritePartNames[spriteNode["CenterSprite"].InnerText];
+                    SpriteNineRegion spriteNineRegion = new SpriteNineRegion(spriteNineRegionName, SpritePartNames[spritePartName], leftWidth, rightWidth, topHeight, bottomHeight);
 
                     sprite = spriteNineRegion;
                 }

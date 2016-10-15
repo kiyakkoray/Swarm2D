@@ -65,7 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Swarm2D.Library\Swarm2D.Library.csproj">
-      <Project>{6C71FC43-48A5-49E5-A551-DD2613C6E6AB}</Project>
+      <Project>{6c71fc43-48a5-49e5-a551-dd2613c6e6ab}</Project>
       <Name>Swarm2D.Library</Name>
     </ProjectReference>
   </ItemGroup>

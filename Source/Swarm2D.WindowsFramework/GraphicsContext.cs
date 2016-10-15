@@ -32,6 +32,7 @@ using Swarm2D.WindowsFramework.Native;
 using Swarm2D.WindowsFramework.Native.Windows;
 using Swarm2D.WindowsFramework.Native.Opengl;
 using System.Threading;
+using Swarm2D.WindowsFramework.Native.OggVorbis;
 
 namespace Swarm2D.WindowsFramework
 {
@@ -50,8 +51,8 @@ namespace Swarm2D.WindowsFramework
         internal Dictionary<string, OpenGLTexture> LoadedTextures { get; private set; }
 
         private List<ScissorTestInfo> _scissorStack;
-        bool _scissorTestEnabled;
-        int[] _scissorParameters = new int[4];
+        private bool _scissorTestEnabled;
+        private int[] _scissorParameters = new int[4];
 
         private Matrix4x4 _projectionMatrix = Matrix4x4.Identity;
         private Matrix4x4 _worldMatrix = Matrix4x4.Identity;
@@ -287,12 +288,17 @@ namespace Swarm2D.WindowsFramework
             }
         }
 
-        public void DrawArrays(float x, float y, OpenGLTexture texture, float[] vertices, float[] uvs)
+        public void DrawArrays(float x, float y, OpenGLTexture texture, float[] vertices, float[] uvs, int vertexCount)
         {
-            DrawArrays(x, y, texture, vertices, uvs, vertices.Length / 2);
+            Opengl32.PushMatrix();
+            Opengl32.Translate(x, y, 0.0f);
+
+            DrawArrays(texture, vertices, uvs, vertexCount);
+
+            Opengl32.PopMatrix();
         }
 
-        public void DrawArrays(float x, float y, OpenGLTexture texture, float[] vertices, float[] uvs, int vertexCount)
+        public void DrawArrays(OpenGLTexture texture, float[] vertices, float[] uvs, int vertexCount)
         {
             SetBlending(true);
 
@@ -305,10 +311,6 @@ namespace Swarm2D.WindowsFramework
 
             Opengl32.Color(1.0f, 1.0f, 1.0f, 1.0f);
 
-            Opengl32.PushMatrix();
-
-            Opengl32.Translate(x, y, 0.0f);
-
             SetVertexArrayClientState(true);
 
             if (texture != null)
@@ -320,43 +322,31 @@ namespace Swarm2D.WindowsFramework
                 SetTextureCoordArrayClientState(false);
             }
 
-            Opengl32.VertexPointer(2, DataType.Float, 0, vertices);
-
-            if (texture != null)
+            //Looks like pointer must be valid when you call draw arrays
+            using (AutoPinner verticesPinner = new AutoPinner(vertices))
             {
-                Opengl32.TexCoordPointer(2, DataType.Float, 0, uvs);
-            }
+                using (AutoPinner uvsPinner = new AutoPinner(uvs))
+                {
+                    Opengl32.VertexPointer(2, DataType.Float, 0, vertices);
 
-            Opengl32.DrawArrays(BeginMode.Quads, 0, vertexCount);
+                    if (texture != null)
+                    {
+                        Opengl32.TexCoordPointer(2, DataType.Float, 0, uvs);
+                    }
+
+                    Opengl32.DrawArrays(BeginMode.Quads, 0, vertexCount);
+                }
+            }
 
             if (texture != null)
             {
                 SetTextureCoordArrayClientState(false);
             }
 
-            Opengl32.PopMatrix();
-
             if (texture != null)
             {
                 Opengl32.Disable(Target.TEXTURE_2D);
             }
-        }
-
-        public void DrawTextureOnScreen(float x, float y, float width, float height, OpenGLTexture texture)
-        {
-            _debugVertices[0] = x;
-            _debugVertices[1] = y;
-
-            _debugVertices[2] = x + width;
-            _debugVertices[3] = y;
-
-            _debugVertices[4] = x + width;
-            _debugVertices[5] = y + height;
-
-            _debugVertices[6] = x;
-            _debugVertices[7] = y + height;
-
-            DrawArrays(x, y, texture, _debugVertices, _textureUVs);
         }
 
         internal void Resize(int width, int height)

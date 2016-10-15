@@ -63,8 +63,17 @@ namespace Swarm2D.SceneEditor.GUIControllers
 
             _closeObjectPropertiesPanel.MouseClick += new UIMouseEvent(OnCloseObjectPropertiesButtonClick);
             _addComponentButton.MouseClick += new UIMouseEvent(OnAddComponentMenuButtonClick);
-
+            _selectedSceneObjectName.TextChanged += OnSelectedSceneObjectNameTextChanged;
             CreateAddComponentMenu();
+        }
+
+        private void OnSelectedSceneObjectNameTextChanged()
+        {
+            if (!String.IsNullOrEmpty(_selectedSceneObjectName.Text))
+            {
+                Entity selectedSceneObject = _sceneEditor.SelectedEntity;
+                selectedSceneObject.Name = _selectedSceneObjectName.Text;
+            }
         }
 
         private void CreateAddComponentMenu()

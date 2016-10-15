@@ -1,5 +1,5 @@
 ﻿/******************************************************************************
-Copyright (c) 2015 Koray Kiyakoglu
+Copyright (c) 2016 Koray Kiyakoglu
 
 http://www.swarm2d.com
 
@@ -27,24 +27,64 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Swarm2D.Library;
 using Swarm2D.Engine.Core;
 using Swarm2D.Engine.Logic;
-using Swarm2D.Library;
 
 namespace Swarm2D.Engine.View
 {
-    public abstract class Sprite : Resource
+    public class AudioSource : Component
     {
-        public int Width { get; private set; }
-        public int Height { get; private set; }
+        public AudioClip Clip { get; set; }
 
-        protected Sprite(string name, int width, int height)
-            : base(name)
+        private IOSystem _ioSystem;
+        private IAudioJob _audioJob;
+
+        protected override void OnAdded()
         {
-            Width = width;
-            Height = height;
+            base.OnAdded();
+
+            _ioSystem = Engine.RootEntity.GetComponent<IOSystem>();
         }
 
-        internal abstract void GetArrays(float mapX, float mapY, float scale, float width, float height, out Texture texture, out float[] outVertices, out float[] outUvs);
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            if (_audioJob != null)
+            {
+                _audioJob.Stop();
+            }
+        }
+
+        public void PlayOneShot()
+        {
+            _audioJob = _ioSystem.PlayOneShotAudio(Clip);
+        }
+
+        public void Play()
+        {
+            _audioJob = _ioSystem.PlayAudio(Clip);
+        }
+
+        public void Stop()
+        {
+            if (_audioJob != null)
+            {
+                _audioJob.Stop();
+                _audioJob = null;
+            }
+        }
+
+        public static void PlayClipAtPoint(Scene scene, AudioClip clip, Vector2 position)
+        {
+            
+        }
+    }
+
+    public interface IAudioJob
+    {
+        bool Finished { get; }
+        void Stop();
     }
 }

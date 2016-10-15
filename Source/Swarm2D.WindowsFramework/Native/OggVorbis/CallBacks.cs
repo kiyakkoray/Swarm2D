@@ -1,5 +1,5 @@
 ﻿/******************************************************************************
-Copyright (c) 2015 Koray Kiyakoglu
+Copyright (c) 2016 Koray Kiyakoglu
 
 http://www.swarm2d.com
 
@@ -27,24 +27,34 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Swarm2D.Engine.Core;
-using Swarm2D.Engine.Logic;
-using Swarm2D.Library;
+using System.Runtime.InteropServices;
 
-namespace Swarm2D.Engine.View
+namespace Swarm2D.WindowsFramework.Native.OggVorbis
 {
-    public abstract class Sprite : Resource
-    {
-        public int Width { get; private set; }
-        public int Height { get; private set; }
+	[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+	delegate int ReadFunc(IntPtr ptr, int size, int nmemb, IntPtr datasource);
 
-        protected Sprite(string name, int width, int height)
-            : base(name)
-        {
-            Width = width;
-            Height = height;
-        }
+	[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+	delegate int SeekFunc(IntPtr datasource, long offset, int whence);
 
-        internal abstract void GetArrays(float mapX, float mapY, float scale, float width, float height, out Texture texture, out float[] outVertices, out float[] outUvs);
-    }
+	[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+	delegate int CloseFunc(IntPtr datasource);
+
+	[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+	delegate int TellFunc(IntPtr datasource);
+
+	struct CallBacks
+	{
+		[MarshalAs(UnmanagedType.FunctionPtr)]
+		public ReadFunc ReadFunc;
+
+		[MarshalAs(UnmanagedType.FunctionPtr)]
+		public SeekFunc SeekFunc;
+
+		[MarshalAs(UnmanagedType.FunctionPtr)]
+		public CloseFunc CloseFunc;
+
+		[MarshalAs(UnmanagedType.FunctionPtr)]
+		public TellFunc TellFunc;
+	}
 }

@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml;
 using Swarm2D.Engine.Core;
 using Swarm2D.Engine.Logic;
 using Swarm2D.Library;
@@ -40,26 +41,30 @@ namespace Swarm2D.Engine.View
         {
             Characters = new Dictionary<int, FontCharacter>();
 
-            byte[] fontData = Resources.LoadBinaryData(@"Fonts/" + name);
+            XmlDocument fontXml = Resources.LoadXmlData(@"Fonts/" + name);
+            XmlElement fontNode = fontXml["font"];
 
-            DataReader reader = new DataReader(fontData);
+            XmlElement commonNode = fontNode["common"];
+            LineHeight = Convert.ToInt32(commonNode.Attributes["lineHeight"].Value);
+            Base = Convert.ToInt32(commonNode.Attributes["base"].Value);
 
-            LineHeight = reader.ReadInt32();
-            Base = reader.ReadInt32();
-            CharacterCount = reader.ReadInt32();
+            XmlElement charsNode = fontNode["chars"];
+            CharacterCount = Convert.ToInt32(charsNode.Attributes["count"].Value);
 
             for (int i = 0; i < CharacterCount; i++)
             {
+                XmlNode charNode = charsNode.ChildNodes[i];
+
                 FontCharacter character;
 
-                character.ID = reader.ReadInt32();
-                character.X = reader.ReadInt32();
-                character.Y = reader.ReadInt32();
-                character.Width = reader.ReadInt32();
-                character.Height = reader.ReadInt32();
-                character.XOffset = reader.ReadInt32();
-                character.YOffset = reader.ReadInt32();
-                character.XAdvance = reader.ReadInt32();
+                character.ID = Convert.ToInt32(charNode.Attributes["id"].Value);
+                character.X = Convert.ToInt32(charNode.Attributes["x"].Value);
+                character.Y = Convert.ToInt32(charNode.Attributes["y"].Value);
+                character.Width = Convert.ToInt32(charNode.Attributes["width"].Value);
+                character.Height = Convert.ToInt32(charNode.Attributes["height"].Value);
+                character.XOffset = Convert.ToInt32(charNode.Attributes["xoffset"].Value);
+                character.YOffset = Convert.ToInt32(charNode.Attributes["yoffset"].Value);
+                character.XAdvance = Convert.ToInt32(charNode.Attributes["xadvance"].Value);
 
                 Characters.Add(character.ID, character);
             }

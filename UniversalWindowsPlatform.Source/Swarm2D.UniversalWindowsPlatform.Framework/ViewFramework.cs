@@ -317,11 +317,6 @@ namespace Swarm2D.UniversalWindowsPlatform.Framework
             DirectXApplication.DrawQuadArrays(x, y, vertices, uvs, vertexCount, directXTexture.InnerTexture);
         }
 
-        public override void DrawTextureOnScreen(float x, float y, float width, float height, Texture texture)
-        {
-            
-        }
-
         public override void LoadTextureUsing(Texture texture, string resourcesName, string name)
         {
             DirectXTexture directXTexture = (DirectXTexture) texture;
@@ -366,6 +361,40 @@ namespace Swarm2D.UniversalWindowsPlatform.Framework
         public override Texture CreateTexture()
         {
             return new DirectXTexture();
+        }
+
+        #endregion
+
+        #region Audio
+
+        public override void InitializeAudioContext()
+        {
+            
+        }
+
+        public override AudioClip LoadAudioClip(string name)
+        {
+            return null;
+        }
+
+        public override IAudioJob PlayOneShotAudio(AudioClip audioClip)
+        {
+            return null;
+        }
+
+        public override IAudioJob PlayOneShotAudio(AudioClip audioClip, Vector2 position)
+        {
+            return null;
+        }
+
+        public override void StopAllAudio()
+        {
+            
+        }
+
+        public override IAudioJob PlayAudio(AudioClip audioClip)
+        {
+            return null;
         }
 
         #endregion

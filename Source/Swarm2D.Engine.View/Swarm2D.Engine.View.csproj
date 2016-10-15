@@ -45,6 +45,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AudioClip.cs" />
+    <Compile Include="AudioSource.cs" />
     <Compile Include="Components\Camera.cs" />
     <Compile Include="Components\DebugRenderer.cs" />
     <Compile Include="Components\Renderer.cs" />
@@ -76,17 +78,21 @@
     <Compile Include="Graphics\Commands\CommandResetMatrices.cs" />
     <Compile Include="Graphics\Commands\CommandSetProjectionMatrix.cs" />
     <Compile Include="Graphics\Commands\CommandSetViewMatrix.cs" />
+    <Compile Include="Graphics\Commands\CommandSetWorldMatrixAsIdentity.cs" />
     <Compile Include="Graphics\Commands\CommandSetWorldMatrix.cs" />
     <Compile Include="Graphics\Commands\CommandSwapBuffers.cs" />
     <Compile Include="Graphics\DebugRender.cs" />
     <Compile Include="Graphics\Font.cs" />
     <Compile Include="Graphics\Graphics.cs" />
-    <Compile Include="Graphics\Graphics2D.cs" />
     <Compile Include="Graphics\GraphicsCommand.cs" />
     <Compile Include="Graphics\Mesh.cs" />
     <Compile Include="Graphics\RenderContext.cs" />
     <Compile Include="Graphics\Sprite.cs" />
+    <Compile Include="Graphics\SpriteCategory.cs" />
     <Compile Include="Graphics\SpriteData.cs" />
+    <Compile Include="Graphics\SpriteGeneric.cs" />
+    <Compile Include="Graphics\SpriteNineRegion.cs" />
+    <Compile Include="Graphics\SpritePart.cs" />
     <Compile Include="Graphics\TextMesh.cs" />
     <Compile Include="Graphics\Texture.cs" />
     <Compile Include="GUI\UIWidget.cs" />

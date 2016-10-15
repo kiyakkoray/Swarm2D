@@ -1,5 +1,5 @@
 ﻿/******************************************************************************
-Copyright (c) 2015 Koray Kiyakoglu
+Copyright (c) 2016 Koray Kiyakoglu
 
 http://www.swarm2d.com
 
@@ -27,24 +27,29 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Swarm2D.Engine.Core;
-using Swarm2D.Engine.Logic;
-using Swarm2D.Library;
+using Swarm2D.Engine.View;
+using Swarm2D.WindowsFramework.Native.OggVorbis;
 
-namespace Swarm2D.Engine.View
+namespace Swarm2D.WindowsFramework
 {
-    public abstract class Sprite : Resource
-    {
-        public int Width { get; private set; }
-        public int Height { get; private set; }
+	public class OggAudioClip : AudioClip
+	{
+	    private string _name;
+	    private float _length;
 
-        protected Sprite(string name, int width, int height)
-            : base(name)
-        {
-            Width = width;
-            Height = height;
-        }
+        public override string Name { get { return _name; } }
+        public override float Length { get { return _length; } }
 
-        internal abstract void GetArrays(float mapX, float mapY, float scale, float width, float height, out Texture texture, out float[] outVertices, out float[] outUvs);
-    }
+        internal OggAudioClip(string name)
+		{
+            _name = name;
+
+			OggStream oggStream = new OggStream(Resources.ResourcesPath + @"\" + name + ".ogg");
+			oggStream.Open();
+
+            _length = oggStream.Length;
+
+			oggStream.Close();
+		}
+	}
 }

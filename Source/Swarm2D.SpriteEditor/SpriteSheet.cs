@@ -30,6 +30,7 @@ using System.Text;
 using Swarm2D.Engine.Logic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using Swarm2D.Engine.View;
 
 namespace Swarm2D.SpriteEditor
@@ -57,7 +58,7 @@ namespace Swarm2D.SpriteEditor
             _freeRectangles.Add(new SpriteSheetRect(this, 0, 0, Width, Height));
         }
 
-        public bool AddSpritePart(SpritePart sprite)
+        public bool AddSpritePart(SpritePart spritePart)
         {
             int edgeSize = spriteSheetEdgeSize;
 
@@ -66,8 +67,8 @@ namespace Swarm2D.SpriteEditor
 
             bool rotated = false;
 
-            int spriteRelativeWidth = sprite.MaxX - sprite.MinX;
-            int spriteRelativeHeight = sprite.MaxY - sprite.MinY;
+            int spriteRelativeWidth = spritePart.MaxX - spritePart.MinX;
+            int spriteRelativeHeight = spritePart.MaxY - spritePart.MinY;
 
             int spriteWidth = spriteRelativeWidth + edgeSize;
             int spriteHeight = spriteRelativeHeight + edgeSize;
@@ -131,9 +132,9 @@ namespace Swarm2D.SpriteEditor
                 spriteWidth = spriteRelativeHeight + edgeSize;
             }
 
-            sprite.Rotated = rotated;
-            sprite.SheetX = selectedRect.X;
-            sprite.SheetY = selectedRect.Y;
+            spritePart.Rotated = rotated;
+            spritePart.SheetX = selectedRect.X;
+            spritePart.SheetY = selectedRect.Y;
 
             //insert to top left
 
@@ -148,7 +149,7 @@ namespace Swarm2D.SpriteEditor
             newRectangles.Add(secondFreeRect);
 
             SpriteSheetRect spriteRect = new SpriteSheetRect(null, selectedRect.X, selectedRect.Y, spriteWidth, spriteHeight);
-            _sheetSprites.Add(sprite, spriteRect);
+            _sheetSprites.Add(spritePart, spriteRect);
 
             spriteRect.Rotated = rotated;
 
@@ -214,10 +215,10 @@ namespace Swarm2D.SpriteEditor
 
             foreach (KeyValuePair<SpritePart, SpriteSheetRect> sheetSprite in _sheetSprites)
             {
-                SpritePart spritaPart = sheetSprite.Key;
+                SpritePart spritePart = sheetSprite.Key;
                 SpriteSheetRect spriteRect = sheetSprite.Value;
 
-                Bitmap spriteBitmap = _spriteDataEditor.GetSpritePartBitmap(spritaPart);
+                Bitmap spriteBitmap = _spriteDataEditor.GetSpritePartBitmap(spritePart);
 
                 DrawBitmapToBitmap(spriteBitmap, sheetBitmap, spriteRect.X, spriteRect.Y, spriteRect.Rotated, sheetSprite.Key, graphics);
                 //DrawBitmapEdgesToBitmap(spriteBitmap, sheetBitmap, spriteRect.X, spriteRect.Y, spriteRect.Rotated, sheetSprite.Key, graphics);
@@ -236,10 +237,15 @@ namespace Swarm2D.SpriteEditor
 
         public void SaveSheet()
         {
-            string fileName = Path + @"\sheet" + ID + ".bmp";
+            string fileName = Path + @"\sheet" + ID + ".png";
+            string fileInternalFormatName = Path + @"\sheet" + ID + ".stx";
 
             Bitmap sheetBitmap = GetSheetBitmap();
             sheetBitmap.Save(fileName, ImageFormat.Png);
+
+            byte[] data = BitmapOperations.ConvertBitmapToInternalFormat(sheetBitmap);
+            File.WriteAllBytes(fileInternalFormatName, data);
+
             sheetBitmap.Dispose();
         }
 

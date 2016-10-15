@@ -1,5 +1,5 @@
 ﻿/******************************************************************************
-Copyright (c) 2015 Koray Kiyakoglu
+Copyright (c) 2016 Koray Kiyakoglu
 
 http://www.swarm2d.com
 
@@ -27,24 +27,37 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Swarm2D.Engine.Core;
-using Swarm2D.Engine.Logic;
-using Swarm2D.Library;
+using System.Runtime.InteropServices;
 
-namespace Swarm2D.Engine.View
+namespace Swarm2D.WindowsFramework.Native.OggVorbis
 {
-    public abstract class Sprite : Resource
-    {
-        public int Width { get; private set; }
-        public int Height { get; private set; }
+	internal struct VorbisInfo
+	{
+        public int Version;
+        public int Channels;
+        public int Rate;
 
-        protected Sprite(string name, int width, int height)
-            : base(name)
-        {
-            Width = width;
-            Height = height;
-        }
+        public int BitrateUpper;
+        public int BitrateNominal;
+        public int BitrateLower;
+        public int BitrateWindow;
 
-        internal abstract void GetArrays(float mapX, float mapY, float scale, float width, float height, out Texture texture, out float[] outVertices, out float[] outUvs);
-    }
+        public IntPtr CodecSetup;
+
+        public static VorbisInfo FromUnmanagedMemory(IntPtr ptr)
+		{
+			VorbisInfo vorbisInfo = new VorbisInfo();
+
+			vorbisInfo.Version = Marshal.ReadInt32(ptr, 0);
+			vorbisInfo.Channels = Marshal.ReadInt32(ptr, 4);
+			vorbisInfo.Rate = Marshal.ReadInt32(ptr, 8);
+			vorbisInfo.BitrateUpper = Marshal.ReadInt32(ptr, 12);
+			vorbisInfo.BitrateNominal = Marshal.ReadInt32(ptr, 16);
+			vorbisInfo.BitrateLower = Marshal.ReadInt32(ptr, 20);
+			vorbisInfo.BitrateWindow = Marshal.ReadInt32(ptr, 24);
+			vorbisInfo.CodecSetup = Marshal.ReadIntPtr(ptr, 28);
+
+			return vorbisInfo;
+		}
+	}
 }

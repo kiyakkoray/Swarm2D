@@ -1,5 +1,5 @@
 ﻿/******************************************************************************
-Copyright (c) 2015 Koray Kiyakoglu
+Copyright (c) 2016 Koray Kiyakoglu
 
 http://www.swarm2d.com
 
@@ -26,25 +26,29 @@ SOFTWARE.
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
-using Swarm2D.Engine.Core;
-using Swarm2D.Engine.Logic;
-using Swarm2D.Library;
+using System.Threading.Tasks;
 
-namespace Swarm2D.Engine.View
+namespace Swarm2D.WindowsFramework.Native
 {
-    public abstract class Sprite : Resource
+    class AutoPinner : IDisposable
     {
-        public int Width { get; private set; }
-        public int Height { get; private set; }
+        private GCHandle _pinnedObject;
 
-        protected Sprite(string name, int width, int height)
-            : base(name)
+        public AutoPinner(Object obj)
         {
-            Width = width;
-            Height = height;
+            _pinnedObject = GCHandle.Alloc(obj, GCHandleType.Pinned);
         }
 
-        internal abstract void GetArrays(float mapX, float mapY, float scale, float width, float height, out Texture texture, out float[] outVertices, out float[] outUvs);
+        public static implicit operator IntPtr(AutoPinner autoPinner)
+        {
+            return autoPinner._pinnedObject.AddrOfPinnedObject();
+        }
+
+        public void Dispose()
+        {
+            _pinnedObject.Free();
+        }
     }
 }

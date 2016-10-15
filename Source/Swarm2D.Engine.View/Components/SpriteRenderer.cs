@@ -109,22 +109,39 @@ namespace Swarm2D.Engine.View
 
         public override void Render(RenderContext renderContext, Box renderBox)
         {
-            if (!Mathf.IsZero(RotationAsAngle) || !Mathf.IsZero(Offset.Length))
-            {
-                var worldMatrix = SceneEntity.TransformMatrix * Matrix4x4.Position2D(Offset) * Matrix4x4.RotationAboutZ(RotationAsAngle * Mathf.Deg2Rad);
-                renderContext.AddGraphicsCommand(new CommandSetWorldMatrix(worldMatrix));
-            }
-            else
-            {
-                if (!SceneEntity.TransformMatrix.IsIdentity)
-                {
-                    renderContext.AddGraphicsCommand(new CommandSetWorldMatrix(SceneEntity.TransformMatrix));
-                }
-            }
-
             if (Sprite != null)
             {
-                renderContext.AddGraphicsCommand(new CommandDrawSprite(-Sprite.Width / 2, -Sprite.Height / 2, Sprite));
+                float x = -Sprite.Width / 2;
+                float y = -Sprite.Height / 2;
+
+                bool matrixSet = false;
+
+                if (!Mathf.IsZero(RotationAsAngle) || !Mathf.IsZero(Offset.Length))
+                {
+                    var worldMatrix = SceneEntity.TransformMatrix * Matrix4x4.Position2D(Offset) * Matrix4x4.RotationAboutZ(RotationAsAngle * Mathf.Deg2Rad);
+                    renderContext.AddGraphicsCommand(new CommandSetWorldMatrix(worldMatrix));
+                    matrixSet = true;
+                }
+                else
+                {
+                    if (SceneEntity.Parent == null && Mathf.IsZero(SceneEntity.LocalRotation))
+                    {
+                        x += SceneEntity.GlobalPosition.X;
+                        y += SceneEntity.GlobalPosition.Y;
+                    }
+                    else /*if (!SceneEntity.TransformMatrix.IsIdentity)*/
+                    {
+                        renderContext.AddGraphicsCommand(new CommandSetWorldMatrix(SceneEntity.TransformMatrix));
+                        matrixSet = true;
+                    }
+                }
+
+                renderContext.AddGraphicsCommand(new CommandDrawSprite(x, y, Sprite));
+
+                if (matrixSet)
+                {
+                    renderContext.AddGraphicsCommand(new CommandSetWorldMatrixAsIdentity());
+                }
             }
         }
     }

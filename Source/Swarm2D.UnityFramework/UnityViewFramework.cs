@@ -382,11 +382,6 @@ namespace Swarm2D.UnityFramework
             _renderer.DrawArrays(x, y, (UnityTexture)texture, vertices, uvs, vertexCount);
         }
 
-        public override void DrawTextureOnScreen(float x, float y, float width, float height, Texture texture)
-        {
-            Debug.Log("x: " + x + "y: " + y);
-        }
-
         public override void LoadTextureUsing(Texture texture, string resourcesName, string name)
         {
             UnityTexture unityTexture = texture as UnityTexture;
@@ -426,5 +421,38 @@ namespace Swarm2D.UnityFramework
 
         #endregion
 
+        #region Audio
+
+        public override void InitializeAudioContext()
+        {
+            
+        }
+
+        public override Engine.View.AudioClip LoadAudioClip(string name)
+        {
+            return null;
+        }
+
+        public override IAudioJob PlayOneShotAudio(Engine.View.AudioClip audioClip)
+        {
+            return null;
+        }
+
+        public override IAudioJob PlayOneShotAudio(Engine.View.AudioClip audioClip, Vector2 position)
+        {
+            return null;
+        }
+
+        public override void StopAllAudio()
+        {
+
+        }
+
+        public override IAudioJob PlayAudio(Engine.View.AudioClip audioClip)
+        {
+            return null;
+        }
+
+        #endregion
     }
 }

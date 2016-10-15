@@ -1,5 +1,5 @@
 ﻿/******************************************************************************
-Copyright (c) 2015 Koray Kiyakoglu
+Copyright (c) 2016 Koray Kiyakoglu
 
 http://www.swarm2d.com
 
@@ -27,24 +27,30 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Swarm2D.Engine.Core;
-using Swarm2D.Engine.Logic;
-using Swarm2D.Library;
+using System.Runtime.InteropServices;
 
-namespace Swarm2D.Engine.View
+namespace Swarm2D.WindowsFramework.Native.OggVorbis
 {
-    public abstract class Sprite : Resource
-    {
-        public int Width { get; private set; }
-        public int Height { get; private set; }
+	class VorbisFile
+	{
+		const string DllName = "vorbisfile.dll";
 
-        protected Sprite(string name, int width, int height)
-            : base(name)
-        {
-            Width = width;
-            Height = height;
-        }
+		[DllImport(DllName, EntryPoint = "ov_open_callbacks", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int OpenCallbacks(IntPtr dataSource, IntPtr vf, [MarshalAs(UnmanagedType.LPArray)]byte[] initial, int ibytes, CallBacks callBacks);
 
-        internal abstract void GetArrays(float mapX, float mapY, float scale, float width, float height, out Texture texture, out float[] outVertices, out float[] outUvs);
-    }
+		[DllImport(DllName, EntryPoint = "ov_info", CallingConvention = CallingConvention.Cdecl)]
+		public static extern IntPtr Info(IntPtr vf, int link);
+
+		[DllImport(DllName, EntryPoint = "ov_read", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int Read(IntPtr vf, IntPtr buffer, int length, int bigendianp, int word, int sgned, ref int bitstream);
+
+        [DllImport(DllName, EntryPoint = "ov_time_total", CallingConvention = CallingConvention.Cdecl)]
+		public static extern double TimeTotal(IntPtr vf, int link);
+
+		[DllImport(DllName, EntryPoint = "ov_clear", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int Clear(IntPtr vf);
+
+		[DllImport(DllName, EntryPoint = "ov_time_seek", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int TimeSeek(IntPtr vf, double s);
+	}
 }

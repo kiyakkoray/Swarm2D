@@ -145,7 +145,7 @@ namespace Swarm2D.Engine.View.GUI
 
             _popups = new List<UIWidget>();
 
-            Font = new Font("ArialKucuk");
+            Font = new Font("Carlito-Regular");
             Skin = new UISkin();
 
             _updateMethods = new List<UIUpdateMethod>();

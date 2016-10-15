@@ -29,6 +29,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using Swarm2D.Engine.Core;
 using Swarm2D.Engine.View;
 using Swarm2D.Library;
@@ -56,6 +57,8 @@ namespace Swarm2D.SpriteEditor
             {
                 if (!_generated)
                 {
+                    Dictionary<SpritePart, NineRegionSpriteParameters> spritePartsWithNineRegionSpriteParameters = new Dictionary<SpritePart, NineRegionSpriteParameters>();
+
                     _generated = true;
 
                     _spriteData = new SpriteData("spriteData");
@@ -73,12 +76,31 @@ namespace Swarm2D.SpriteEditor
 
                         foreach (var spritePartName in currentSpriteParts)
                         {
-                            SpritePart spritePart = _spriteDataEditor.AddSpritePart(category, spritePartName);
+                            NineRegionSpriteParameters nineRegionSpriteParameters = HaveCustomParameters(category, spritePartName);
+                            bool nineRegionParameter = nineRegionSpriteParameters != null;
+
+                            SpritePart spritePart = _spriteDataEditor.AddSpritePart(category, spritePartName, nineRegionParameter);
                             _spriteDataEditor.GenerateSpriteFromSpritePart(spritePart);
+
+                            if (nineRegionParameter)
+                            {
+                                spritePartsWithNineRegionSpriteParameters.Add(spritePart, nineRegionSpriteParameters);
+                            }
                         }
                     }
 
-                    _spriteDataEditor.GenerateSpriteSheets();
+                    _spriteDataEditor.CalculateSpriteSheets();
+
+                    foreach (var spritePartsWithNineRegionSpriteParameter in spritePartsWithNineRegionSpriteParameters)
+                    {
+                        SpritePart spritePart = spritePartsWithNineRegionSpriteParameter.Key;
+                        NineRegionSpriteParameters nineRegionSpriteParameters = spritePartsWithNineRegionSpriteParameter.Value;
+
+                        _spriteDataEditor.GenerateNineRegionSpriteFromSpritePart(spritePart, nineRegionSpriteParameters);
+                    }
+
+                    _spriteDataEditor.SaveSpriteSheetData();
+                    _spriteDataEditor.SaveSpriteSheets();
                 }
                 else
                 {
@@ -112,13 +134,45 @@ namespace Swarm2D.SpriteEditor
             return files;
         }
 
+        private NineRegionSpriteParameters HaveCustomParameters(SpriteCategory category, string spritePartName)
+        {
+            try
+            {
+                string spritePartsPath = @"SpriteParts\" + category.Name + @"\";
+                string spritePartXmlName = Resources.ResourcesPath + @"\" + spritePartsPath + spritePartName + ".xml";
+
+                if (File.Exists(spritePartXmlName))
+                {
+                    XmlDocument document = new XmlDocument();
+                    document.Load(spritePartXmlName);
+
+                    XmlNode nineRegionSpriteNode = document.SelectSingleNode("NineRegionSprite");
+
+                    if (nineRegionSpriteNode != null)
+                    {
+                        string name = nineRegionSpriteNode.SelectSingleNode("Name").InnerText;
+                        int leftWidth = Convert.ToInt32(nineRegionSpriteNode.SelectSingleNode("LeftWidth").InnerText);
+                        int rightWidth = Convert.ToInt32(nineRegionSpriteNode.SelectSingleNode("RightWidth").InnerText);
+                        int topHeight = Convert.ToInt32(nineRegionSpriteNode.SelectSingleNode("TopHeight").InnerText);
+                        int bottomHeight = Convert.ToInt32(nineRegionSpriteNode.SelectSingleNode("BottomHeight").InnerText);
+
+                        NineRegionSpriteParameters nineRegionSpriteParameters = new NineRegionSpriteParameters(name, leftWidth, rightWidth, topHeight, bottomHeight);
+                        return nineRegionSpriteParameters;
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            return null;
+        }
+
         private string[] GetSpritePartsList()
         {
-            string[] spriteBmpPartsList = GetFiles("SpriteParts", "bmp");
             string[] spritePngPartsList = GetFiles("SpriteParts", "png");
 
             List<string> spritePartsList = new List<string>();
-            spritePartsList.AddRange(spriteBmpPartsList);
             spritePartsList.AddRange(spritePngPartsList);
 
             return spritePartsList.ToArray();

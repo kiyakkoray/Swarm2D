@@ -427,7 +427,7 @@ namespace Swarm2D.Engine.View.GUI
                     int height = (int)Widget.Height;
 
                     //ioSystem.AddGraphicsCommand(new CommandDrawSprite(Math.Floor(X), Math.Floor(Y), sprite, false, false, 1.0f, false, 0.0f, Math.Floor(Width), Math.Floor(Height)));
-                    renderContext.AddGraphicsCommand(new CommandDrawSprite(x, y, sprite, false, false, 1.0f, false, 0.0f, width, height));
+                    renderContext.AddGraphicsCommand(new CommandDrawSprite(x, y, sprite, 1.0f, width, height));
                 }
             }
 

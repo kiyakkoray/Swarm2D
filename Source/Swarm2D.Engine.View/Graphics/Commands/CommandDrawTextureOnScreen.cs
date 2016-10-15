@@ -38,6 +38,13 @@ namespace Swarm2D.Engine.View
         private float _y;
         private Texture _texture;
 
+        private static readonly float[] _textureUVs;
+
+        static CommandDrawTextureOnScreen()
+        {
+            _textureUVs = new float[8] { 0, 0, 0, 1, 1, 1, 1, 0 };
+        }
+
         internal CommandDrawTextureOnScreen(float x, float y, Texture texture)
         {
             _x = x;
@@ -47,7 +54,21 @@ namespace Swarm2D.Engine.View
 
         internal override void DoJob()
         {
-            Graphics.DrawTextureOnScreen(_x, _y, _texture.Width, _texture.Height, _texture);
+            float[] vertices = new float[8];
+
+            vertices[0] = _x;
+            vertices[1] = _y;
+
+            vertices[2] = _x + _texture.Width;
+            vertices[3] = _y;
+
+            vertices[4] = _x + _texture.Width;
+            vertices[5] = _y + _texture.Height;
+
+            vertices[6] = _x;
+            vertices[7] = _y + _texture.Height;
+
+            Graphics.DrawArrays(_x, _y, _texture, vertices, _textureUVs);
         }
     }
 }

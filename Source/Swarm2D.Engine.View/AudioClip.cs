@@ -1,5 +1,5 @@
 ﻿/******************************************************************************
-Copyright (c) 2015 Koray Kiyakoglu
+Copyright (c) 2016 Koray Kiyakoglu
 
 http://www.swarm2d.com
 
@@ -27,27 +27,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Swarm2D.Library;
 
 namespace Swarm2D.Engine.View
 {
-    public abstract class GraphicsCommand
+    public abstract class AudioClip
     {
-        //internal GraphicsContext GraphicsContext;
-        //internal GraphicsWindow GraphicsWindow;
-        internal IOSystem IOSystem { get; set; }
-        internal Framework Framework { get; set; }
-        internal virtual bool Batchable { get { return false; } }
-        internal abstract void DoJob();
-
-        internal virtual void PrepareJob()
-        {
-            
-        }
-
-        internal virtual bool TryBatch(GraphicsCommand command)
-        {
-            return false;
-        }
+        public abstract string Name { get; }
+        public abstract float Length { get; }
     }
 }

@@ -69,7 +69,7 @@ namespace Swarm2D.Game
                 Entity backgroundObject = scene.CreateChildEntity("BackgroundObject");
 
                 SpriteRenderer spriteRenderer = backgroundObject.AddComponent<SpriteRenderer>();
-                spriteRenderer.Sprite = Resource.GetResource<Sprite>("Background_Ref1_LVL00");
+                spriteRenderer.Sprite = Resource.GetResource<Sprite>("bg02");
             }
 
             PhysicsMaterial physicsMaterial = new PhysicsMaterial(Resource.GenerateName<PhysicsMaterial>());
@@ -192,7 +192,7 @@ namespace Swarm2D.Game
                 Entity backgroundObject = scene.CreateChildEntity("BackgroundObject");
 
                 SpriteRenderer spriteRenderer = backgroundObject.AddComponent<SpriteRenderer>();
-                spriteRenderer.Sprite = Resource.GetResource<Sprite>("Background_Ref1_LVL00");
+                spriteRenderer.Sprite = Resource.GetResource<Sprite>("bg02");
             }
 
             PhysicsMaterial physicsMaterial = new PhysicsMaterial(Resource.GenerateName<PhysicsMaterial>());

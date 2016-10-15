@@ -1,5 +1,5 @@
 ﻿/******************************************************************************
-Copyright (c) 2015 Koray Kiyakoglu
+Copyright (c) 2016 Koray Kiyakoglu
 
 http://www.swarm2d.com
 
@@ -27,24 +27,40 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Swarm2D.Engine.Core;
-using Swarm2D.Engine.Logic;
 using Swarm2D.Library;
+using Swarm2D.WindowsFramework.Native.OpenAL;
 
-namespace Swarm2D.Engine.View
+namespace Swarm2D.WindowsFramework
 {
-    public abstract class Sprite : Resource
-    {
-        public int Width { get; private set; }
-        public int Height { get; private set; }
+	class AudioSource
+	{
+        public uint[] Buffers { get; private set; }
+        public int Source { get; private set; }
 
-        protected Sprite(string name, int width, int height)
-            : base(name)
-        {
-            Width = width;
-            Height = height;
+        public AudioSource()
+		{
+			Buffers = new uint[AudioContext.BufferCount];
+		}
+
+		public void Generate()
+		{
+			AL.GenBuffers(AudioContext.BufferCount, Buffers);
+			Source = AL.GenSource();
+		}
+
+		public void Destroy()
+		{
+			AL.DeleteSource(Source);
+			AL.DeleteBuffers(AudioContext.BufferCount, Buffers);
+		}
+
+	    public void SetPosition(Vector2 position)
+	    {
+	        AL.Source3f(Source, ALDefinitions.Position, position.X, position.Y, 50.0f);
+	        int errorValue = AL.GetError();
+
+            AL.Source3f(Source, ALDefinitions.Velocity, 0.0f, 0.0f, 0.0f);
+            errorValue = AL.GetError();
         }
-
-        internal abstract void GetArrays(float mapX, float mapY, float scale, float width, float height, out Texture texture, out float[] outVertices, out float[] outUvs);
-    }
+	}
 }
