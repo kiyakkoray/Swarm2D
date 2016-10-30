@@ -36,7 +36,6 @@ namespace Swarm2D.Engine.Logic
         public GameLogic GameLogic { get; private set; }
 
         public List<Scene> LoadedScenes { get; private set; }
-        public Scene CurrentScene { get; set; }
 
         private EntityDomain _entityDomain;
         private GameSystem _gameSystem;
@@ -61,9 +60,15 @@ namespace Swarm2D.Engine.Logic
 
              for (int i = 0; i < LoadedScenes.Count; i++)
              {
-                Scene scene = LoadedScenes[0];
+                Scene scene = LoadedScenes[i];
                 scene.OnIdleUpdate();
             }
+        }
+
+        [EntityMessageHandler(MessageType = typeof(NonStartedGameFrameUpdate))]
+        private void OnNonStartedGameFrameUpdate(Message message)
+        {
+            _entityDomain.InitializeNonInitializedEntityComponents();
         }
 
         protected override void OnAdded()
@@ -81,18 +86,6 @@ namespace Swarm2D.Engine.Logic
         {
             LoadedScenes.Remove(scene);
 
-            if (CurrentScene == scene)
-            {
-                if (LoadedScenes.Count > 0)
-                {
-                    CurrentScene = LoadedScenes[LoadedScenes.Count - 1];
-                }
-                else
-                {
-                    CurrentScene = null;
-                }
-            }
-
             scene.Entity.Destroy();
         }
 
@@ -104,11 +97,6 @@ namespace Swarm2D.Engine.Logic
             scene.GameLogic = GameLogic;
 
             LoadedScenes.Add(scene);
-
-            if (CurrentScene == null)
-            {
-                CurrentScene = scene;
-            }
         }
 
         public void SendMessage(DomainMessage message)

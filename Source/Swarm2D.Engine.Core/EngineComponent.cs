@@ -33,10 +33,15 @@ namespace Swarm2D.Engine.Core
 
         public bool InputEnabled { get; set; }
 
-        public EngineComponent()
+        protected EngineComponent()
         {
             RenderEnabled = true;
             InputEnabled = true;
+        }
+
+        protected internal virtual void OnEngineStart()
+        {
+            
         }
     }
 }

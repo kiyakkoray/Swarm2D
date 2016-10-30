@@ -153,11 +153,6 @@ namespace Swarm2D.Engine.View
                 float objectXOffset = MinX * scale * customWidthScale;
                 float objectYOffset = -MinY * scale * customHeightScale;
 
-                float uMin = MinU;
-                float uMax = MaxU;
-                float vMin = MinV;
-                float vMax = MaxV;
-
                 float screenX = mapX + objectXOffset;
                 float screenY = mapY - objectYOffset;
 
@@ -170,28 +165,39 @@ namespace Swarm2D.Engine.View
                 outVertices[verticesStartIndex + 6] = screenX + objectWidth;
                 outVertices[verticesStartIndex + 7] = screenY + 0;
 
-                if (Rotated)
-                {
-                    outUvs[uvsStartIndex + 0] = uMin;
-                    outUvs[uvsStartIndex + 1] = vMin;
-                    outUvs[uvsStartIndex + 2] = uMax;
-                    outUvs[uvsStartIndex + 3] = vMin;
-                    outUvs[uvsStartIndex + 4] = uMax;
-                    outUvs[uvsStartIndex + 5] = vMax;
-                    outUvs[uvsStartIndex + 6] = uMin;
-                    outUvs[uvsStartIndex + 7] = vMax;
-                }
-                else
-                {
-                    outUvs[uvsStartIndex + 0] = uMin;
-                    outUvs[uvsStartIndex + 1] = vMin;
-                    outUvs[uvsStartIndex + 2] = uMin;
-                    outUvs[uvsStartIndex + 3] = vMax;
-                    outUvs[uvsStartIndex + 4] = uMax;
-                    outUvs[uvsStartIndex + 5] = vMax;
-                    outUvs[uvsStartIndex + 6] = uMax;
-                    outUvs[uvsStartIndex + 7] = vMin;
-                }
+
+                FillTextureCoordinates(outUvs, uvsStartIndex);
+            }
+        }
+
+        public void FillTextureCoordinates(float[] outUVs, int uvsStartIndex)
+        {
+            float uMin = MinU;
+            float uMax = MaxU;
+            float vMin = MinV;
+            float vMax = MaxV;
+
+            if (Rotated)
+            {
+                outUVs[uvsStartIndex + 0] = uMin;
+                outUVs[uvsStartIndex + 1] = vMin;
+                outUVs[uvsStartIndex + 2] = uMax;
+                outUVs[uvsStartIndex + 3] = vMin;
+                outUVs[uvsStartIndex + 4] = uMax;
+                outUVs[uvsStartIndex + 5] = vMax;
+                outUVs[uvsStartIndex + 6] = uMin;
+                outUVs[uvsStartIndex + 7] = vMax;
+            }
+            else
+            {
+                outUVs[uvsStartIndex + 0] = uMin;
+                outUVs[uvsStartIndex + 1] = vMin;
+                outUVs[uvsStartIndex + 2] = uMin;
+                outUVs[uvsStartIndex + 3] = vMax;
+                outUVs[uvsStartIndex + 4] = uMax;
+                outUVs[uvsStartIndex + 5] = vMax;
+                outUVs[uvsStartIndex + 6] = uMax;
+                outUVs[uvsStartIndex + 7] = vMin;
             }
         }
     }

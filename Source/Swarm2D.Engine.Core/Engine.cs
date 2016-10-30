@@ -77,7 +77,8 @@ namespace Swarm2D.Engine.Core
         private Stack<Entity> _freeEntities;
         private Dictionary<Type, Stack<Component>> _freeComponents;
 
-        public Engine(bool pooledMode)
+        public Engine(Framework framework, bool pooledMode)
+            : base(framework)
         {
             PooledMode = pooledMode;
 
@@ -175,6 +176,13 @@ namespace Swarm2D.Engine.Core
 
         public void Start()
         {
+            EngineComponent[] engineComponents = RootEntity.GetComponents<EngineComponent>();
+
+            foreach (var engineComponent in engineComponents)
+            {
+                engineComponent.OnEngineStart();
+            }
+
             EntityDomain.InitializeNonInitializedEntityComponents();
         }
 

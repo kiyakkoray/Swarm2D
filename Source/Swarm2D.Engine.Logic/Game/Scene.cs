@@ -166,40 +166,27 @@ namespace Swarm2D.Engine.Logic
             entity.NodeOnSceneEntitiesList = null;
         }
 
-        public void LoadFromXML(XmlDocument xmlDocument)
+        public void Load(SceneData sceneData)
         {
-            //SceneEntities.Clear();
-            //SceneControllers.Clear();
-
-            XmlElement sceneNode = xmlDocument["Scene"];
-
-            XmlElement sceneControllersElement = sceneNode["SceneControllers"];
-
-            for (int i = 0; i < sceneControllersElement.ChildNodes.Count; i++)
+            foreach (var sceneControllerData in sceneData.SceneControllers)
             {
-                XmlNode componentNode = sceneControllersElement.ChildNodes[i];
+                string componentType = sceneControllerData.Type;
 
-                string componentType = componentNode.Attributes["type"].Value;
+                //TODO: multiple instantiation of same component at same time?
 
-                Component component = null;
+                Component component = Entity.GetComponent(componentType);
 
-                if (componentType == "Scene")
-                {
-                    component = this;
-                }
-                else
+                if (component == null)
                 {
                     component = Entity.AddComponent(componentType);
                 }
 
                 ComponentInfo componentInfo = component.GetComponentInfo();
 
-                for (int k = 0; k < componentNode.ChildNodes.Count; k++)
+                foreach (var propertyData in sceneControllerData.Properties)
                 {
-                    XmlNode propertyNode = componentNode.ChildNodes[k];
-
-                    string propertyName = propertyNode.Attributes["name"].Value;
-                    string propertyValue = propertyNode.Attributes["value"].Value;
+                    string propertyName = propertyData.Name;
+                    string propertyValue = propertyData.Value;
 
                     ComponentPropertyInfo componentPropertyInfo = componentInfo.ComponentPropertyInfos[propertyName];
 
@@ -207,20 +194,16 @@ namespace Swarm2D.Engine.Logic
                 }
             }
 
-            XmlElement entitiesElement = sceneNode["Entities"];
-
-            for (int i = 0; i < entitiesElement.ChildNodes.Count; i++)
+            foreach (var entityData in sceneData.Entities)
             {
-                XmlNode entitiyNode = entitiesElement.ChildNodes[i];
-
-                string entityName = entitiyNode.Attributes["name"].Value;
-                bool instantiatedFromPrefab = entitiyNode.Attributes["prefab"] != null;
+                string entityName = entityData.Name;
+                bool instantiatedFromPrefab = entityData.IsInstantiatedFromPrefab;
 
                 Entity entity = null;
 
                 if (instantiatedFromPrefab)
                 {
-                    string prefab = entitiyNode.Attributes["prefab"].Value;
+                    string prefab = entityData.PrefabName;
                     entity = Engine.InstantiatePrefab(prefab, this);
                 }
                 else
@@ -229,13 +212,9 @@ namespace Swarm2D.Engine.Logic
                     entity.Name = entityName;
                 }
 
-                XmlNode componentsNode = entitiyNode["Components"];
-
-                for (int j = 0; j < componentsNode.ChildNodes.Count; j++)
+                foreach (var componentData in entityData.Components)
                 {
-                    XmlNode componentNode = componentsNode.ChildNodes[j];
-
-                    string componentType = componentNode.Attributes["type"].Value;
+                    string componentType = componentData.Type;
 
                     //TODO: multiple instantiation of same component at same time?
 
@@ -248,12 +227,10 @@ namespace Swarm2D.Engine.Logic
 
                     ComponentInfo componentInfo = component.GetComponentInfo();
 
-                    for (int k = 0; k < componentNode.ChildNodes.Count; k++)
+                    foreach (var componentDataProperty in componentData.Properties)
                     {
-                        XmlNode propertyNode = componentNode.ChildNodes[k];
-
-                        string propertyName = propertyNode.Attributes["name"].Value;
-                        string propertyValue = propertyNode.Attributes["value"].Value;
+                        string propertyName = componentDataProperty.Name;
+                        string propertyValue = componentDataProperty.Value;
 
                         ComponentPropertyInfo componentPropertyInfo = componentInfo.ComponentPropertyInfos[propertyName];
 
@@ -263,65 +240,44 @@ namespace Swarm2D.Engine.Logic
             }
         }
 
-        public XmlDocument SaveToXML()
+        public SceneData Save()
         {
-            XmlDocument xmlDocument = new XmlDocument();
-
-            XmlElement sceneElement = xmlDocument.CreateElement("Scene");
-            xmlDocument.AppendChild(sceneElement);
-
-            XmlElement sceneControllersElement = xmlDocument.CreateElement("SceneControllers");
-            sceneElement.AppendChild(sceneControllersElement);
+            SceneData sceneData = new SceneData();
 
             for (int i = 0; i < Entity.Components.Count; i++)
             {
                 Component component = Entity.Components[i];
                 ComponentInfo componentInfo = component.GetComponentInfo();
 
-                XmlElement componentElement = xmlDocument.CreateElement("Component");
-                sceneControllersElement.AppendChild(componentElement);
-
-                componentElement.SetAttribute("type", componentInfo.Name);
+                ComponentData componentData = sceneData.AddSceneController(componentInfo);
 
                 foreach (ComponentPropertyInfo componentPropertyInfo in componentInfo.ComponentPropertyInfos.Values)
                 {
                     string value = componentPropertyInfo.GetValueAsStringFrom(component);
 
-                    XmlElement propertyElement = xmlDocument.CreateElement("Property");
-                    componentElement.AppendChild(propertyElement);
-
-                    propertyElement.SetAttribute("name", componentPropertyInfo.Name);
-                    propertyElement.SetAttribute("value", value);
+                    componentData.SetPropertyValue(componentPropertyInfo.Name, value);
                 }
             }
-
-            XmlElement entitiesElement = xmlDocument.CreateElement("Entities");
-            sceneElement.AppendChild(entitiesElement);
 
             foreach (SceneEntity sceneEntity in SceneEntities)
             {
                 Entity entity = sceneEntity.Entity;
-
-                XmlElement entityElement = xmlDocument.CreateElement("Entity");
-                entitiesElement.AppendChild(entityElement);
-
-                entityElement.SetAttribute("name", entity.Name);
+                EntityData entityData = sceneData.AddEntity(entity.Name);
 
                 Entity prefab = null;
 
                 if (entity.IsInstantiatedFromPrefab)
                 {
-                    entityElement.SetAttribute("prefab", entity.PrefabName);
                     prefab = Engine.GetPrefab(entity.PrefabName);
+                    entityData.PrefabName = entity.PrefabName;
                 }
-
-                XmlElement componentsElement = xmlDocument.CreateElement("Components");
-                entityElement.AppendChild(componentsElement);
 
                 for (int j = 0; j < entity.Components.Count; j++)
                 {
                     Component component = entity.Components[j];
                     Component componentFromPrefab = null;
+
+                    ComponentData componentData = null;
 
                     if (prefab != null)
                     {
@@ -329,12 +285,6 @@ namespace Swarm2D.Engine.Logic
                     }
 
                     ComponentInfo componentInfo = component.GetComponentInfo();
-
-                    XmlElement componentElement = xmlDocument.CreateElement("Component");
-
-                    bool appendComponent = componentFromPrefab == null;
-
-                    componentElement.SetAttribute("type", componentInfo.Name);
 
                     foreach (ComponentPropertyInfo componentPropertyInfo in componentInfo.ComponentPropertyInfos.Values)
                     {
@@ -354,24 +304,18 @@ namespace Swarm2D.Engine.Logic
 
                         if (appendProperty)
                         {
-                            appendComponent = true;
+                            if (componentData == null)
+                            {
+                                componentData = entityData.AddComponent(componentInfo);
+                            }
 
-                            XmlElement propertyElement = xmlDocument.CreateElement("Property");
-                            componentElement.AppendChild(propertyElement);
-
-                            propertyElement.SetAttribute("name", componentPropertyInfo.Name);
-                            propertyElement.SetAttribute("value", valueFromEntity);
+                            componentData.SetPropertyValue(componentPropertyInfo.Name, valueFromEntity);
                         }
-                    }
-
-                    if (appendComponent)
-                    {
-                        componentsElement.AppendChild(componentElement);
                     }
                 }
             }
-            return xmlDocument;
-            //xmlDocument.Save(@"SxTest\Scenes\export.xml");
+
+            return sceneData;
         }
 
         public T[] FindComponentsOfSceneEntities<T>() where T : SceneEntityComponent

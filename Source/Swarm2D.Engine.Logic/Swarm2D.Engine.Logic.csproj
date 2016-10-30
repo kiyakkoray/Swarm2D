@@ -53,6 +53,7 @@
     <Compile Include="Game\PhysicsWorld.cs" />
     <Compile Include="Game\PhysicsObject.cs" />
     <Compile Include="Game\SceneController.cs" />
+    <Compile Include="Game\SceneData.cs" />
     <Compile Include="Game\SceneEntityComponent.cs" />
     <Compile Include="Game\SceneManager.cs" />
     <Compile Include="Coroutine\Coroutine.cs" />

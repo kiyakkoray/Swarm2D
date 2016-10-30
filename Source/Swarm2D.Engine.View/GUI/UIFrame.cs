@@ -383,13 +383,15 @@ namespace Swarm2D.Engine.View.GUI
 
         internal void RenderController(RenderContext renderContext)
         {
+            RenderContext renderContextToUse = renderContext;
+
             if (ScissorTestOnRender)
             {
-                renderContext.AddGraphicsCommand(new CommandPushScissor((int)Widget.X, (int)Widget.Y, (int)Widget.Width, (int)Widget.Height));
-                //graphicsContext.PushScissor((int)X, (int)Y, (int)Width, (int)Height);
+                renderContextToUse = renderContextToUse.AddChildRenderContext(0);
+                renderContextToUse.SetScissor((int)Widget.X, (int)Widget.Y, (int)Widget.Width, (int)Widget.Height);
             }
 
-            Render(renderContext);
+            Render(renderContextToUse);
 
             for (int i = Widget.Children.Count - 1; i >= 0; i--)
             {
@@ -401,15 +403,9 @@ namespace Swarm2D.Engine.View.GUI
 
                     if (frame != null)
                     {
-                        frame.RenderController(renderContext);
+                        frame.RenderController(renderContextToUse);
                     }
                 }
-            }
-
-            if (ScissorTestOnRender)
-            {
-                renderContext.AddGraphicsCommand(new CommandPopScissor());
-                //graphicsContext.PopScissor();
             }
         }
 
@@ -426,8 +422,7 @@ namespace Swarm2D.Engine.View.GUI
                     int width = (int)Widget.Width;
                     int height = (int)Widget.Height;
 
-                    //ioSystem.AddGraphicsCommand(new CommandDrawSprite(Math.Floor(X), Math.Floor(Y), sprite, false, false, 1.0f, false, 0.0f, Math.Floor(Width), Math.Floor(Height)));
-                    renderContext.AddGraphicsCommand(new CommandDrawSprite(x, y, sprite, 1.0f, width, height));
+                    renderContext.AddDrawSpriteJob(x, y, sprite, 1.0f, width, height);
                 }
             }
 

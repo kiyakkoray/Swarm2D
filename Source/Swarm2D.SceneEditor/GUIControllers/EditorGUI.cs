@@ -140,8 +140,9 @@ namespace Swarm2D.SceneEditor.GUIControllers
 
                 if (result == DialogResult.OK)
                 {
-                    XmlDocument sceneData = _sceneEditor.Scene.SaveToXML();
-                    sceneData.Save(saveFileDialog.FileName);
+                    SceneData sceneData = _sceneEditor.Scene.Save();
+                    XmlDocument sceneDataAsXml = sceneData.SaveToXML();
+                    sceneDataAsXml.Save(saveFileDialog.FileName);
                 }
             }
         }

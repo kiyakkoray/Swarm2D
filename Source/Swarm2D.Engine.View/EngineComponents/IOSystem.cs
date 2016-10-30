@@ -61,16 +61,25 @@ namespace Swarm2D.Engine.View
 
         private Framework _framework;
 
+        public Framework Framework
+        {
+            get { return _framework; }
+            set { _framework = value; }
+        }
+
         private ManualResetEvent _renderThreadEvent;
+        private ManualResetEvent _mainThreadEvent;
 
         protected override void OnInitialize()
         {
             base.OnInitialize();
             
             _renderThreadEvent = new ManualResetEvent(false);
+            _mainThreadEvent = new ManualResetEvent(false);
+
             _framework = Framework.Current;
             _currentRootRenderContext = null;
-             _nextRootRenderContext = new RenderContext(this, _framework);
+             _nextRootRenderContext = new RenderContext(this, _framework, 0);
             Current = this;
 
             if (_framework.SupportSeperatedRenderThread)
@@ -121,7 +130,7 @@ namespace Swarm2D.Engine.View
                 WaitPreviousRenderFrame();
 
                 var nextRenderContext = _nextRootRenderContext;
-                _nextRootRenderContext = new RenderContext(this, _framework);
+                _nextRootRenderContext = new RenderContext(this, _framework, 0);
 
                 var previousRenderContext = _nextRootRenderContext.AddChildRenderContext(-10000);
                 previousRenderContext.AddGraphicsCommand(new CommandBeginFrame());
@@ -133,6 +142,8 @@ namespace Swarm2D.Engine.View
                 lastRenderContext.AddGraphicsCommand(new CommandSwapBuffers());
 
                 _currentRootRenderContext = nextRenderContext;
+
+                _mainThreadEvent.Set();
             }
         }
 
@@ -148,7 +159,6 @@ namespace Swarm2D.Engine.View
         [EntityMessageHandler(MessageType = typeof(OnGameFrameUpdate))]
         private void HanldeOnGameFrameUpdateMessage(Message message)
         {
-            AddGraphicsCommand(new CommandResetDebugRender());
         }
 
         public void UpdateInput()
@@ -168,10 +178,15 @@ namespace Swarm2D.Engine.View
             if (_currentRootRenderContext != null)
             {
                 var renderContext = _currentRootRenderContext;
+                renderContext.Render();
+
                 _currentRootRenderContext = null;
                 _renderThreadEvent.Set();
-
-                renderContext.Render();
+            }
+            else
+            {
+                _mainThreadEvent.WaitOne();
+                _mainThreadEvent.Reset();
             }
         }
 
@@ -312,16 +327,6 @@ namespace Swarm2D.Engine.View
         public void FillInputData(InputData inputData)
         {
             _framework.FillInputData(inputData);
-        }
-
-        public void AddDebugPoint(Vector2 point)
-        {
-            this.AddGraphicsCommand(new CommandDrawDebugPoint(point));
-        }
-
-        public void AddDebugLine(Vector2 pointA, Vector2 pointB)
-        {
-            this.AddGraphicsCommand(new CommandDrawDebugLine(pointA, pointB));
         }
 
         #region Audio

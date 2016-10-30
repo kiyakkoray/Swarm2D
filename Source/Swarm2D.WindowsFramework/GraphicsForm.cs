@@ -78,6 +78,7 @@ namespace Swarm2D.WindowsFramework
         {
             if (GraphicsContext != null)
             {
+                GraphicsContext.BeginFrame(_windowsForm.Width, _windowsForm.Height);
                 GraphicsContext.Resize(_windowsForm.Width, _windowsForm.Height);
             }
 

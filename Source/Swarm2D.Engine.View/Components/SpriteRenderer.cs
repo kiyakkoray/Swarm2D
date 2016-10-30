@@ -40,6 +40,9 @@ namespace Swarm2D.Engine.View
         private Sprite _sprite;
 
         [ComponentProperty]
+        public int RenderOrder { get; set; }
+
+        [ComponentProperty]
         public float RotationAsAngle { get; set; }
 
         [ComponentProperty]
@@ -87,6 +90,13 @@ namespace Swarm2D.Engine.View
             }
         }
 
+        protected override void OnAdded()
+        {
+            base.OnAdded();
+
+            RenderOrder = 0;
+        }
+
         protected override void OnInitialize()
         {
             base.OnInitialize();
@@ -114,13 +124,13 @@ namespace Swarm2D.Engine.View
                 float x = -Sprite.Width / 2;
                 float y = -Sprite.Height / 2;
 
-                bool matrixSet = false;
-
                 if (!Mathf.IsZero(RotationAsAngle) || !Mathf.IsZero(Offset.Length))
                 {
-                    var worldMatrix = SceneEntity.TransformMatrix * Matrix4x4.Position2D(Offset) * Matrix4x4.RotationAboutZ(RotationAsAngle * Mathf.Deg2Rad);
-                    renderContext.AddGraphicsCommand(new CommandSetWorldMatrix(worldMatrix));
-                    matrixSet = true;
+                    Matrix4x4 spriteCenterMatrix = Matrix4x4.Position2D(new Vector2(x, y));
+                    var modelMatrix = SceneEntity.TransformMatrix * Matrix4x4.Position2D(Offset) * Matrix4x4.RotationAboutZ(RotationAsAngle * Mathf.Deg2Rad);
+                    modelMatrix = modelMatrix * spriteCenterMatrix;
+
+                    AddDrawSpriteJob(renderContext, modelMatrix);
                 }
                 else
                 {
@@ -128,21 +138,48 @@ namespace Swarm2D.Engine.View
                     {
                         x += SceneEntity.GlobalPosition.X;
                         y += SceneEntity.GlobalPosition.Y;
+
+                        AddDrawSpriteJob(renderContext, x, y);
                     }
-                    else /*if (!SceneEntity.TransformMatrix.IsIdentity)*/
+                    else
                     {
-                        renderContext.AddGraphicsCommand(new CommandSetWorldMatrix(SceneEntity.TransformMatrix));
-                        matrixSet = true;
+                        Matrix4x4 spriteCenterMatrix = Matrix4x4.Position2D(new Vector2(x, y));
+                        var modelMatrix = SceneEntity.TransformMatrix * spriteCenterMatrix;
+
+                        AddDrawSpriteJob(renderContext, modelMatrix);
                     }
-                }
-
-                renderContext.AddGraphicsCommand(new CommandDrawSprite(x, y, Sprite));
-
-                if (matrixSet)
-                {
-                    renderContext.AddGraphicsCommand(new CommandSetWorldMatrixAsIdentity());
                 }
             }
+        }
+
+        private void AddDrawSpriteJob(RenderContext renderContext, float x, float y)
+        {
+            float[] vertices;
+            float[] uvs;
+            Texture texture;
+
+            Sprite.GetArrays(x, y, 1.0f, Sprite.Width, Sprite.Height, out texture, out vertices, out uvs);
+
+            //TODO: temporary
+            vertices = new List<float>(vertices).ToArray();
+            uvs = new List<float>(uvs).ToArray();
+
+            renderContext.AddDrawMeshJob(0, 0, new Mesh(MeshTopology.Quads, vertices, uvs, vertices.Length / 2), new SimpleMaterial(texture, RenderOrder));
+        }
+
+        private void AddDrawSpriteJob(RenderContext renderContext, Matrix4x4 matrix)
+        {
+            float[] vertices;
+            float[] uvs;
+            Texture texture;
+
+            Sprite.GetArrays(0, 0, 1.0f, Sprite.Width, Sprite.Height, out texture, out vertices, out uvs);
+
+            //TODO: temporary
+            vertices = new List<float>(vertices).ToArray();
+            uvs = new List<float>(uvs).ToArray();
+
+            renderContext.AddDrawMeshJob(matrix, new Mesh(MeshTopology.Quads, vertices, uvs, vertices.Length / 2), new SimpleMaterial(texture, RenderOrder));
         }
     }
 }

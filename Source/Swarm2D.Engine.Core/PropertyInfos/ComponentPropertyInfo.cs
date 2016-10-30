@@ -85,13 +85,6 @@ namespace Swarm2D.Engine.Core
                         {
                             setMethod.Invoke(component, new object[] { resource });
                         }
-
-                        //if (Engine.Project.SpriteData.SpriteNames.ContainsKey(value))
-                        //{
-                        //	Sprite sprite = Engine.Project.SpriteData.SpriteNames[value];
-                        //
-                        //	setMethod.Invoke(component, new object[] { sprite });
-                        //}
                     }
                     break;
                 case ComponentPropertyType.Enumerator:

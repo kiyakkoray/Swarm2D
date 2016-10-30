@@ -47,7 +47,7 @@ namespace Swarm2D.UnityFramework
             _logicFramework = new UnityLogicFramework(this);
             _viewFramework = new UnityViewFramework();
 
-            _engine = new Engine.Core.Engine(false);
+            _engine = new Engine.Core.Engine(_logicFramework, false);
 
             Entity rootEntity = _engine.RootEntity;
 

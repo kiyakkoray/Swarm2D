@@ -25,6 +25,7 @@ SOFTWARE.
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Swarm2D.Library;
@@ -32,12 +33,16 @@ using Swarm2D.WindowsFramework.Native;
 using Swarm2D.WindowsFramework.Native.Windows;
 using Swarm2D.WindowsFramework.Native.Opengl;
 using System.Threading;
+using Swarm2D.Engine.View;
 using Swarm2D.WindowsFramework.Native.OggVorbis;
+using Debug = Swarm2D.Library.Debug;
 
 namespace Swarm2D.WindowsFramework
 {
     public class GraphicsContext
     {
+        public const int MaxFrameRate = 60;
+        public readonly int MaxTimeToRenderOneFrame;
         internal WindowsForm Control { get; set; }
 
         private float[] _debugVertices = new float[16];
@@ -55,10 +60,12 @@ namespace Swarm2D.WindowsFramework
         private int[] _scissorParameters = new int[4];
 
         private Matrix4x4 _projectionMatrix = Matrix4x4.Identity;
-        private Matrix4x4 _worldMatrix = Matrix4x4.Identity;
+        private Matrix4x4 _modelMatrix = Matrix4x4.Identity;
         private Matrix4x4 _viewMatrix = Matrix4x4.Identity;
 
-        private Matrix4x4 _modelviewMatrix = Matrix4x4.Identity;
+        private Matrix4x4 _modelViewMatrix = Matrix4x4.Identity;
+
+        private Stopwatch _stopwatch;
 
         public Matrix4x4 ProjectionMatrix
         {
@@ -84,28 +91,26 @@ namespace Swarm2D.WindowsFramework
             set
             {
                 _viewMatrix = value;
-
-                _modelviewMatrix = _viewMatrix * _worldMatrix;
+                _modelViewMatrix = _viewMatrix * _modelMatrix;
 
                 Opengl32.MatrixMode(MatrixMode.ModelView);
-                Opengl32.LoadMatrix(ref _modelviewMatrix);
+                Opengl32.LoadMatrix(ref _modelViewMatrix);
             }
         }
 
-        public Matrix4x4 WorldMatrix
+        public Matrix4x4 ModelMatrix
         {
             get
             {
-                return _worldMatrix;
+                return _modelMatrix;
             }
             set
             {
-                _worldMatrix = value;
-
-                _modelviewMatrix = _viewMatrix * _worldMatrix;
+                _modelMatrix = value;
+                _modelViewMatrix = _viewMatrix * _modelMatrix;
 
                 Opengl32.MatrixMode(MatrixMode.ModelView);
-                Opengl32.LoadMatrix(ref _modelviewMatrix);
+                Opengl32.LoadMatrix(ref _modelViewMatrix);
             }
         }
 
@@ -113,6 +118,10 @@ namespace Swarm2D.WindowsFramework
         {
             LoadedTextures = new Dictionary<string, OpenGLTexture>();
             _scissorStack = new List<ScissorTestInfo>();
+
+            _stopwatch = new Stopwatch();
+
+            MaxTimeToRenderOneFrame = (int)(1000.0f * (1.0f / MaxFrameRate));
         }
 
         public void CreateContext()
@@ -193,7 +202,7 @@ namespace Swarm2D.WindowsFramework
 
             ProjectionMatrix = Matrix4x4.Identity;
             //ModelViewMatrix = Matrix4x4.Identity;
-            WorldMatrix = Matrix4x4.Identity;
+            ModelMatrix = Matrix4x4.Identity;
             ViewMatrix = Matrix4x4.Identity;
         }
 
@@ -212,9 +221,41 @@ namespace Swarm2D.WindowsFramework
             }
         }
 
+        public void BeginFrame(int width, int height)
+        {
+            _stopwatch.Start();
+
+            Resize(width, height);
+
+            Matrix4x4 projectionMatrix = Matrix4x4.OrthographicProjection(0, width, height, 0);
+            Matrix4x4 identityMatrix = Matrix4x4.Identity;
+
+            Opengl32.MatrixMode(MatrixMode.Projection);
+            Opengl32.LoadMatrix(ref projectionMatrix);
+
+            Opengl32.MatrixMode(MatrixMode.ModelView);
+            Opengl32.LoadMatrix(ref identityMatrix);
+        }
+
         public void SwapBuffers()
         {
+            int timeTookToRender = (int)_stopwatch.ElapsedMilliseconds;
+
+            int timeToSleep = 0;
+
+            if (MaxTimeToRenderOneFrame > timeTookToRender)
+            {
+                timeToSleep = MaxTimeToRenderOneFrame - timeTookToRender;
+            }
+
+            if (timeToSleep > 0)
+            {
+                Thread.Sleep(timeToSleep);
+            }
+
             Gdi32.SwapBuffers(_handleDeviceContext);
+
+            _stopwatch.Restart();
             Opengl32.Clear(AttribueMask.ColorBufferBit);
         }
 
@@ -288,28 +329,56 @@ namespace Swarm2D.WindowsFramework
             }
         }
 
-        public void DrawArrays(float x, float y, OpenGLTexture texture, float[] vertices, float[] uvs, int vertexCount)
+        public void DrawArrays(float x, float y, Material material, Mesh mesh)
         {
             Opengl32.PushMatrix();
             Opengl32.Translate(x, y, 0.0f);
 
-            DrawArrays(texture, vertices, uvs, vertexCount);
+            DrawArrays(material, mesh);
 
             Opengl32.PopMatrix();
         }
 
-        public void DrawArrays(OpenGLTexture texture, float[] vertices, float[] uvs, int vertexCount)
+        public void DrawArrays(Material material, Mesh mesh)
         {
-            SetBlending(true);
+            bool blending = material.Blending;
+
+            if (material is SimpleMaterial)
+            {
+                SimpleMaterial simpleMaterial = (SimpleMaterial)material;
+                OpenGLTexture texture = (OpenGLTexture)simpleMaterial.Texture;
+
+                DrawArrays(texture, mesh.Vertices, mesh.TextureCoordinates, mesh.VertexCount, new Color(255, 255, 255, 255), mesh.Topology, blending);
+            }
+            else if (material is PrimitivePolygonMaterial)
+            {
+                PrimitivePolygonMaterial primitiveMaterial = (PrimitivePolygonMaterial)material;
+                Color color = primitiveMaterial.Color;
+                MeshTopology meshTopology = mesh.Topology;
+
+                DrawArrays(null, mesh.Vertices, null, mesh.VertexCount, color, meshTopology, blending);
+            }
+        }
+
+        private void DrawArrays(OpenGLTexture texture, float[] vertices, float[] uvs, int vertexCount, Color color, MeshTopology meshTopology, bool blending)
+        {
+            SetBlending(blending);
 
             if (texture != null)
             {
-                Opengl32.Enable(Target.TEXTURE_2D);
+                Opengl32.Enable(Target.Texture2D);
 
                 texture.MakeActive();
             }
 
-            Opengl32.Color(1.0f, 1.0f, 1.0f, 1.0f);
+            const float byteToFloatCoeff = 1.0f / 255.0f;
+
+            float r = ((float)color.Red) * byteToFloatCoeff;
+            float g = ((float)color.Green) * byteToFloatCoeff;
+            float b = ((float)color.Blue) * byteToFloatCoeff;
+            float a = ((float)color.Alpha) * byteToFloatCoeff;
+
+            Opengl32.Color(r, g, b, a);
 
             SetVertexArrayClientState(true);
 
@@ -334,7 +403,22 @@ namespace Swarm2D.WindowsFramework
                         Opengl32.TexCoordPointer(2, DataType.Float, 0, uvs);
                     }
 
-                    Opengl32.DrawArrays(BeginMode.Quads, 0, vertexCount);
+                    BeginMode mode = BeginMode.Quads;
+
+                    if (meshTopology == MeshTopology.Lines)
+                    {
+                        mode = BeginMode.Lines;
+                    }
+                    else if (meshTopology == MeshTopology.Quads)
+                    {
+                        mode = BeginMode.Quads;
+                    }
+                    else if (meshTopology == MeshTopology.Triangles)
+                    {
+                        mode = BeginMode.Triangles;
+                    }
+
+                    Opengl32.DrawArrays(mode, 0, vertexCount);
                 }
             }
 
@@ -345,7 +429,7 @@ namespace Swarm2D.WindowsFramework
 
             if (texture != null)
             {
-                Opengl32.Disable(Target.TEXTURE_2D);
+                Opengl32.Disable(Target.Texture2D);
             }
         }
 
@@ -417,12 +501,12 @@ namespace Swarm2D.WindowsFramework
 
                 if (_blendingMode)
                 {
-                    Opengl32.Enable(Target.BLEND);
+                    Opengl32.Enable(Target.Blend);
                     Opengl32.BlendFunc(BlendingSourceFactor.SourceAlpha, BlendingDestinationFactor.OneMinusSourceAlpha);
                 }
                 else
                 {
-                    Opengl32.Disable(Target.BLEND);
+                    Opengl32.Disable(Target.Blend);
                 }
             }
         }

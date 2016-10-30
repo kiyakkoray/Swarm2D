@@ -34,6 +34,13 @@ namespace Swarm2D.Engine.View
     public class CommandCustomLogic : GraphicsCommand
     {
         private CommandCustomLogicDelegate _customLogic;
+        private object _parameter;
+
+        public CommandCustomLogic(CommandCustomLogicDelegate customLogic, object parameter)
+        {
+            _customLogic = customLogic;
+            _parameter = parameter;
+        }
 
         public CommandCustomLogic(CommandCustomLogicDelegate customLogic)
         {
@@ -42,9 +49,9 @@ namespace Swarm2D.Engine.View
 
         internal override void DoJob()
         {
-            _customLogic();
+            _customLogic(_parameter);
         }
     }
 
-    public delegate void CommandCustomLogicDelegate();
+    public delegate void CommandCustomLogicDelegate(object parameter);
 }

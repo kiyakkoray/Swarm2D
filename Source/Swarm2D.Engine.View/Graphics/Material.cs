@@ -1,5 +1,5 @@
 ﻿/******************************************************************************
-Copyright (c) 2015 Koray Kiyakoglu
+Copyright (c) 2016 Koray Kiyakoglu
 
 http://www.swarm2d.com
 
@@ -26,49 +26,63 @@ SOFTWARE.
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using Swarm2D.Library;
 
 namespace Swarm2D.Engine.View
 {
-    class CommandDrawTextureOnScreen : GraphicsCommand
+    public abstract class Material
     {
-        private float _x;
-        private float _y;
-        private Texture _texture;
+        public bool Blending { get; private set; }
+        public int RenderOrder { get; private set; }
 
-        private static readonly float[] _textureUVs;
-
-        static CommandDrawTextureOnScreen()
+        protected Material(bool blending, int renderOrder)
         {
-            _textureUVs = new float[8] { 0, 0, 0, 1, 1, 1, 1, 0 };
+            Blending = blending;
+            RenderOrder = renderOrder;
+        }
+    }
+
+    public class SimpleMaterial : Material
+    {
+        public Texture Texture { get; private set; }
+
+        public SimpleMaterial(Texture texture)
+            : this(texture, 0)
+        {
+
         }
 
-        internal CommandDrawTextureOnScreen(float x, float y, Texture texture)
+        public SimpleMaterial(Texture texture, int renderOrder)
+            : this(texture, renderOrder, true)
         {
-            _x = x;
-            _y = y;
-            _texture = texture;
         }
 
-        internal override void DoJob()
+        public SimpleMaterial(Texture texture, int renderOrder, bool blending)
+            : base(blending, renderOrder)
         {
-            float[] vertices = new float[8];
+            Texture = texture;
+        }
+    }
 
-            vertices[0] = _x;
-            vertices[1] = _y;
+    public class PrimitivePolygonMaterial : Material
+    {
+        public Color Color { get; private set; }
 
-            vertices[2] = _x + _texture.Width;
-            vertices[3] = _y;
+        public PrimitivePolygonMaterial(Color color)
+           : this(color, 0)
+        {
+        }
 
-            vertices[4] = _x + _texture.Width;
-            vertices[5] = _y + _texture.Height;
+        public PrimitivePolygonMaterial(Color color, int renderOrder)
+           : this(color, renderOrder, true)
+        {
+        }
 
-            vertices[6] = _x;
-            vertices[7] = _y + _texture.Height;
-
-            Graphics.DrawArrays(_x, _y, _texture, vertices, _textureUVs);
+        public PrimitivePolygonMaterial(Color color, int renderOrder, bool blending)
+          : base(blending, renderOrder)
+        {
+            Color = color;
         }
     }
 }

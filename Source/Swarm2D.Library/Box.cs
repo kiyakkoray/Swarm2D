@@ -57,6 +57,7 @@ namespace Swarm2D.Library
                     intersects = box.Position.Y >= Position.Y && box.Position.Y <= Position.Y + Size.Y;
                 }
             }
+
             return intersects;
         }
 

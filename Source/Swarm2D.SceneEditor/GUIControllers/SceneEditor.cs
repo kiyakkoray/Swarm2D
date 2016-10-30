@@ -140,7 +140,7 @@ namespace Swarm2D.SceneEditor.GUIControllers
 
         public Scene Scene { get; private set; }
 
-        private XmlDocument _currentSceneData;
+        private SceneData _currentSceneData;
 
         private Dictionary<Type, List<Type>> _sceneEditorPluginTypes;
         private Dictionary<Component, List<Component>> _sceneEditorPlugins;
@@ -263,16 +263,21 @@ namespace Swarm2D.SceneEditor.GUIControllers
             SceneEditor sceneEditor = CreateSceneEditor(editorGUI);
 
             sceneEditor.Scene = editorGUI.GameLogic.CreateNewScene();
+            sceneEditor.Scene.IsRunning = false;
 
             return sceneEditor;
         }
 
-        public static SceneEditor OpenScene(EditorGUI editorGUI, XmlDocument sceneData)
+        public static SceneEditor OpenScene(EditorGUI editorGUI, XmlDocument sceneDataAsXml)
         {
             SceneEditor sceneEditor = CreateSceneEditor(editorGUI);
 
+            SceneData sceneData = new SceneData();
+            sceneData.LoadFromXML(sceneDataAsXml);
+
             sceneEditor.Scene = editorGUI.GameLogic.CreateNewScene();
-            sceneEditor.Scene.LoadFromXML(sceneData);
+            sceneEditor.Scene.IsRunning = false;
+            sceneEditor.Scene.Load(sceneData);
 
             return sceneEditor;
         }
@@ -904,12 +909,10 @@ namespace Swarm2D.SceneEditor.GUIControllers
 
         private void AfterInGameScreenRender(UIFrame sender, RenderContext renderContext)
         {
-            renderContext.AddGraphicsCommand(new CommandPushScissor((int)sender.X, (int)sender.Y, (int)sender.Width, (int)sender.Height));
+            RenderContext gameRenderContext = renderContext.AddChildRenderContext(0);
+            gameRenderContext.SetScissor((int)sender.X, (int)sender.Y, (int)sender.Width, (int)sender.Height);
 
-            _gameRenderer.Render(renderContext);
-
-            renderContext.AddGraphicsCommand(new CommandResetMatrices());
-            renderContext.AddGraphicsCommand(new CommandPopScissor());
+            _gameRenderer.Render(gameRenderContext);
         }
 
         private void AfterEditorGameScreenRender(UIFrame sender, RenderContext renderContext)
@@ -922,31 +925,17 @@ namespace Swarm2D.SceneEditor.GUIControllers
                 {
                     Vector2 uiPosition = new Vector2(sender.X, sender.Y);
 
-                    renderContext.AddGraphicsCommand(new CommandPushScissor((int)sender.X, (int)sender.Y, (int)sender.Width,
-                        (int)sender.Height));
-                    //graphicsContext.PushScissor((int)sender.X, (int)sender.Y, (int)sender.Width, (int)sender.Height);
+                    RenderContext editorRenderContext = renderContext.AddChildRenderContext(0);
 
-                    renderContext.AddGraphicsCommand(
-                        new CommandSetViewMatrix(
-                            Matrix4x4.Position2D(uiPosition + _editorCameraPosition * -1.0f +
-                                                 new Vector2(sender.Width * 0.5f, sender.Height * 0.5f))));
-                    //graphicsContext.ViewMatrix = Matrix4x4.Position2D(uiPosition + _editorCameraPosition * -1.0f + new Vector2(sender.Width * 0.5f, sender.Height * 0.5f));
-
-                    Scene scene = _editorGUI.GameLogic.CurrentScene;
+                    editorRenderContext.SetScissor((int)sender.X, (int)sender.Y, (int)sender.Width, (int)sender.Height);
+                    editorRenderContext.ViewMatrix = Matrix4x4.Position2D(uiPosition + _editorCameraPosition * -1.0f + new Vector2(sender.Width * 0.5f, sender.Height * 0.5f));
 
                     Box renderBox = new Box();
 
                     renderBox.Size = new Vector2(sender.Width, sender.Height);
                     renderBox.Position = _editorCameraPosition - new Vector2(sender.Width * 0.5f, sender.Height * 0.5f);
 
-                    sceneRenderer.Render(renderContext, renderBox);
-
-                    renderContext.AddGraphicsCommand(new CommandResetMatrices());
-                    //graphicsContext.WorldMatrix = Matrix4x4.Identity;
-                    //graphicsContext.ViewMatrix = Matrix4x4.Identity;
-
-                    renderContext.AddGraphicsCommand(new CommandPopScissor());
-                    //graphicsContext.PopScissor();
+                    sceneRenderer.Render(editorRenderContext, renderBox);
                 }
             }
         }
@@ -1026,7 +1015,7 @@ namespace Swarm2D.SceneEditor.GUIControllers
             {
                 Debug.Log("game started");
 
-                _currentSceneData = Scene.SaveToXML();
+                _currentSceneData = Scene.Save();
 
                 _gameLogic.StartGame();
             }
@@ -1040,7 +1029,8 @@ namespace Swarm2D.SceneEditor.GUIControllers
                 _gameLogic.StopGame();
 
                 Scene = _gameLogic.CreateNewScene();
-                Scene.LoadFromXML(_currentSceneData);
+                Scene.IsRunning = false;
+                Scene.Load(_currentSceneData);
 
                 _currentSceneData = null;
             }

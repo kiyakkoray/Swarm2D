@@ -166,15 +166,17 @@ namespace Swarm2D.Library
     {
         public static string ConvertToString(byte[] array)
         {
-            string result = array.Length.ToString();
+            StringBuilder stringBuilder = new StringBuilder(array.Length * 2);
+
+            stringBuilder.Append(array.Length.ToString());
 
             for (int i = 0; i < array.Length; i++)
             {
-                result += ".";
-                result += array[i].ToString();
+                stringBuilder.Append(".");
+                stringBuilder.Append(array[i].ToString());
             }
 
-            return result;
+            return stringBuilder.ToString();
         }
 
         public static byte[] ConvertToBytes(string dataAsString)

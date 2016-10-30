@@ -111,8 +111,6 @@ namespace Swarm2D.Game
                 AddCircle(rotatingBox);
                 PhysicsObject rigidBody = rotatingBox.AddComponent<PhysicsObject>();
                 rigidBody.Material = physicsMaterial;
-
-                rotatingBox.AddComponent<ObjectRotater>();
             }
 
             {

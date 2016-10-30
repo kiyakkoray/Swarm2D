@@ -71,30 +71,6 @@ namespace Swarm2D.Engine.View
 
         #endregion
 
-        #region Debug Render
-
-        public abstract void ResetDebugRender();
-
-        public abstract void DrawBufferedDebugObjects();
-
-        public abstract void DrawDebugLine(Vector2 a, Vector2 b);
-
-        public abstract void DrawDebugPoint(Vector2 point);
-
-        public abstract void DrawDebugPolygon(List<Vector2> vertices, Color color);
-
-        public abstract void DrawDebugCircle(float radius, Color color);
-
-        public abstract void DrawDebugQuad();
-
-        public abstract void DrawDebugQuad(float x, float y, float width, float height);
-
-        public abstract void AddDebugPoint(Vector2 point);
-
-        public abstract void AddDebugLine(Vector2 pointA, Vector2 pointB);
-
-        #endregion
-
         #region Graphics Context
 
         public abstract bool SupportSeperatedRenderThread { get; }
@@ -115,7 +91,7 @@ namespace Swarm2D.Engine.View
 
         public abstract Matrix4x4 ViewMatrix { get; set; }
 
-        public abstract Matrix4x4 WorldMatrix { get; set; }
+        public abstract Matrix4x4 ModelMatrix { get; set; }
 
         public abstract Matrix4x4 ProjectionMatrix { get; set; }
 
@@ -123,9 +99,9 @@ namespace Swarm2D.Engine.View
 
         public abstract void PopScissor();
 
-        public abstract void DrawArrays(Texture texture, float[] vertices, float[] uvs, int vertexCount);
+        public abstract void DrawArrays(Material material, Mesh mesh);
 
-        public abstract void DrawArrays(float x, float y, Texture texture, float[] vertices, float[] uvs, int vertexCount);
+        public abstract void DrawArrays(float x, float y, Material material, Mesh mesh);
 
         public abstract void LoadTextureUsing(Texture texture, string resourcesName, string name);
 

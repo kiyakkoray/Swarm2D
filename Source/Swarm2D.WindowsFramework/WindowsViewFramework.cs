@@ -109,60 +109,6 @@ namespace Swarm2D.WindowsFramework
 
         #endregion
 
-        #region Debug Render
-
-        public override void ResetDebugRender()
-        {
-            DebugRender.Reset();
-        }
-
-        public override void DrawBufferedDebugObjects()
-        {
-            DebugRender.DrawBufferedDebugObjects();
-        }
-
-        public override void DrawDebugLine(Vector2 a, Vector2 b)
-        {
-            DebugRender.DrawDebugLine(a, b);
-        }
-
-        public override void DrawDebugPoint(Vector2 point)
-        {
-            DebugRender.DrawDebugPoint(point);
-        }
-
-        public override void DrawDebugPolygon(List<Vector2> vertices, Color color)
-        {
-            DebugRender.DrawDebugPolygon(vertices, color);
-        }
-
-        public override void DrawDebugCircle(float radius, Color color)
-        {
-            DebugRender.DrawDebugCircle(radius, color);
-        }
-
-        public override void DrawDebugQuad()
-        {
-            DebugRender.DrawDebugQuad();
-        }
-
-        public override void DrawDebugQuad(float x, float y, float width, float height)
-        {
-            DebugRender.DrawDebugQuad(x, y, width, height);
-        }
-
-        public override void AddDebugPoint(Vector2 point)
-        {
-            DebugRender.AddDebugPoint(point);
-        }
-
-        public override void AddDebugLine(Vector2 pointA, Vector2 pointB)
-        {
-            DebugRender.AddDebugLine(pointA, pointB);
-        }
-
-        #endregion
-
         #region Graphics Context
 
         public override bool SupportSeperatedRenderThread { get { return true; } }
@@ -185,8 +131,6 @@ namespace Swarm2D.WindowsFramework
         {
             _graphicsForm = new GraphicsWindow(100, 100, 1280, 720);
             _graphicsContext = _graphicsForm.GraphicsContext;
-
-            DebugRender.Initialize(_graphicsContext);
         }
 
         public override void UpdateGraphics()
@@ -205,10 +149,10 @@ namespace Swarm2D.WindowsFramework
             set { _graphicsContext.ViewMatrix = value; }
         }
 
-        public override Matrix4x4 WorldMatrix
+        public override Matrix4x4 ModelMatrix
         {
-            get { return _graphicsContext.WorldMatrix; }
-            set { _graphicsContext.WorldMatrix = value; }
+            get { return _graphicsContext.ModelMatrix; }
+            set { _graphicsContext.ModelMatrix = value; }
         }
 
         public override Matrix4x4 ProjectionMatrix
@@ -227,14 +171,14 @@ namespace Swarm2D.WindowsFramework
             _graphicsContext.PopScissor();
         }
 
-        public override void DrawArrays(Texture texture, float[] vertices, float[] uvs, int vertexCount)
+        public override void DrawArrays(Material material, Mesh mesh)
         {
-            _graphicsContext.DrawArrays((OpenGLTexture)texture, vertices, uvs, vertexCount);
+            _graphicsContext.DrawArrays(material, mesh);
         }
 
-        public override void DrawArrays(float x, float y, Texture texture, float[] vertices, float[] uvs, int vertexCount)
+        public override void DrawArrays(float x, float y, Material material, Mesh mesh)
         {
-            _graphicsContext.DrawArrays(x, y, (OpenGLTexture)texture, vertices, uvs, vertexCount);
+            _graphicsContext.DrawArrays(x, y, material, mesh);
         }
 
         public override void LoadTextureUsing(Texture texture, string resourcesName, string name)

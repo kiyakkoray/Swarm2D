@@ -87,9 +87,9 @@ namespace Swarm2D.Engine.View
 
             if (_gameLogic.IsRunning)
             {
-                renderContext.AddGraphicsCommand(new CommandSetViewMatrix(Matrix4x4.Position2D(_gameRenderer.RenderTargetPosition)));
-                //graphicsContext.ViewMatrix = Matrix4x4.Position2D(_gameRenderer.RenderTargetPosition);
-                UIManager.Render(renderContext);
+                RenderContext renderContextToUse = renderContext.AddChildRenderContext(100);
+                renderContextToUse.ViewMatrix = Matrix4x4.Position2D(_gameRenderer.RenderTargetPosition);
+                UIManager.Render(renderContextToUse);
             }
         }
     }

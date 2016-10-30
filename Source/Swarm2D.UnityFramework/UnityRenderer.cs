@@ -35,7 +35,7 @@ namespace Swarm2D.UnityFramework
     public class UnityRenderer
     {
         private Matrix4x4 _projectionMatrix = Matrix4x4.Identity;
-        private Matrix4x4 _worldMatrix = Matrix4x4.Identity;
+        private Matrix4x4 _modelMatrix = Matrix4x4.Identity;
         private Matrix4x4 _viewMatrix = Matrix4x4.Identity;
 
         private Matrix4x4 _modelviewMatrix = Matrix4x4.Identity;
@@ -67,7 +67,7 @@ namespace Swarm2D.UnityFramework
             {
                 _viewMatrix = value;
 
-                _modelviewMatrix = _viewMatrix * _worldMatrix;
+                _modelviewMatrix = _viewMatrix * _modelMatrix;
 
                 if (_currentlyRendering)
                 {
@@ -76,17 +76,17 @@ namespace Swarm2D.UnityFramework
             }
         }
 
-        public Matrix4x4 WorldMatrix
+        public Matrix4x4 ModelMatrix
         {
             get
             {
-                return _worldMatrix;
+                return _modelMatrix;
             }
             set
             {
-                _worldMatrix = value;
+                _modelMatrix = value;
 
-                _modelviewMatrix = _viewMatrix * _worldMatrix;
+                _modelviewMatrix = _viewMatrix * _modelMatrix;
 
                 if (_currentlyRendering)
                 {

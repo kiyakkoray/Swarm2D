@@ -39,12 +39,40 @@ namespace Swarm2D.Engine.View.GUI
             set;
         }
 
+        private Mesh _mesh;
+
+        public UITextureBox()
+        {
+            _mesh = new Mesh(MeshTopology.Quads, 4);
+
+            _mesh.TextureCoordinates[0] = 0;
+            _mesh.TextureCoordinates[1] = 0;
+            _mesh.TextureCoordinates[2] = 0;
+            _mesh.TextureCoordinates[3] = 1;
+            _mesh.TextureCoordinates[4] = 1;
+            _mesh.TextureCoordinates[5] = 1;
+            _mesh.TextureCoordinates[6] = 1;
+            _mesh.TextureCoordinates[7] = 0;
+        }
+
         protected override void Render(RenderContext renderContext)
         {
             if (Texture != null)
             {
-                renderContext.AddGraphicsCommand(new CommandDrawTextureOnScreen(X, Y, Texture));
-                //graphicsContext.DrawTextureOnScreen(X, Y, Texture.Width, Texture.Height, Texture);
+                _mesh.Vertices[0] = X;
+                _mesh.Vertices[1] = Y;
+
+                _mesh.Vertices[2] = X + Texture.Width;
+                _mesh.Vertices[3] = Y;
+
+                _mesh.Vertices[4] = X + Texture.Width;
+                _mesh.Vertices[5] = Y + Texture.Height;
+
+                _mesh.Vertices[6] = X;
+                _mesh.Vertices[7] = Y + Texture.Height;
+
+                renderContext.AddDrawMeshJob(0, 0, _mesh, new SimpleMaterial(Texture));
+
             }
             else
             {

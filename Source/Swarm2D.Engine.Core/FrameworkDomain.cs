@@ -32,6 +32,13 @@ namespace Swarm2D.Engine.Core
 {
     public abstract class FrameworkDomain
     {
+        public Framework Framework { get; private set; }
+
+        protected FrameworkDomain(Framework framework)
+        {
+            Framework = framework;
+        }
+
         public abstract void Update();
         public abstract void Destroy();
     }

@@ -45,7 +45,6 @@
     <Compile Include="Components\CharacterController.cs" />
     <Compile Include="Components\Dungeon.cs" />
     <Compile Include="Components\NPC.cs" />
-    <Compile Include="Components\ObjectRotater.cs" />
     <Compile Include="Components\RigidBodySynchronizer.cs" />
     <Compile Include="Components\Testbed.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

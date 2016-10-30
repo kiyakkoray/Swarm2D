@@ -33,16 +33,16 @@ using Swarm2D.WindowsFramework.Native.OpenAL;
 
 namespace Swarm2D.WindowsFramework.Native.OggVorbis
 {
-	class OggStream
-	{
-		const int VorbisFilePointerCount = 64;
+    class OggStream
+    {
+        const int VorbisBufferCount = 64;
 
-		private FileStream _stream;
-		private CallBacks _callBacks;
-		private IntPtr _vorbisFile;
-		private VorbisInfo _vorbisInfo;
+        private FileStream _stream;
+        private CallBacks _callBacks;
+        private byte[] _vorbisFile;
+        private VorbisInfo _vorbisInfo;
 
-        private static LinkedList<IntPtr> _freeVorbisFilePointers;
+        private static List<byte[]> _freeVorbisBuffers;
 
         public string FileName { get; private set; }
         public int Format { get; private set; }
@@ -51,185 +51,199 @@ namespace Swarm2D.WindowsFramework.Native.OggVorbis
         public int BufferSize { get; private set; }
         public float Length { get; private set; }
 
+        private GCHandle _vorbisFileHandle;
+
         static OggStream()
-		{
-			_freeVorbisFilePointers = new LinkedList<IntPtr>();
+        {
+            _freeVorbisBuffers = new List<byte[]>();
+            for (int i = 0; i < VorbisBufferCount; i++)
+            {
+                byte[] buffer = new byte[1024];
+                _freeVorbisBuffers.Add(buffer);
+            }
+        }
 
-			for (int i = 0; i < VorbisFilePointerCount; i++)
-			{
-				IntPtr newVorbisFile = Marshal.AllocHGlobal(1024);
-				_freeVorbisFilePointers.AddLast(newVorbisFile);
+        private static byte[] GetVorbisBuffer()
+        {
+            byte[] value = null;
 
-				for (int j = 0; j < 1024; j++)
-				{
-					Marshal.WriteByte(newVorbisFile, j, 0);
-				}
-			}
-		}
+            if (_freeVorbisBuffers.Count > 0)
+            {
+                int index = _freeVorbisBuffers.Count - 1;
 
-        private static IntPtr GetVorbisFilePointer()
-		{
-			IntPtr value = _freeVorbisFilePointers.Last.Value;
-			_freeVorbisFilePointers.RemoveLast();
-			return value;
-		}
+                value = _freeVorbisBuffers[index];
+                _freeVorbisBuffers.RemoveAt(index);
+            }
+            else
+            {
+                value = new byte[1024];
+            }
 
-        private static void AddVorbisFilePointer(IntPtr pointer)
-		{
-			_freeVorbisFilePointers.AddLast(pointer);
-		}
+            return value;
+        }
 
-		public OggStream(string fileName)
-		{
-			_vorbisFile = IntPtr.Zero;
+        private static void AddVorbisBuffer(byte[] buffer)
+        {
+            _freeVorbisBuffers.Add(buffer);
+        }
 
-			FileName = fileName;
+        public OggStream(string fileName)
+        {
+            FileName = fileName;
 
-			_callBacks = new CallBacks();
+            _callBacks = new CallBacks();
+            _callBacks.ReadFunc = ReadFunc;
+            _callBacks.SeekFunc = SeekFunc;
+            _callBacks.CloseFunc = CloseFunc;
+            _callBacks.TellFunc = TellFunc;
 
-			_callBacks.ReadFunc = ReadFunc;
-			_callBacks.SeekFunc = SeekFunc;
-			_callBacks.CloseFunc = CloseFunc;
-			_callBacks.TellFunc = TellFunc;
+            _vorbisFile = GetVorbisBuffer();
+        }
 
-			_vorbisFile = GetVorbisFilePointer();			
-		}
+        public bool Open()
+        {
+            _stream = File.Open(FileName, FileMode.Open, FileAccess.Read, FileShare.Read);
 
-		public bool Open()
-		{
-			_stream = File.Open(FileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            _vorbisFileHandle = GCHandle.Alloc(_vorbisFile, GCHandleType.Pinned);
+            IntPtr vorbisFilePtr = _vorbisFileHandle.AddrOfPinnedObject();
 
-			if (VorbisFile.OpenCallbacks(new IntPtr(1), _vorbisFile, null, 0, _callBacks) == 0)
-			{
-				IntPtr vorbisInfoPtr = VorbisFile.Info(_vorbisFile, -1);
+            if (VorbisFile.OpenCallbacks(new IntPtr(1), vorbisFilePtr, null, 0, _callBacks) == 0)
+            {
+                IntPtr vorbisInfoPtr = VorbisFile.Info(vorbisFilePtr, -1);
 
-				if (vorbisInfoPtr != IntPtr.Zero)
-				{
-					_vorbisInfo = VorbisInfo.FromUnmanagedMemory(vorbisInfoPtr);
-					Frequency = _vorbisInfo.Rate;
-					Channels = _vorbisInfo.Channels;
-					Length = (float)VorbisFile.TimeTotal(_vorbisFile, -1);
+                if (vorbisInfoPtr != IntPtr.Zero)
+                {
+                    _vorbisInfo = VorbisInfo.FromUnmanagedMemory(vorbisInfoPtr);
+                    Frequency = _vorbisInfo.Rate;
+                    Channels = _vorbisInfo.Channels;
+                    Length = (float)VorbisFile.TimeTotal(vorbisFilePtr, -1);
 
-					if (_vorbisInfo.Channels == 1)
-					{
-						Format = ALDefinitions.FormatMono16;
-						BufferSize = Frequency / 2;
-						BufferSize -= (BufferSize % 2);
-					}
-					else if (_vorbisInfo.Channels == 2)
-					{
-						Format = ALDefinitions.FormatStereo16;
-						BufferSize = Frequency;
-						BufferSize -= (BufferSize % 4);
-					}
-					else if (_vorbisInfo.Channels == 4)
-					{
-						Format = AL.GetEnumValue("AL_FORMAT_QUAD16");
-						BufferSize = Frequency * 2;
-						BufferSize -= (BufferSize % 8);
-					}
-					else if (_vorbisInfo.Channels == 6)
-					{
-						Format = AL.GetEnumValue("AL_FORMAT_51CHN16");
-						BufferSize = Frequency * 3;
-						BufferSize -= (BufferSize % 12);
-					}
-				}
+                    if (_vorbisInfo.Channels == 1)
+                    {
+                        Format = ALDefinitions.FormatMono16;
+                        BufferSize = Frequency / 2;
+                        BufferSize -= (BufferSize % 2);
+                    }
+                    else if (_vorbisInfo.Channels == 2)
+                    {
+                        Format = ALDefinitions.FormatStereo16;
+                        BufferSize = Frequency;
+                        BufferSize -= (BufferSize % 4);
+                    }
+                    else if (_vorbisInfo.Channels == 4)
+                    {
+                        Format = AL.GetEnumValue("AL_FORMAT_QUAD16");
+                        BufferSize = Frequency * 2;
+                        BufferSize -= (BufferSize % 8);
+                    }
+                    else if (_vorbisInfo.Channels == 6)
+                    {
+                        Format = AL.GetEnumValue("AL_FORMAT_51CHN16");
+                        BufferSize = Frequency * 3;
+                        BufferSize -= (BufferSize % 12);
+                    }
+                }
 
-				if (Format != 0)
-				{
-					return true;
-				}
-			}
+                if (Format != 0)
+                {
+                    return true;
+                }
+            }
 
-			return false;
-		}
+            return false;
+        }
 
-		public void Close()
-		{
-			VorbisFile.Clear(_vorbisFile);
-			AddVorbisFilePointer(_vorbisFile);
-		}
+        public void Close()
+        {
+            IntPtr vorbisFilePtr = _vorbisFileHandle.AddrOfPinnedObject();
+            VorbisFile.Clear(vorbisFilePtr);
+
+            _vorbisFileHandle.Free();
+            AddVorbisBuffer(_vorbisFile);
+        }
 
         private int ReadFunc(IntPtr ptr, int size, int nmemb, IntPtr datasource)
-		{
-			byte[] data = new byte[size * nmemb];
+        {
+            byte[] data = new byte[size * nmemb];
 
-			int readCount = _stream.Read(data, 0, size * nmemb);
-			Marshal.Copy(data, 0, ptr, readCount);
-			return readCount;
-		}
+            int readCount = _stream.Read(data, 0, size * nmemb);
+            Marshal.Copy(data, 0, ptr, readCount);
+            return readCount;
+        }
 
         private int SeekFunc(IntPtr datasource, long offset, int whence)
-		{
-			if (whence == 1)
-			{
-				_stream.Seek(offset, SeekOrigin.Current);
-			}
-			else if (whence == 2)
-			{
-				_stream.Seek(offset, SeekOrigin.End);
-			}
-			else if (whence == 0)
-			{
-				_stream.Seek(offset, SeekOrigin.Begin);
-			}
+        {
+            if (whence == 1)
+            {
+                _stream.Seek(offset, SeekOrigin.Current);
+            }
+            else if (whence == 2)
+            {
+                _stream.Seek(offset, SeekOrigin.End);
+            }
+            else if (whence == 0)
+            {
+                _stream.Seek(offset, SeekOrigin.Begin);
+            }
 
-			return 0;
-		}
+            return 0;
+        }
 
         private int CloseFunc(IntPtr datasource)
-		{
-			_stream.Close();
-			return 0;
-		}
+        {
+            _stream.Close();
+            return 0;
+        }
 
-		private int TellFunc(IntPtr datasource)
-		{
-			return (int)_stream.Position;
-		}
+        private int TellFunc(IntPtr datasource)
+        {
+            return (int)_stream.Position;
+        }
 
-		public void SeekBegin()
-		{
-			VorbisFile.TimeSeek(_vorbisFile, 0);
-		}
+        public void SeekBegin()
+        {
+            IntPtr vorbisFilePtr = _vorbisFileHandle.AddrOfPinnedObject();
+            VorbisFile.TimeSeek(vorbisFilePtr, 0);
+        }
 
-		public int DecodeOggVorbis(byte[] decodeBuffer)
-		{
-			int currentSection = 0;
-			int bytesDone = 0;
+        public int DecodeOggVorbis(byte[] decodeBuffer)
+        {
+            int currentSection = 0;
+            int bytesDone = 0;
 
-			while (true)
-			{
-			    int decodeSize = 0;
+            while (true)
+            {
+                int decodeSize = 0;
 
-			    using (AutoPinner autoPinner = new AutoPinner(decodeBuffer))
-			    {
-			        IntPtr decodeBufferPtr = autoPinner;
-                    decodeSize = VorbisFile.Read(_vorbisFile, new IntPtr(decodeBufferPtr.ToInt32() + bytesDone), BufferSize - bytesDone, 0, 2, 1, ref currentSection);
+                using (AutoPinner decodeBufferPinner = new AutoPinner(decodeBuffer))
+                {
+                    IntPtr decodeBufferPtr = decodeBufferPinner;
+
+                    IntPtr vorbisFilePtr = _vorbisFileHandle.AddrOfPinnedObject();
+                    decodeSize = VorbisFile.Read(vorbisFilePtr, new IntPtr(decodeBufferPtr.ToInt32() + bytesDone), BufferSize - bytesDone, 0, 2, 1, ref currentSection);
                 }
 
                 if (decodeSize > 0)
-				{
-					bytesDone += decodeSize;
+                {
+                    bytesDone += decodeSize;
 
-				    if (bytesDone >= BufferSize)
-				    {
-				        break;
-				    }
-				}
-				else
-				{
-					break;
-				}
-			}
+                    if (bytesDone >= BufferSize)
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
 
-			if (Channels == 6)
-			{
-				//TODO
-			}
+            if (Channels == 6)
+            {
+                //TODO
+            }
 
-			return bytesDone;
-		}
-	}
+            return bytesDone;
+        }
+    }
 }

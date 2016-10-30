@@ -279,8 +279,6 @@ namespace Swarm2D.Game
             _scene = _gameLogic.CreateNewScene();
             _physicsWorld = _scene.AddComponent<PhysicsWorld>();
             _scene.AddComponent<SceneRenderer>();
-
-            _gameLogic.CurrentScene = _scene;
         }
 
         void OnTestScene1ButtonClick(UIWidget frame, MouseEventArgs e)

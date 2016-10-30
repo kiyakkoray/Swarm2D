@@ -81,12 +81,6 @@ namespace Swarm2D.Engine.View
             }
         }
 
-        public void Render(RenderContext renderContext, float x, float y)
-        {
-            renderContext.AddGraphicsCommand(new CommandDrawArrays(x, y, LabelFont.FontTexture, Vertices, TextureCoordinates, _textMeshCharacterCount * 4));
-            //graphicsContext.DrawArrays(x, y, LabelFont.FontTexture, _textVerices, _textUvs, _textMeshCharacterCount * 4);
-        }
-
         public int GetCursorPositionNear(float x, float y)
         {
             return 0;
@@ -250,6 +244,8 @@ namespace Swarm2D.Engine.View
                     currentWidth += ((double)fontCharacter.XAdvance + ExtraPadding) * _scaleValue;
                 }
             }
+
+            VertexCount = _textMeshCharacterCount * 4;
 
             _meshNeedUpdate = false;
         }

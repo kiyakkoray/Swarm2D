@@ -38,17 +38,28 @@ namespace Swarm2D.WindowsFramework.Native
 
         public AutoPinner(Object obj)
         {
-            _pinnedObject = GCHandle.Alloc(obj, GCHandleType.Pinned);
+            if (obj != null)
+            {
+                _pinnedObject = GCHandle.Alloc(obj, GCHandleType.Pinned);
+            }
         }
 
         public static implicit operator IntPtr(AutoPinner autoPinner)
         {
-            return autoPinner._pinnedObject.AddrOfPinnedObject();
+            if (autoPinner._pinnedObject.IsAllocated)
+            {
+                return autoPinner._pinnedObject.AddrOfPinnedObject();
+            }
+
+            return IntPtr.Zero;
         }
 
         public void Dispose()
         {
-            _pinnedObject.Free();
+            if (_pinnedObject.IsAllocated)
+            {
+                _pinnedObject.Free();
+            }
         }
     }
 }

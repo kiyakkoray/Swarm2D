@@ -40,12 +40,6 @@ namespace Swarm2D.Engine.Logic
 
         public SceneManager SceneManager { get; private set; }
 
-        public Scene CurrentScene
-        {
-            get { return SceneManager.CurrentScene; }
-            set { SceneManager.CurrentScene = value; }
-        }
-
         public List<Scene> LoadedScenes
         {
             get { return SceneManager.LoadedScenes; }
@@ -66,6 +60,7 @@ namespace Swarm2D.Engine.Logic
 
         private readonly OnGameFrameUpdate _onGameFrameUpdate = new OnGameFrameUpdate();
         private readonly OnIdleGameFrameUpdate _onIdleGameFrameUpdate = new OnIdleGameFrameUpdate();
+        private readonly NonStartedGameFrameUpdate _nonStartedGameFrameUpdate = new NonStartedGameFrameUpdate();
 
         protected override void OnAdded()
         {
@@ -110,7 +105,6 @@ namespace Swarm2D.Engine.Logic
                 }
 
                 LoadedScenes.Clear();
-                CurrentScene = null;
             }
         }
 
@@ -137,46 +131,56 @@ namespace Swarm2D.Engine.Logic
         [DomainMessageHandler(MessageType = typeof(UpdateMessage))]
         private void OnUpdate(Message message)
         {
-            if (IsRunning)
+            _entityDomain.InitializeNonInitializedEntityComponents();
+
+            if (IsGameStarted)
             {
-                _entityDomain.InitializeNonInitializedEntityComponents();
-                _entityDomain.StartNotStartedEntityComponents();
-
-                float fixedDt = 1.0f / (float)FrameRate;
-
-                FixedDeltaTime = fixedDt;
-
-                long currentTick = Time.ElapsedTicks;
-                long passedTick = currentTick - _startTick - _delayTick;
-                int currentFrame = (int)((float)(FrameRate * passedTick) / (float)Time.TicksPerSecond);
-
-                int currentUpdateFrameCount = 0;
-
-                while (currentFrame > ExecutedFrame && !_firstFrame && currentUpdateFrameCount < 10)
+                if (IsRunning)
                 {
-                    ExecutedFrame++;
+                    _entityDomain.StartNotStartedEntityComponents();
 
-                    Engine.DoneJob();
+                    float fixedDt = 1.0f/(float) FrameRate;
 
-                    Engine.RootEntity.SendMessage(_onGameFrameUpdate);
-                    Entity.SendMessage(_onGameFrameUpdate);
-                    SceneManager.Entity.SendMessage(_onGameFrameUpdate);
+                    FixedDeltaTime = fixedDt;
 
-                    FixedTime = ExecutedFrame * fixedDt;
+                    long currentTick = Time.ElapsedTicks;
+                    long passedTick = currentTick - _startTick - _delayTick;
+                    int currentFrame = (int) ((float) (FrameRate*passedTick)/(float) Time.TicksPerSecond);
 
-                    currentUpdateFrameCount++;
+                    int currentUpdateFrameCount = 0;
+
+                    while (currentFrame > ExecutedFrame && !_firstFrame && currentUpdateFrameCount < 10)
+                    {
+                        ExecutedFrame++;
+
+                        Engine.DoneJob();
+
+                        Engine.RootEntity.SendMessage(_onGameFrameUpdate);
+                        Entity.SendMessage(_onGameFrameUpdate);
+                        SceneManager.Entity.SendMessage(_onGameFrameUpdate);
+
+                        FixedTime = ExecutedFrame*fixedDt;
+
+                        currentUpdateFrameCount++;
+                    }
+
+                    if (_firstFrame)
+                    {
+                        _firstFrame = false;
+                    }
                 }
-
-                if (_firstFrame)
+                else
                 {
+                    Entity.SendMessage(_onIdleGameFrameUpdate);
+                    SceneManager.Entity.SendMessage(_onIdleGameFrameUpdate);
+
                     _firstFrame = false;
                 }
             }
             else
             {
-                _entityDomain.InitializeNonInitializedEntityComponents();
-
-                SceneManager.Entity.SendMessage(_onIdleGameFrameUpdate);
+                Entity.SendMessage(_nonStartedGameFrameUpdate);
+                SceneManager.Entity.SendMessage(_nonStartedGameFrameUpdate);
 
                 _firstFrame = false;
             }
@@ -184,7 +188,8 @@ namespace Swarm2D.Engine.Logic
 
         public Scene CreateNewScene()
         {
-            return SceneManager.CreateChildEntity("Scene").GetComponent<Scene>();
+            Entity sceneEntity = SceneManager.CreateChildEntity("Scene");
+            return sceneEntity.GetComponent<Scene>();
         }
 
         void IEntityDomain.OnCreateChildEntity(Entity entity)
@@ -229,6 +234,11 @@ namespace Swarm2D.Engine.Logic
     public class OnIdleGameFrameUpdate : EntityMessage
     {
 
+    }
+
+    public class NonStartedGameFrameUpdate : EntityMessage
+    {
+        
     }
 
     public class OnStartGameMessage : EntityMessage

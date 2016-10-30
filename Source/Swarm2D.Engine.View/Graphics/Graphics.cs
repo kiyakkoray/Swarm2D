@@ -72,24 +72,14 @@ namespace Swarm2D.Engine.View
             Framework.Current.PopScissor();
         }
 
-        public static void DrawArrays(Texture texture, float[] vertices, float[] uvs)
+        public static void DrawArrays(Material material, Mesh mesh)
         {
-            DrawArrays(texture, vertices, uvs, vertices.Length / 2);
+            Framework.Current.DrawArrays(material, mesh);
         }
 
-        public static void DrawArrays(Texture texture, float[] vertices, float[] uvs, int vertexCount)
+        public static void DrawArrays(float x, float y, Material material, Mesh mesh)
         {
-            Framework.Current.DrawArrays(texture, vertices, uvs, vertexCount);
-        }
-
-        public static void DrawArrays(float x, float y, Texture texture, float[] vertices, float[] uvs)
-        {
-            DrawArrays(x, y, texture, vertices, uvs, vertices.Length / 2);
-        }
-
-        public static void DrawArrays(float x, float y, Texture texture, float[] vertices, float[] uvs, int vertexCount)
-        {
-            Framework.Current.DrawArrays(x, y, texture, vertices, uvs, vertexCount);
+            Framework.Current.DrawArrays(x, y, material, mesh);
         }
 
         public static void LoadTextureUsing(Texture texture, string resourcesName, string name)
@@ -123,10 +113,10 @@ namespace Swarm2D.Engine.View
             set { Framework.Current.ViewMatrix = value; }
         }
 
-        public static Matrix4x4 WorldMatrix
+        public static Matrix4x4 ModelMatrix
         {
-            get { return Framework.Current.WorldMatrix; }
-            set { Framework.Current.WorldMatrix = value; }
+            get { return Framework.Current.ModelMatrix; }
+            set { Framework.Current.ModelMatrix = value; }
         }
 
         public static Matrix4x4 ProjectionMatrix

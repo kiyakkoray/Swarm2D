@@ -40,7 +40,7 @@ namespace Swarm2D.Engine.View.GUI
         private bool _isEditing;
 
         private Font _editBoxFont;
-        private TextMesh _textRenderer;
+        private TextMesh _textMesh;
 
         private int _cursorPosition;
 
@@ -65,8 +65,8 @@ namespace Swarm2D.Engine.View.GUI
 
             _editBoxFont = Manager.Font;
 
-            _textRenderer = new TextMesh(_editBoxFont);
-            _textRenderer.SetSingleLine(true);
+            _textMesh = new TextMesh(_editBoxFont);
+            _textMesh.SetSingleLine(true);
 
             _cursorPosition = 0;
             _isEditing = false;
@@ -139,10 +139,10 @@ namespace Swarm2D.Engine.View.GUI
 
             currentSprite = _mouseDownSprite;
 
-            renderContext.AddGraphicsCommand(new CommandDrawSprite(X, Y, currentSprite, 1.0f, Width, Height));
+            renderContext.AddDrawSpriteJob(X, Y, currentSprite, 1.0f, Width, Height);
 
-            _textRenderer.Update(X, Y, Text);
-            _textRenderer.Render(renderContext, X, Y);
+            _textMesh.Update(X, Y, Text);
+            renderContext.AddDrawMeshJob(X, Y, _textMesh, new SimpleMaterial(_editBoxFont.FontTexture));
         }
 
         protected internal override void ObjectUpdate()
@@ -161,19 +161,19 @@ namespace Swarm2D.Engine.View.GUI
                     _cursorPosition = 0;
                     _isEditing = true;
                     _renderState = UIEditBoxRenderState.MouseDown;
-                    _textRenderer.SetRenderCursor(true);
+                    _textMesh.SetRenderCursor(true);
                 }
             }
             else
             {
-                _textRenderer.SetRenderCursor(false);
+                _textMesh.SetRenderCursor(false);
                 _isEditing = false;
                 _renderState = UIEditBoxRenderState.Normal;
             }
 
             if (_isEditing)
             {
-                _textRenderer.SetRenderCursorPosition(_cursorPosition);
+                _textMesh.SetRenderCursorPosition(_cursorPosition);
 
                 if (IOSystem.GetKeyDown(KeyCode.KeyLeftArrow))
                 {

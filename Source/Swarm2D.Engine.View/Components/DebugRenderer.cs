@@ -39,6 +39,9 @@ namespace Swarm2D.Engine.View
     {
         public bool DebugPhysics { get; set; }
 
+        private static Mesh _quadMesh;
+        private static Mesh _quadLineMesh;
+
         public override Box BoundingBox
         {
             get
@@ -50,6 +53,25 @@ namespace Swarm2D.Engine.View
 
                 return boundingBox;
             }
+        }
+
+        static DebugRenderer()
+        {
+            _quadMesh = new Mesh(MeshTopology.Quads, 4);
+
+            _quadMesh.Vertices[0] = -15.0f;
+            _quadMesh.Vertices[1] = -15.0f;
+
+            _quadMesh.Vertices[1] = 15.0f;
+            _quadMesh.Vertices[2] = -15.0f;
+
+            _quadMesh.Vertices[3] = 15.0f;
+            _quadMesh.Vertices[4] = 15.0f;
+
+            _quadMesh.Vertices[5] = -15.0f;
+            _quadMesh.Vertices[6] = 15.0f;
+
+            _quadLineMesh = Mesh.CreateLineTopologyMeshWithQuadVertices(_quadMesh.Vertices, _quadMesh.VertexCount);
         }
 
         protected override void OnInitialize()
@@ -71,28 +93,30 @@ namespace Swarm2D.Engine.View
         {
             ShapeFilter shapeFilter = Entity.GetComponent<ShapeFilter>();
 
-            renderContext.AddGraphicsCommand(new CommandSetWorldMatrix(SceneEntity.TransformMatrix));
-            //graphicsContext.WorldMatrix = Transform.TransformMatrix;
+            Color normalColor = new Color(127, 127, 127, 127);
+            Color debugColor = new Color(32, 32, 32, 160);
+            Color outlineColor = new Color(127, 255, 0, 127);
+
+            Color selectedColor = DebugPhysics ? debugColor : normalColor;
 
             if (shapeFilter != null)
             {
-                Color normalColor = new Color(127, 127, 127, 127);
-                Color debugColor = new Color(32, 32, 32, 160);
-
                 object shapeToRender = shapeFilter;
 
                 if (shapeToRender is ResourceShapeFilter)
                 {
-                    shapeToRender = ((ResourceShapeFilter) shapeToRender).Shape;
+                    shapeToRender = ((ResourceShapeFilter)shapeToRender).Shape;
                 }
 
                 if (shapeToRender is IPolygon)
                 {
-                    IPolygon polygon = shapeToRender as IPolygon;
-                    //PolygonData polygonData = physicsObject.ShapeData as PolygonData;
+                    IPolygon polygon = (IPolygon)shapeToRender;
 
-                    renderContext.AddGraphicsCommand(new CommandDrawDebugPolygon(polygon.Vertices, DebugPhysics ? debugColor : normalColor));
-                    //DebugRender.DrawDebugPolygon(polygon.Vertices);
+                    Mesh polygonMesh = Mesh.CreateTriangleTopologyMeshWithPolygonCoordinates(polygon.Vertices);
+                    Mesh lineMesh = Mesh.CreateLineTopologyMeshWithPolygonCoordinates(polygon.Vertices);
+
+                    renderContext.AddDrawMeshJob(SceneEntity.TransformMatrix, polygonMesh, new PrimitivePolygonMaterial(selectedColor, 100));
+                    renderContext.AddDrawMeshJob(SceneEntity.TransformMatrix, lineMesh, new PrimitivePolygonMaterial(outlineColor, 101));
 
                     Width = 200;
                     Height = 200;
@@ -102,13 +126,13 @@ namespace Swarm2D.Engine.View
                 }
                 else if (shapeToRender is ICircle)
                 {
-                    ICircle circle = shapeToRender as ICircle;
+                    ICircle circle = (ICircle)shapeToRender;
 
                     Width = circle.Radius;
                     Height = circle.Radius;
 
-                    renderContext.AddGraphicsCommand(new CommandDrawDebugCircle(circle.Radius, DebugPhysics ? debugColor : normalColor));
-                    //DebugRender.DrawDebugCircle(circle.Radius);
+                    renderContext.AddDrawMeshJob(SceneEntity.TransformMatrix, Mesh.CreateTriangleTopologyMeshWithCircleRadius(circle.Radius), new PrimitivePolygonMaterial(selectedColor, 100));
+                    renderContext.AddDrawMeshJob(SceneEntity.TransformMatrix, Mesh.CreateLineTopologyMeshWithCircleRadius(circle.Radius), new PrimitivePolygonMaterial(outlineColor, 101));
                 }
 
                 //if (DebugPhysics)
@@ -133,10 +157,9 @@ namespace Swarm2D.Engine.View
                 Width = 30.0f;
                 Height = 30.0f;
 
-                renderContext.AddGraphicsCommand(new CommandDrawDebugQuad());
-                //DebugRender.DrawDebugQuad();
+                renderContext.AddDrawMeshJob(SceneEntity.TransformMatrix, _quadMesh, new PrimitivePolygonMaterial(selectedColor, 100));
+                renderContext.AddDrawMeshJob(SceneEntity.TransformMatrix, _quadLineMesh, new PrimitivePolygonMaterial(outlineColor, 101));
             }
-            //graphicsContext.DrawDebugQuad(-15, -15, 30, 30);
         }
 
         private Vector2 GetLocalPoint(Vector2 worldPoint)

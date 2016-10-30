@@ -80,6 +80,7 @@ namespace Swarm2D.Engine.View
             SceneRenderer = null;
             Width = 0;
             Height = 0;
+
             base.OnDestroy();
         }
 

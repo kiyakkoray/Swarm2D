@@ -33,7 +33,7 @@ namespace Swarm2D.Engine.View.GUI
 {
     public class UILabel : UIFrame
     {
-        private TextMesh _textRenderer;
+        private TextMesh _textMesh;
 
         protected Font LabelFont;
 
@@ -45,7 +45,7 @@ namespace Swarm2D.Engine.View.GUI
 
             LabelFont = Manager.Font;
 
-            _textRenderer = new TextMesh(LabelFont);
+            _textMesh = new TextMesh(LabelFont);
             ShowBox = false;
         }
 
@@ -53,11 +53,11 @@ namespace Swarm2D.Engine.View.GUI
         {
             get
             {
-                return _textRenderer.FontHeight;
+                return _textMesh.FontHeight;
             }
             set
             {
-                _textRenderer.FontHeight = value;
+                _textMesh.FontHeight = value;
             }
         }
 
@@ -65,8 +65,8 @@ namespace Swarm2D.Engine.View.GUI
         {
             base.Render(renderContext);
 
-            _textRenderer.Update(Width, Height, Text);
-            _textRenderer.Render(renderContext, (float)Math.Floor(X), (float)Math.Floor(Y));
+            _textMesh.Update(Width, Height, Text);
+            renderContext.AddDrawMeshJob(X, Y, _textMesh, new SimpleMaterial(LabelFont.FontTexture));
         }
     }
 }

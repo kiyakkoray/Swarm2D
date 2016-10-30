@@ -50,12 +50,8 @@ namespace Swarm2D.SceneEditor
 
         public SpriteData EditorSpriteData { get; private set; }
 
-        //public Project Project { get; private set; }
-
         protected override void OnStart()
         {
-            //Project = Swarm2D.Engine.Project;
-
             EditorSpriteData = new SpriteData("Editor", "spriteData");
 
             IOSystem = GetComponent<IOSystem>();

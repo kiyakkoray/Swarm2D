@@ -51,6 +51,8 @@ namespace Swarm2D.WindowsFramework
 
         private byte[] _decodeBuffer;
 
+        private volatile bool _stopRequested;
+
         public AudioJob(AudioContext audioContext, bool loop, OggAudioClip clip)
             :this(audioContext, loop, clip, Vector2.Zero)
         {
@@ -93,6 +95,10 @@ namespace Swarm2D.WindowsFramework
                 AL.SourcePlay(_audioSource.Source);
 
                 _firstLoop = false;
+            }
+            else if (_stopRequested && !Finished)
+            {
+                Stop();
             }
             else if (!Finished)
             {
@@ -176,6 +182,11 @@ namespace Swarm2D.WindowsFramework
                 _audioContext.FreeAudioSource(_audioSource);
                 Finished = true;
             }
+        }
+
+        void IAudioJob.Stop()
+        {
+            _stopRequested = true;
         }
     }
 }

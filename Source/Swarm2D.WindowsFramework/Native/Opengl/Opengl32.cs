@@ -194,6 +194,12 @@ namespace Swarm2D.WindowsFramework.Native.Opengl
         [DllImport("Opengl32.dll", EntryPoint = "glGetError")]
         public static extern uint GetError();
 
+        [DllImport("Opengl32.dll", EntryPoint = "glFlush")]
+        public static extern void Flush();
+
+        [DllImport("Opengl32.dll", EntryPoint = "glFinish")]
+        public static extern void Finish();
+
         #endregion
 
         #region Windows Specific
@@ -235,11 +241,18 @@ namespace Swarm2D.WindowsFramework.Native.Opengl
         Linear = 0x2601
     }
 
+    enum TextureWrapParameter : int
+    {
+        ClampToEdge = 0x812F,
+        MirroredRepeat = 0x8370,
+        Repeat = 0x2901
+    }
+
     enum Target : uint
     {
-        CURRENT_COLOR = 0x0B00,
-        CURRENT_INDEX = 0x0B01,
-        CURRENT_NORMAL = 0x0B02,
+        CurrentColor = 0x0B00,
+        CurrentIndex = 0x0B01,
+        CurrentNormal = 0x0B02,
         CURRENT_TEXTURE_COORDS = 0x0B03,
         CURRENT_RASTER_COLOR = 0x0B04,
         CURRENT_RASTER_INDEX = 0x0B05,
@@ -269,15 +282,15 @@ namespace Swarm2D.WindowsFramework.Native.Opengl
         CULL_FACE = 0x0B44,
         CULL_FACE_MODE = 0x0B45,
         FRONT_FACE = 0x0B46,
-        LIGHTING = 0x0B50,
+        Lighting = 0x0B50,
         LIGHT_MODEL_LOCAL_VIEWER = 0x0B51,
         LIGHT_MODEL_TWO_SIDE = 0x0B52,
         LIGHT_MODEL_AMBIENT = 0x0B53,
-        SHADE_MODEL = 0x0B54,
+        ShadeModel = 0x0B54,
         COLOR_MATERIAL_FACE = 0x0B55,
         COLOR_MATERIAL_PARAMETER = 0x0B56,
         COLOR_MATERIAL = 0x0B57,
-        FOG = 0x0B60,
+        Fog = 0x0B60,
         FOG_INDEX = 0x0B61,
         FOG_DENSITY = 0x0B62,
         FOG_START = 0x0B63,
@@ -299,8 +312,8 @@ namespace Swarm2D.WindowsFramework.Native.Opengl
         STENCIL_PASS_DEPTH_PASS = 0x0B96,
         STENCIL_REF = 0x0B97,
         STENCIL_WRITEMASK = 0x0B98,
-        MATRIX_MODE = 0x0BA0,
-        NORMALIZE = 0x0BA1,
+        MatrixMode = 0x0BA0,
+        Normalize = 0x0BA1,
         VIEWPORT = 0x0BA2,
         MODELVIEW_STACK_DEPTH = 0x0BA3,
         PROJECTION_STACK_DEPTH = 0x0BA4,
@@ -310,13 +323,13 @@ namespace Swarm2D.WindowsFramework.Native.Opengl
         TEXTURE_MATRIX = 0x0BA8,
         ATTRIB_STACK_DEPTH = 0x0BB0,
         CLIENT_ATTRIB_STACK_DEPTH = 0x0BB1,
-        ALPHA_TEST = 0x0BC0,
+        AlphaTest = 0x0BC0,
         ALPHA_TEST_FUNC = 0x0BC1,
         ALPHA_TEST_REF = 0x0BC2,
         DITHER = 0x0BD0,
         BLEND_DST = 0x0BE0,
         BLEND_SRC = 0x0BE1,
-        BLEND = 0x0BE2,
+        Blend = 0x0BE2,
         LOGIC_OP_MODE = 0x0BF0,
         INDEX_LOGIC_OP = 0x0BF1,
         COLOR_LOGIC_OP = 0x0BF2,
@@ -439,8 +452,8 @@ namespace Swarm2D.WindowsFramework.Native.Opengl
         MAP1_GRID_SEGMENTS = 0x0DD1,
         MAP2_GRID_DOMAIN = 0x0DD2,
         MAP2_GRID_SEGMENTS = 0x0DD3,
-        TEXTURE_1D = 0x0DE0,
-        TEXTURE_2D = 0x0DE1,
+        Texture1D = 0x0DE0,
+        Texture2D = 0x0DE1,
         FEEDBACK_BUFFER_POINTER = 0x0DF0,
         FEEDBACK_BUFFER_SIZE = 0x0DF1,
         FEEDBACK_BUFFER_TYPE = 0x0DF2,

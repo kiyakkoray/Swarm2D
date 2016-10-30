@@ -217,7 +217,7 @@ namespace Swarm2D.Engine.Logic
             StaticCollisionCount = 0;
             PhysicsWorld = Scene.GetComponent<PhysicsWorld>();
 
-            Debug.Assert(PhysicsWorld != null, "a physics objects added to a scene without physics world");
+            Debug.Assert(PhysicsWorld != null, "a physics object added to a scene without physics world");
 
             PhysicsWorld.AddPhysicsObject(this);
             MakeTransformDirty();

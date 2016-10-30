@@ -153,8 +153,6 @@ namespace Swarm2D.Engine.View
 
         public void Render(RenderContext renderContext)
         {
-            //Scene scene = _gameLogic.CurrentScene;
-
             foreach (var scene in _gameLogic.LoadedScenes)
             {
                 if (scene.IsRunning)
@@ -169,19 +167,13 @@ namespace Swarm2D.Engine.View
 
                             if (camera.Enabled)
                             {
+                                RenderContext cameraRenderContext = renderContext.AddChildRenderContext(10);
+
                                 Matrix4x4 cameraTransform = camera.GetViewMatrix(Width, Height, RenderTargetPosition);
                                 Box renderBox = camera.GetRenderBox(Width, Height);
 
-                                renderContext.AddGraphicsCommand(new CommandSetViewMatrix(cameraTransform));
-                                //graphicsContext.ViewMatrix = Matrix4x4.Position2D(RenderTargetPosition + cameraTransform.GlobalPosition * -1.0f + new Vector2(Width * 0.5f, Height * 0.5f));
-
-                                sceneRenderer.Render(renderContext, renderBox);
-
-                                renderContext.AddGraphicsCommand(new CommandSetWorldMatrix(Matrix4x4.Identity));
-                                //graphicsContext.WorldMatrix = Matrix4x4.Identity;
-
-                                renderContext.AddGraphicsCommand(new CommandDrawBufferedDebugObjects());
-                                //DebugRender.DrawBufferedDebugObjects();
+                                cameraRenderContext.ViewMatrix = cameraTransform;
+                                sceneRenderer.Render(cameraRenderContext, renderBox);
                             }
                         }
                     }

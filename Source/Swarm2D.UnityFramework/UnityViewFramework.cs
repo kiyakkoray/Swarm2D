@@ -267,50 +267,6 @@ namespace Swarm2D.UnityFramework
 
         #endregion
 
-        #region Debug Render
-
-        public override void ResetDebugRender()
-        {
-        }
-
-        public override void DrawBufferedDebugObjects()
-        {
-        }
-
-        public override void DrawDebugLine(Vector2 a, Vector2 b)
-        {
-        }
-
-        public override void DrawDebugPoint(Vector2 point)
-        {
-        }
-
-        public override void DrawDebugPolygon(List<Vector2> vertices, Color color)
-        {
-        }
-
-        public override void DrawDebugCircle(float radius, Color color)
-        {
-        }
-
-        public override void DrawDebugQuad()
-        {
-        }
-
-        public override void DrawDebugQuad(float x, float y, float width, float height)
-        {
-        }
-
-        public override void AddDebugPoint(Vector2 point)
-        {
-        }
-
-        public override void AddDebugLine(Vector2 pointA, Vector2 pointB)
-        {
-        }
-
-        #endregion
-
         #region Graphics Context
 
         public override bool SupportSeperatedRenderThread { get { return false; } }
@@ -352,10 +308,10 @@ namespace Swarm2D.UnityFramework
             set { _renderer.ViewMatrix = value; }
         }
 
-        public override Matrix4x4 WorldMatrix
+        public override Matrix4x4 ModelMatrix
         {
-            get { return _renderer.WorldMatrix; }
-            set { _renderer.WorldMatrix = value; }
+            get { return _renderer.ModelMatrix; }
+            set { _renderer.ModelMatrix = value; }
         }
 
         public override Matrix4x4 ProjectionMatrix
@@ -372,14 +328,22 @@ namespace Swarm2D.UnityFramework
         {
         }
 
-        public override void DrawArrays(Texture texture, float[] vertices, float[] uvs, int vertexCount)
+        public override void DrawArrays(Engine.View.Material material, Engine.View.Mesh mesh)
         {
-            _renderer.DrawArrays(0, 0, (UnityTexture)texture, vertices, uvs, vertexCount);
+            if (material is SimpleMaterial)
+            {
+                SimpleMaterial simpleMaterial = (SimpleMaterial)material;
+                _renderer.DrawArrays(0, 0, (UnityTexture)simpleMaterial.Texture, mesh.Vertices, mesh.TextureCoordinates, mesh.VertexCount);
+            }
         }
 
-        public override void DrawArrays(float x, float y, Texture texture, float[] vertices, float[] uvs, int vertexCount)
+        public override void DrawArrays(float x, float y, Engine.View.Material material, Engine.View.Mesh mesh)
         {
-            _renderer.DrawArrays(x, y, (UnityTexture)texture, vertices, uvs, vertexCount);
+            if (material is SimpleMaterial)
+            {
+                SimpleMaterial simpleMaterial = (SimpleMaterial)material;
+                _renderer.DrawArrays(x, y, (UnityTexture)simpleMaterial.Texture, mesh.Vertices, mesh.TextureCoordinates, mesh.VertexCount);
+            }
         }
 
         public override void LoadTextureUsing(Texture texture, string resourcesName, string name)

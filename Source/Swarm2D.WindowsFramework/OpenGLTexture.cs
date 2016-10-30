@@ -93,9 +93,23 @@ namespace Swarm2D.WindowsFramework
         {
             if (ActiveTexture != this)
             {
-                Opengl32.BindTexture(Target.TEXTURE_2D, _id);
+                Opengl32.BindTexture(Target.Texture2D, _id);
                 ActiveTexture = this;
+
+                SetTextureParameters();
             }
+        }
+
+        private void SetTextureParameters()
+        {
+            Opengl32.TexParameteri(Target.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMagFilter.Nearest);
+            Opengl32.TexParameteri(Target.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+
+            //Opengl32.TexParameteri(Target.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapParameter.ClampToEdge);
+            //Opengl32.TexParameteri(Target.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapParameter.ClampToEdge);
+
+            //Opengl32.TexParameteri(Target.TEXTURE_2D, TextureParameterName.TextureWrapS, OpenGL.EXT.TextureEdgeClamp.ClampToEdge);
+            //Opengl32.TexParameteri(Target.TEXTURE_2D, TextureParameterName.TextureWrapT, OpenGL.EXT.TextureEdgeClamp.ClampToEdge);
         }
 
         public static OpenGLTexture FromFile(string fileName)
@@ -130,7 +144,7 @@ namespace Swarm2D.WindowsFramework
                         System.Drawing.Imaging.ImageLockMode.ReadOnly, bmp.PixelFormat);
 
                     //#define GL_BGR_EXT 0x80E0
-                    Opengl32.TexImage2D(Target.TEXTURE_2D, 0, /*TextureInternalFormat.RGB8*/3, width, height, 0, (PixelFormat)0x80E0,
+                    Opengl32.TexImage2D(Target.Texture2D, 0, /*TextureInternalFormat.RGB8*/3, width, height, 0, (PixelFormat)0x80E0,
                         DataType.UnsignedByte, bitmapData.Scan0);
                     bmp.UnlockBits(bitmapData);
                 }
@@ -139,7 +153,7 @@ namespace Swarm2D.WindowsFramework
                     System.Drawing.Imaging.BitmapData bitmapData = bmp.LockBits(new Rectangle(0, 0, width, height),
                         System.Drawing.Imaging.ImageLockMode.ReadOnly, bmp.PixelFormat);
 
-                    Opengl32.TexImage2D(Target.TEXTURE_2D, 0, /*TextureInternalFormat.RGBA8*/0x8058, width, height, 0,
+                    Opengl32.TexImage2D(Target.Texture2D, 0, /*TextureInternalFormat.RGBA8*/0x8058, width, height, 0,
                         (PixelFormat)0x80E1, DataType.UnsignedByte, bitmapData.Scan0);
                     bmp.UnlockBits(bitmapData);
 
@@ -154,7 +168,7 @@ namespace Swarm2D.WindowsFramework
 
                     //#define GL_BGRA_EXT 0x80E1
 
-                    Opengl32.TexImage2D(Target.TEXTURE_2D, 0, /*TextureInternalFormat.RGBA8*/4, width, height, 0, (PixelFormat)0x80E1,
+                    Opengl32.TexImage2D(Target.Texture2D, 0, /*TextureInternalFormat.RGBA8*/4, width, height, 0, (PixelFormat)0x80E1,
                         DataType.UnsignedByte, bitmapData.Scan0);
                     bmp.UnlockBits(bitmapData);
 
@@ -168,12 +182,6 @@ namespace Swarm2D.WindowsFramework
                 {
                     Debug.Log("non 24 or 32 bit bitmap file");
                 }
-
-                Opengl32.TexParameteri(Target.TEXTURE_2D, TextureParameterName.TextureMinFilter, (int)TextureMagFilter.Linear);
-                Opengl32.TexParameteri(Target.TEXTURE_2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-
-                //Opengl32.TexParameteri(Target.TEXTURE_2D, TextureParameterName.TextureWrapS, OpenGL.EXT.TextureEdgeClamp.ClampToEdge);
-                //Opengl32.TexParameteri(Target.TEXTURE_2D, TextureParameterName.TextureWrapT, OpenGL.EXT.TextureEdgeClamp.ClampToEdge);
 
                 bmp.Dispose();
             }
