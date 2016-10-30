@@ -43,18 +43,18 @@ namespace Swarm2D.Cluster
 
         public NetworkView NetworkView { get; private set; }
 
-        protected override void OnInitialize()
+        protected override void OnEngineStart()
         {
-            base.OnInitialize();
+            base.OnEngineStart();
 
             ClusterNode = GetComponent<ClusterNode>();
             NetworkController = GetComponent<NetworkController>();
             NetworkView = GetComponent<NetworkView>();
         }
 
-        protected override void OnStart()
+        protected override void OnInitialize()
         {
-            base.OnStart();
+            base.OnInitialize();
 
             CoroutineManager = Engine.FindComponent<CoroutineManager>();
         }

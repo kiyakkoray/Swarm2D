@@ -121,9 +121,9 @@ namespace Swarm2D.Starter
 
     public class DebugSpriteLoader : EngineComponent
     {
-        protected override void OnStart()
+        protected override void OnInitialize()
         {
-            base.OnStart();
+            base.OnInitialize();
 
             LoadTemporarySprites();
         }

@@ -50,7 +50,7 @@ namespace Swarm2D.SceneEditor
 
         public SpriteData EditorSpriteData { get; private set; }
 
-        protected override void OnStart()
+        protected override void OnInitialize()
         {
             EditorSpriteData = new SpriteData("Editor", "spriteData");
 

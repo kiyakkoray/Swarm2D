@@ -134,7 +134,6 @@ namespace Swarm2D.Engine.Logic
                 CurrentFrame++;
 
                 _entityDomain.InitializeNonInitializedEntityComponents();
-                _entityDomain.StartNotStartedEntityComponents();
 
                 _updateMessage.Dt = updateMessage.Dt;
                 _sceneControllerUpdateMessage.Dt = updateMessage.Dt; 

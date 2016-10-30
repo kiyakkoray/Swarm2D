@@ -62,9 +62,9 @@ namespace Swarm2D.Cluster
         private ClusterType _clusterType;
         private ClusterObjectManager _clusterObjectManager;
 
-        protected override void OnStart()
+        protected override void OnInitialize()
         {
-            base.OnStart();
+            base.OnInitialize();
 
             _networkController = GetComponent<NetworkController>();
             _coroutineManager = Engine.FindComponent<CoroutineManager>();

@@ -137,8 +137,6 @@ namespace Swarm2D.Engine.Logic
             {
                 if (IsRunning)
                 {
-                    _entityDomain.StartNotStartedEntityComponents();
-
                     float fixedDt = 1.0f/(float) FrameRate;
 
                     FixedDeltaTime = fixedDt;

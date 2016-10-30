@@ -70,9 +70,9 @@ namespace Swarm2D.Engine.View
         private ManualResetEvent _renderThreadEvent;
         private ManualResetEvent _mainThreadEvent;
 
-        protected override void OnInitialize()
+        protected override void OnAdded()
         {
-            base.OnInitialize();
+            base.OnAdded();
             
             _renderThreadEvent = new ManualResetEvent(false);
             _mainThreadEvent = new ManualResetEvent(false);
@@ -92,8 +92,10 @@ namespace Swarm2D.Engine.View
             Graphics.CreateGraphics();
         }
 
-        protected override void OnStart()
+        protected override void OnInitialize()
         {
+            base.OnInitialize();
+
             AddGraphicsCommand(new CommandInitializeGraphicsContext());
             _framework.InitializeAudioContext();
         }

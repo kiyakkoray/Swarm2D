@@ -65,7 +65,6 @@ namespace Swarm2D.Engine.Core
             
             IsDestroyed = false;
             IsInitialized = false;
-            IsStarted = false;
 
             Entity = entity;
         }
@@ -89,15 +88,6 @@ namespace Swarm2D.Engine.Core
 
         }
 
-        internal void Start()
-        {
-            if (!IsStarted)
-            {
-                OnStart();
-                IsStarted = true;
-            }
-        }
-
         public T GetComponent<T>() where T : Component
         {
             return Entity.GetComponent<T>();
@@ -119,11 +109,6 @@ namespace Swarm2D.Engine.Core
         }
 
         protected virtual void OnInitialize()
-        {
-
-        }
-
-        protected virtual void OnStart()
         {
 
         }
@@ -195,8 +180,6 @@ namespace Swarm2D.Engine.Core
         }
 
         public bool IsInitialized { get; private set; }
-
-        public bool IsStarted { get; private set; }
 
         public bool IsDestroyed { get; private set; }
 

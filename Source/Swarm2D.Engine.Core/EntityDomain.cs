@@ -34,7 +34,6 @@ namespace Swarm2D.Engine.Core
     public class EntityDomain
     {
         private List<Component> _nonInitializedComponents;
-        private List<Component> _nonStartedComponents;
 
         private Dictionary<int, List<MessageHandlerDelegate>> _domainMessageHandlerDelegates;
         private int _lastClonedPrefabId = 1;
@@ -47,7 +46,6 @@ namespace Swarm2D.Engine.Core
             _domainMessageHandlerDelegates = new Dictionary<int, List<MessageHandlerDelegate>>();
 
             _nonInitializedComponents = new List<Component>();
-            _nonStartedComponents = new List<Component>();
         }
 
         public void SendMessage(DomainMessage message)
@@ -58,6 +56,8 @@ namespace Swarm2D.Engine.Core
 
                 for (int index = 0; index < messageHandlers.Count; index++)
                 {
+                    InitializeNonInitializedEntityComponents();
+
                     MessageHandlerDelegate messageHandlerDelegate = messageHandlers[index];
 
                     try
@@ -103,33 +103,6 @@ namespace Swarm2D.Engine.Core
             }
         }
 
-        public void StartNotStartedEntityComponents()
-        {
-            while (_nonStartedComponents.Count > 0)
-            {
-                Component[] nonStartedComponents = _nonStartedComponents.ToArray();
-
-                _nonStartedComponents.Clear();
-
-                for (int i = 0; i < nonStartedComponents.Length; i++)
-                {
-                    Component component = nonStartedComponents[i];
-
-                    Debug.Assert(!component.Entity.IsDestroyed, "a destroyed entity tried to start");
-
-                    try
-                    {
-                        component.Start();
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.Log("Exception on component start, type of component " + component.GetType().Name);
-                        Debug.Log(ex.Message);
-                    }
-                }
-            }
-        }
-
         public void OnComponentCreated(Component component)
         {
             foreach (KeyValuePair<int, List<MessageHandlerDelegate>> messageHandlers in component.DomainMessageHandlers)
@@ -148,7 +121,6 @@ namespace Swarm2D.Engine.Core
             }
 
             _nonInitializedComponents.Add(component);
-            _nonStartedComponents.Add(component);
         }
 
         public void OnComponentDestroyed(Component component)
@@ -161,11 +133,6 @@ namespace Swarm2D.Engine.Core
                 {
                     _domainMessageHandlerDelegates[currentMessageId].Remove(messageHandlerDelegate);
                 }
-            }
-
-            if (_nonStartedComponents.Contains(component))
-            {
-                _nonStartedComponents.Remove(component);
             }
 
             if (_nonInitializedComponents.Contains(component))

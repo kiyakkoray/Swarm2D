@@ -62,14 +62,14 @@ namespace Swarm2D.Engine.View
             _quadMesh.Vertices[0] = -15.0f;
             _quadMesh.Vertices[1] = -15.0f;
 
-            _quadMesh.Vertices[1] = 15.0f;
-            _quadMesh.Vertices[2] = -15.0f;
+            _quadMesh.Vertices[2] = 15.0f;
+            _quadMesh.Vertices[3] = -15.0f;
 
-            _quadMesh.Vertices[3] = 15.0f;
             _quadMesh.Vertices[4] = 15.0f;
+            _quadMesh.Vertices[5] = 15.0f;
 
-            _quadMesh.Vertices[5] = -15.0f;
-            _quadMesh.Vertices[6] = 15.0f;
+            _quadMesh.Vertices[6] = -15.0f;
+            _quadMesh.Vertices[7] = 15.0f;
 
             _quadLineMesh = Mesh.CreateLineTopologyMeshWithQuadVertices(_quadMesh.Vertices, _quadMesh.VertexCount);
         }

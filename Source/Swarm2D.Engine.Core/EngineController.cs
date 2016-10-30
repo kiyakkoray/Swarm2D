@@ -46,7 +46,6 @@ namespace Swarm2D.Engine.Core
         private void OnUpdate(Message message)
         {
             EntityDomain.InitializeNonInitializedEntityComponents();
-            EntityDomain.StartNotStartedEntityComponents();
         }
 
         void IEntityDomain.OnCreateChildEntity(Entity entity)

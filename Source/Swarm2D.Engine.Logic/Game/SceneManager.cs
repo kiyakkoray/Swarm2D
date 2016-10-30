@@ -46,7 +46,6 @@ namespace Swarm2D.Engine.Logic
         private void HanldeOnGameFrameUpdateMessage(Message message)
         {
             _entityDomain.InitializeNonInitializedEntityComponents();
-            _entityDomain.StartNotStartedEntityComponents();
 
             _updateMessage.Dt = GameLogic.FixedDeltaTime;
 

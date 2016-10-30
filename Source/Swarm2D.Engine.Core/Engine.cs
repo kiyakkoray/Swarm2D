@@ -44,6 +44,8 @@ namespace Swarm2D.Engine.Core
 
         private bool _currentFrameHadJob = false;
 
+        private bool _started = false;
+
         public int UpdatePerSecond { get; private set; }
         public int UpdateMessageTimePerSecond { get; private set; }
         public int LateUpdateMessageTimePerSecond { get; private set; }
@@ -176,14 +178,17 @@ namespace Swarm2D.Engine.Core
 
         public void Start()
         {
-            EngineComponent[] engineComponents = RootEntity.GetComponents<EngineComponent>();
-
-            foreach (var engineComponent in engineComponents)
+            if (!_started)
             {
-                engineComponent.OnEngineStart();
-            }
+                EngineComponent[] engineComponents = RootEntity.GetComponents<EngineComponent>();
 
-            EntityDomain.InitializeNonInitializedEntityComponents();
+                foreach (var engineComponent in engineComponents)
+                {
+                    engineComponent.OnEngineStart();
+                }
+
+                _started = true;
+            }
         }
 
         public void DoneJob()

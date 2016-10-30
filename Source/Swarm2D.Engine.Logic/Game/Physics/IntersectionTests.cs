@@ -42,19 +42,19 @@ namespace Swarm2D.Engine.Logic
 
             if (shapeA is PolygonInstance && shapeB is PolygonInstance)
             {
-                isIntersection = CheckIntersectionAndProduceResult(shapeA as PolygonInstance, shapeB as PolygonInstance, out minimumTranslation, out intersectionPoint);
+                isIntersection = CheckIntersectionAndProduceResult((PolygonInstance)shapeA, (PolygonInstance)shapeB, out minimumTranslation, out intersectionPoint);
             }
             else if (shapeA is CircleInstance && shapeB is CircleInstance)
             {
-                isIntersection = CheckIntersectionAndProduceResult(shapeA as CircleInstance, shapeB as CircleInstance, out minimumTranslation, out intersectionPoint);
+                isIntersection = CheckIntersectionAndProduceResult((CircleInstance)shapeA, (CircleInstance)shapeB, out minimumTranslation, out intersectionPoint);
             }
             else if (shapeA is PolygonInstance && shapeB is CircleInstance)
             {
-                isIntersection = CheckIntersectionAndProduceResult(shapeA as PolygonInstance, shapeB as CircleInstance, out minimumTranslation, out intersectionPoint);
+                isIntersection = CheckIntersectionAndProduceResult((PolygonInstance)shapeA, (CircleInstance)shapeB, out minimumTranslation, out intersectionPoint);
             }
             else if (shapeA is CircleInstance && shapeB is PolygonInstance)
             {
-                isIntersection = CheckIntersectionAndProduceResult(shapeB as PolygonInstance, shapeA as CircleInstance, out minimumTranslation, out intersectionPoint);
+                isIntersection = CheckIntersectionAndProduceResult((PolygonInstance)shapeB, (CircleInstance)shapeA, out minimumTranslation, out intersectionPoint);
 
                 minimumTranslation *= -1.0f;
             }
@@ -231,19 +231,19 @@ namespace Swarm2D.Engine.Logic
 
             if (shapeA is PolygonInstance && shapeB is PolygonInstance)
             {
-                isIntersection = CheckIntersection(shapeA as PolygonInstance, shapeB as PolygonInstance);
+                isIntersection = CheckIntersection((PolygonInstance)shapeA, (PolygonInstance)shapeB);
             }
             else if (shapeA is CircleInstance && shapeB is CircleInstance)
             {
-                isIntersection = CheckIntersection(shapeA as CircleInstance, shapeB as CircleInstance);
+                isIntersection = CheckIntersection((CircleInstance)shapeA, (CircleInstance)shapeB);
             }
             else if (shapeA is PolygonInstance && shapeB is CircleInstance)
             {
-                isIntersection = CheckIntersection(shapeA as PolygonInstance, shapeB as CircleInstance);
+                isIntersection = CheckIntersection((PolygonInstance)shapeA, (CircleInstance)shapeB);
             }
             else if (shapeA is CircleInstance && shapeB is PolygonInstance)
             {
-                isIntersection = CheckIntersection(shapeB as PolygonInstance, shapeA as CircleInstance);
+                isIntersection = CheckIntersection((PolygonInstance)shapeB, (CircleInstance)shapeA);
             }
 
             return isIntersection;

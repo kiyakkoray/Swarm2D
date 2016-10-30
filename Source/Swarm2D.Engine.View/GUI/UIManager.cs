@@ -278,7 +278,6 @@ namespace Swarm2D.Engine.View.GUI
             }
 
             _entityDomain.InitializeNonInitializedEntityComponents();
-            _entityDomain.StartNotStartedEntityComponents();
 
             UpdateMessage updateMessage = new UpdateMessage();
             updateMessage.Dt = 1.0f / 60.0f; //TODO
