@@ -37,8 +37,8 @@ namespace Swarm2D.Engine.View.GUI
     {
         private UIWidget _mouseDownObject;
 
-        private float lastMouseX;
-        private float lastMouseY;
+        private float _lastMouseX;
+        private float _lastMouseY;
 
         private List<UIUpdateMethod> _updateMethods;
 
@@ -104,7 +104,7 @@ namespace Swarm2D.Engine.View.GUI
             {
                 return _mouseDownObject;
             }
-            set
+            internal set
             {
                 _mouseDownObject = value;
 
@@ -129,6 +129,43 @@ namespace Swarm2D.Engine.View.GUI
             {
                 return IOSystem.MousePosition;
             }
+        }
+
+        public float MouseLeftButtonDownX { get; private set; }
+
+        public float MouseLeftButtonDownY { get; private set; }
+
+        public bool HasMouseEvent { get { return MouseEventObject != null; } }
+        public UIWidget MouseEventObject { get; private set; }
+
+        public bool PointerDown
+        {
+            get { return IOSystem.LeftMouseDown; }
+        }
+
+        public bool PointerRelease
+        {
+            get { return IOSystem.LeftMouseUp; }
+        }
+
+        public bool PointerRightDown
+        {
+            get { return IOSystem.RightMouseDown; }
+        }
+
+        public bool PointerRightRelease
+        {
+            get { return IOSystem.RightMouseUp; }
+        }
+
+        public float VerticalScaleValue
+        {
+            get { return CurrentDomain.VerticalScaleValue; }
+        }
+
+        public float HorizontalScaleValue
+        {
+            get { return CurrentDomain.HorizontalScaleValue; }
         }
 
         public UISkin Skin { get; set; }
@@ -181,6 +218,8 @@ namespace Swarm2D.Engine.View.GUI
 
         public void Update()
         {
+            MouseEventObject = MouseDownObject;
+
             if (IOSystem.LeftMouseDown)
             {
                 MouseLeftButtonDownX = PointerPosition.X;
@@ -221,8 +260,8 @@ namespace Swarm2D.Engine.View.GUI
                 }
             }
 
-            lastMouseX = PointerPosition.X;
-            lastMouseY = PointerPosition.Y;
+            _lastMouseX = PointerPosition.X;
+            _lastMouseY = PointerPosition.Y;
             RootWidget.MouseEnterLeaveController(false);
 
             RootObject.Update(_updateMethods);
@@ -234,39 +273,59 @@ namespace Swarm2D.Engine.View.GUI
 
             _updateMethods.Clear();
 
-            if (PointerDown())
+            if (PointerDown)
             {
                 UIWidget mouseDownObject = RootWidget.MouseDownController(PointerPosition.X, PointerPosition.Y);
 
-                if (mouseDownObject != null && mouseDownObject != MouseDownObject)
+                if (mouseDownObject != null)
                 {
-                    mouseDownObject.OnMouseDown(new MouseEventArgs(0, PointerPosition.X, PointerPosition.Y));
+                    MouseEventObject = mouseDownObject;
+
+                    if (mouseDownObject != MouseDownObject)
+                    {
+                        mouseDownObject.OnMouseDown(new MouseEventArgs(0, PointerPosition.X, PointerPosition.Y));
+                    }
                 }
 
                 MouseDownObject = mouseDownObject;
             }
-            else if (PointerRightDown())
+            else if (PointerRightDown)
             {
                 UIWidget mouseDownObject = RootWidget.MouseDownController(PointerPosition.X, PointerPosition.Y, true);
 
-                if (mouseDownObject != null && mouseDownObject != MouseDownObject)
+                if (mouseDownObject != null)
                 {
-                    mouseDownObject.OnMouseRightDown(new MouseEventArgs(0, PointerPosition.X, PointerPosition.Y));
+                    MouseEventObject = mouseDownObject;
+
+                    if (mouseDownObject != MouseDownObject)
+                    {
+                        mouseDownObject.OnMouseRightDown(new MouseEventArgs(0, PointerPosition.X, PointerPosition.Y));
+                    }
                 }
 
                 MouseDownObject = mouseDownObject;
             }
 
-            if (PointerRelease())
+            if (PointerRelease)
             {
                 RootWidget.MouseUpController(PointerPosition.X, PointerPosition.Y);
-                MouseDownObject = null;
+
+                if (MouseDownObject != null)
+                {
+                    MouseEventObject = MouseDownObject;
+                    MouseDownObject = null;
+                }
             }
 
-            if (PointerRightRelease())
+            if (PointerRightRelease)
             {
                 RootWidget.MouseUpController(PointerPosition.X, PointerPosition.Y, true);
-                MouseDownObject = null;
+
+                if (MouseDownObject != null)
+                {
+                    MouseEventObject = MouseDownObject;
+                    MouseDownObject = null;
+                }
             }
 
             foreach (UIWidget popup in _popups)
@@ -288,40 +347,6 @@ namespace Swarm2D.Engine.View.GUI
         public void Render(RenderContext renderContext)
         {
             RootObject.RenderController(renderContext);
-        }
-
-        public float VerticalScaleValue()
-        {
-            return CurrentDomain.VerticalScaleValue;
-        }
-
-        public float HorizontalScaleValue()
-        {
-            return CurrentDomain.HorizontalScaleValue;
-        }
-
-        public float MouseLeftButtonDownX { get; private set; }
-
-        public float MouseLeftButtonDownY { get; private set; }
-
-        public bool PointerDown()
-        {
-            return IOSystem.LeftMouseDown;
-        }
-
-        public bool PointerRelease()
-        {
-            return IOSystem.LeftMouseUp;
-        }
-
-        public bool PointerRightDown()
-        {
-            return IOSystem.RightMouseDown;
-        }
-
-        public bool PointerRightRelease()
-        {
-            return IOSystem.RightMouseUp;
         }
 
         public void DoObjectDeletionJob(UIWidget widget)

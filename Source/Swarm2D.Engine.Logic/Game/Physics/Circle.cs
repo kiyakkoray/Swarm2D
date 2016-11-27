@@ -60,11 +60,6 @@ namespace Swarm2D.Engine.Logic
 
         private ICircle _circle;
 
-        public override IShape Shape
-        {
-            get { return _circle; }
-        }
-
         public CircleInstance(ICircle circle)
         {
             _circle = circle;
@@ -135,7 +130,7 @@ namespace Swarm2D.Engine.Logic
             return new Vector2(min, max);
         }
 
-        internal override bool IsInside(Vector2 worldPosition)
+        public override bool IsInside(Vector2 worldPosition)
         {
             return (worldPosition - CurrentCenter).Length <= RadiusWithTransformation;
         }

@@ -135,15 +135,35 @@ namespace Swarm2D.Engine.View
 
         private void CalculateTextureCoordinates()
         {
-            _u0 = BaseSprite.MinU;
-            _u1 = BaseSprite.MinU + (BaseSprite.MaxU - BaseSprite.MinU) * ((float)LeftWidth / (float)Width);
-            _u2 = BaseSprite.MinU + (BaseSprite.MaxU - BaseSprite.MinU) * ((float)(LeftWidth + _centerWidth) / (float)Width);
-            _u3 = BaseSprite.MaxU;
+            float minU = BaseSprite.MinU;
+            float minV = BaseSprite.MinV;
+            float maxU = BaseSprite.MaxU;
+            float maxV = BaseSprite.MaxV;
 
-            _v0 = BaseSprite.MinV;
-            _v1 = BaseSprite.MinV + (BaseSprite.MaxV - BaseSprite.MinV) * ((float)TopHeight / (float)Height);
-            _v2 = BaseSprite.MinV + (BaseSprite.MaxV - BaseSprite.MinV) * ((float)(TopHeight + _centerHeight) / (float)Height);
-            _v3 = BaseSprite.MaxV;
+            if (BaseSprite.Rotated)
+            {
+                _u0 = minU;
+                _u1 = minU + (maxU - minU) * ((float)TopHeight / (float)Height);
+                _u2 = minU + (maxU - minU) * ((float)(TopHeight + _centerHeight) / (float)Height);
+                _u3 = maxU;
+
+                _v0 = minV;
+                _v1 = minV + (maxV - minV) * ((float)LeftWidth / (float)Width);
+                _v2 = minV + (maxV - minV) * ((float)(LeftWidth + _centerWidth) / (float)Width);
+                _v3 = maxV;
+            }
+            else
+            {
+                _u0 = minU;
+                _u1 = minU + (maxU - minU) * ((float)LeftWidth / (float)Width);
+                _u2 = minU + (maxU - minU) * ((float)(LeftWidth + _centerWidth) / (float)Width);
+                _u3 = maxU;
+
+                _v0 = minV;
+                _v1 = minV + (maxV - minV) * ((float)TopHeight / (float)Height);
+                _v2 = minV + (maxV - minV) * ((float)(TopHeight + _centerHeight) / (float)Height);
+                _v3 = maxV;
+            }
 
             CalculateTextureCoordinatesTopLeft();
             CalculateTextureCoordinatesTop();
@@ -280,6 +300,14 @@ namespace Swarm2D.Engine.View
             float uMax = _u2;
             float vMax = _v1;
 
+            if (BaseSprite.Rotated)
+            {
+                uMin = _u0;
+                vMin = _v1;
+                uMax = _u1;
+                vMax = _v2;
+            }
+
             CalculateTextureCoordinates(uMin, vMin, uMax, vMax);
         }
 
@@ -290,6 +318,14 @@ namespace Swarm2D.Engine.View
             float uMax = _u3;
             float vMax = _v1;
 
+            if (BaseSprite.Rotated)
+            {
+                uMin = _u0;
+                vMin = _v2;
+                uMax = _u1;
+                vMax = _v3;
+            }
+
             CalculateTextureCoordinates(uMin, vMin, uMax, vMax);
         }
 
@@ -299,6 +335,14 @@ namespace Swarm2D.Engine.View
             float vMin = _v1;
             float uMax = _u1;
             float vMax = _v2;
+
+            if (BaseSprite.Rotated)
+            {
+                uMin = _u1;
+                vMin = _v0;
+                uMax = _u2;
+                vMax = _v1;
+            }
 
             CalculateTextureCoordinates(uMin, vMin, uMax, vMax);
         }
@@ -320,6 +364,14 @@ namespace Swarm2D.Engine.View
             float uMax = _u3;
             float vMax = _v2;
 
+            if (BaseSprite.Rotated)
+            {
+                uMin = _u1;
+                vMin = _v2;
+                uMax = _u2;
+                vMax = _v3;
+            }
+
             CalculateTextureCoordinates(uMin, vMin, uMax, vMax);
         }
 
@@ -330,6 +382,14 @@ namespace Swarm2D.Engine.View
             float uMax = _u1;
             float vMax = _v3;
 
+            if (BaseSprite.Rotated)
+            {
+                uMin = _u2;
+                vMin = _v0;
+                uMax = _u3;
+                vMax = _v1;
+            }
+
             CalculateTextureCoordinates(uMin, vMin, uMax, vMax);
         }
 
@@ -339,6 +399,14 @@ namespace Swarm2D.Engine.View
             float vMin = _v2;
             float uMax = _u2;
             float vMax = _v3;
+
+            if (BaseSprite.Rotated)
+            {
+                uMin = _u2;
+                vMin = _v1;
+                uMax = _u3;
+                vMax = _v2;
+            }
 
             CalculateTextureCoordinates(uMin, vMin, uMax, vMax);
         }
@@ -375,10 +443,13 @@ namespace Swarm2D.Engine.View
             {
                 _outUvs[_uvsStartIndex + 0] = uMin;
                 _outUvs[_uvsStartIndex + 1] = vMin;
+            
                 _outUvs[_uvsStartIndex + 2] = uMax;
                 _outUvs[_uvsStartIndex + 3] = vMin;
+            
                 _outUvs[_uvsStartIndex + 4] = uMax;
                 _outUvs[_uvsStartIndex + 5] = vMax;
+            
                 _outUvs[_uvsStartIndex + 6] = uMin;
                 _outUvs[_uvsStartIndex + 7] = vMax;
             }
@@ -386,10 +457,13 @@ namespace Swarm2D.Engine.View
             {
                 _outUvs[_uvsStartIndex + 0] = uMin;
                 _outUvs[_uvsStartIndex + 1] = vMin;
+
                 _outUvs[_uvsStartIndex + 2] = uMin;
                 _outUvs[_uvsStartIndex + 3] = vMax;
+
                 _outUvs[_uvsStartIndex + 4] = uMax;
                 _outUvs[_uvsStartIndex + 5] = vMax;
+
                 _outUvs[_uvsStartIndex + 6] = uMax;
                 _outUvs[_uvsStartIndex + 7] = vMin;
             }

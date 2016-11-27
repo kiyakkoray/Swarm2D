@@ -142,6 +142,16 @@ namespace Swarm2D.SceneEditor.GUIControllers
                     case ComponentPropertyType.Enumerator:
                         AddPropertyEditorEnumerator(propertyInfo);
                         break;
+                    case ComponentPropertyType.String:
+                        if (propertyInfo.MemberOfGlobalList)
+                        {
+                            AddPropertyEditorStringMemberOfGlobalList(propertyInfo);
+                        }
+                        else
+                        {
+                            AddPropertyEditorString(propertyInfo);
+                        }
+                        break;
                     case ComponentPropertyType.Object:
                         break;
                     default:
@@ -165,11 +175,6 @@ namespace Swarm2D.SceneEditor.GUIControllers
 
         public virtual void Dispose()
         {
-            for (int i = 0; i < _componentPropertyEditors.Count; i++)
-            {
-                //_componentPropertyEditors[i].Dispose();
-            }
-
             _componentFrame.Entity.Destroy();
             _componentPropertiesMenu.Entity.Destroy();
         }
@@ -208,6 +213,24 @@ namespace Swarm2D.SceneEditor.GUIControllers
             _panelLength = componentResourcePropertyEditor.CreateUI(_componentFrame, _panelLength);
 
             _componentPropertyEditors.Add(componentResourcePropertyEditor);
+        }
+
+        private void AddPropertyEditorString(ComponentPropertyInfo componentStringPropertyInfo)
+        {
+            ComponentStringPropertyEditor componentStringPropertyEditor = new ComponentStringPropertyEditor(_component, componentStringPropertyInfo);
+
+            _panelLength = componentStringPropertyEditor.CreateUI(_componentFrame, _panelLength);
+
+            _componentPropertyEditors.Add(componentStringPropertyEditor);
+        }
+
+        private void AddPropertyEditorStringMemberOfGlobalList(ComponentPropertyInfo componentStringPropertyInfo)
+        {
+            ComponentMemberOfGlobalListPropertyEditor componentMemberOfGlobalListPropertyEditor = new ComponentMemberOfGlobalListPropertyEditor(_component, componentStringPropertyInfo);
+
+            _panelLength = componentMemberOfGlobalListPropertyEditor.CreateUI(_componentFrame, _panelLength);
+
+            _componentPropertyEditors.Add(componentMemberOfGlobalListPropertyEditor);
         }
 
         private void AddPropertyEditorEnumerator(ComponentPropertyInfo componentSpritePropertyInfo)

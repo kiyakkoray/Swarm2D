@@ -31,10 +31,17 @@ namespace Swarm2D.Engine.Core
 {
     public class ComponentPropertyInfo
     {
+        public bool MemberOfGlobalList { get; internal set; }
+        public string GlobalListName { get; internal set; }
         public string Name { get; internal set; }
         public PropertyInfo PropertyInfo { get; internal set; }
 
         public ComponentPropertyType PropertyType { get; internal set; }
+
+        internal ComponentPropertyInfo()
+        {
+            
+        }
 
         public void SetValueTo(Component component, string value)
         {
@@ -93,6 +100,12 @@ namespace Swarm2D.Engine.Core
                         setMethod.Invoke(component, new object[] { enumValue });
                     }
                     break;
+                case ComponentPropertyType.String:
+                    {
+                        string stringValue = value;
+                        setMethod.Invoke(component, new object[] { stringValue });
+                    }
+                    break;
                 case ComponentPropertyType.Object:
                     {
                         ConstructorInfo constructorInfo = PropertyInfo.PropertyType.GetConstructor(new Type[] { });
@@ -142,6 +155,11 @@ namespace Swarm2D.Engine.Core
                     }
                     break;
                 case ComponentPropertyType.Enumerator:
+                    {
+                        setMethod.Invoke(component, new object[] { value });
+                    }
+                    break;
+                case ComponentPropertyType.String:
                     {
                         setMethod.Invoke(component, new object[] { value });
                     }
@@ -207,6 +225,12 @@ namespace Swarm2D.Engine.Core
                         result = enumValueAsString;
                     }
                     break;
+                case ComponentPropertyType.String:
+                    {
+                        string value = (string)getMethod.Invoke(component, new object[] { });
+                        result = value;
+                    }
+                    break;
                 case ComponentPropertyType.Object:
                     {
                         object objectValue = getMethod.Invoke(component, new object[] { });
@@ -246,6 +270,7 @@ namespace Swarm2D.Engine.Core
         Vector2,
         Resource,
         Enumerator,
+        String,
         Object,
     }
 }

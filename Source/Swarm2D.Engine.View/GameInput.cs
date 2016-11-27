@@ -34,23 +34,26 @@ namespace Swarm2D.Engine.View
 {
     public static class GameInput
     {
-        private static IIOSystem _gameRenderer;
+        public static bool InputEnabled { get; set; }
+
+        private static IIOSystem _input;
 
         internal static void Initialize(GameRenderer gameRenderer)
         {
-            _gameRenderer = gameRenderer;
+            InputEnabled = true;
+            _input = gameRenderer;
         }
 
         public static Vector2 MousePosition
         {
             get
             {
-                if (_gameRenderer == null)
+                if (_input == null)
                 {
                     return new Vector2(0, 0);
                 }
 
-                return _gameRenderer.MousePosition;
+                return _input.MousePosition;
             }
         }
 
@@ -58,7 +61,7 @@ namespace Swarm2D.Engine.View
         {
             get
             {
-                return _gameRenderer != null && _gameRenderer.LeftMouse;
+                return InputEnabled && _input != null && _input.LeftMouse;
             }
         }
 
@@ -66,7 +69,7 @@ namespace Swarm2D.Engine.View
         {
             get
             {
-                return _gameRenderer != null && _gameRenderer.LeftMouseDown;
+                return InputEnabled && _input != null && _input.LeftMouseDown;
             }
         }
 
@@ -74,7 +77,7 @@ namespace Swarm2D.Engine.View
         {
             get
             {
-                return _gameRenderer != null && _gameRenderer.LeftMouseUp;
+                return InputEnabled && _input != null && _input.LeftMouseUp;
             }
         }
 
@@ -82,7 +85,7 @@ namespace Swarm2D.Engine.View
         {
             get
             {
-                return _gameRenderer != null && _gameRenderer.RightMouse;
+                return InputEnabled && _input != null && _input.RightMouse;
             }
         }
 
@@ -90,7 +93,7 @@ namespace Swarm2D.Engine.View
         {
             get
             {
-                return _gameRenderer != null && _gameRenderer.RightMouseDown;
+                return InputEnabled && _input != null && _input.RightMouseDown;
             }
         }
 
@@ -98,7 +101,7 @@ namespace Swarm2D.Engine.View
         {
             get
             {
-                return _gameRenderer != null && _gameRenderer.RightMouseUp;
+                return InputEnabled && _input != null && _input.RightMouseUp;
             }
         }
 
@@ -106,9 +109,9 @@ namespace Swarm2D.Engine.View
         {
             get
             {
-                if (_gameRenderer != null)
+                if (InputEnabled && _input != null)
                 {
-                    return _gameRenderer.GamepadData;
+                    return _input.GamepadData;
                 }
                 
                 return new GamepadData();
@@ -117,17 +120,17 @@ namespace Swarm2D.Engine.View
 
         public static bool GetKeyDown(KeyCode keyCode)
         {
-            return _gameRenderer != null && _gameRenderer.GetKeyDown(keyCode);
+            return InputEnabled && _input != null && _input.GetKeyDown(keyCode);
         }
 
         public static bool GetKey(KeyCode keyCode)
         {
-            return _gameRenderer != null && _gameRenderer.GetKey(keyCode);
+            return InputEnabled && _input != null && _input.GetKey(keyCode);
         }
 
         public static bool GetKeyUp(KeyCode keyCode)
         {
-            return _gameRenderer != null && _gameRenderer.GetKeyUp(keyCode);
+            return InputEnabled && _input != null && _input.GetKeyUp(keyCode);
         }
     }
 }

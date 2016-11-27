@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Swarm2D.Engine.Core;
 using Swarm2D.Engine.Logic;
 using Swarm2D.Library;
 
@@ -69,6 +70,8 @@ namespace Swarm2D.Engine.View
 
             _rendererCheckCircleData.Initialize();
             _rendererCheckBoxData.Initialize();
+
+            Scene.SendMessage(new SceneRendererCreatedMessage(this));
         }
 
         public override void OnReset()
@@ -144,6 +147,16 @@ namespace Swarm2D.Engine.View
                     }
                 }
             }
+        }
+    }
+
+    public class SceneRendererCreatedMessage : DomainMessage
+    {
+        public SceneRenderer SceneRenderer { get; private set; }
+
+        internal SceneRendererCreatedMessage(SceneRenderer sceneRenderer)
+        {
+            SceneRenderer = sceneRenderer;
         }
     }
 }

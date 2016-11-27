@@ -229,6 +229,29 @@ namespace Swarm2D.Engine.Logic
         }
     }
 
+    public static class GameLogicExtensions
+    {
+        public static GameLogic CreateGame(this Core.Engine engine)
+        {
+            Entity gameLogicEntity = engine.RootEntity.CreateChildEntity("GameLogic");
+            GameLogic gameLogic = gameLogicEntity.AddComponent<GameLogic>();
+
+            engine.InvokeMessage(new GameCreatedMessage(gameLogic));
+
+            return gameLogic;
+        }
+    }
+
+    public class GameCreatedMessage : GlobalMessage
+    {
+        public GameLogic GameLogic { get; private set; }
+
+        public GameCreatedMessage(GameLogic gameLogic)
+        {
+            GameLogic = gameLogic;
+        }
+    }
+
     public class OnIdleGameFrameUpdate : EntityMessage
     {
 

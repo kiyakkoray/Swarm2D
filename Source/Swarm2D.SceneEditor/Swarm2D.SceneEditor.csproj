@@ -44,7 +44,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ComponentPropertyEditors\ComponentMemberOfGlobalListPropertyEditor.cs" />
     <Compile Include="ComponentPropertyEditors\ComponentEnumeratorPropertyEditor.cs" />
+    <Compile Include="ComponentPropertyEditors\ComponentStringPropertyEditor.cs" />
     <Compile Include="SceneEditorDomain.cs" />
     <Compile Include="EditorInput.cs" />
     <Compile Include="EditorScreen.cs" />

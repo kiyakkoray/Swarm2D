@@ -57,10 +57,9 @@ namespace Swarm2D.SceneEditor
             IOSystem = GetComponent<IOSystem>();
 
             {
-                Entity gameLogicEntity = Entity.CreateChildEntity("GameLogic");
-                GameLogic = gameLogicEntity.AddComponent<GameLogic>();
-                GameRenderer = gameLogicEntity.AddComponent<GameRenderer>();
-                gameLogicEntity.AddComponent<GameUI>();
+                GameLogic = Engine.CreateGame();
+                GameRenderer = GameLogic.AddComponent<GameRenderer>();
+                GameLogic.AddComponent<GameUI>();
             }
 
             EditorInput.Initialize(IOSystem);

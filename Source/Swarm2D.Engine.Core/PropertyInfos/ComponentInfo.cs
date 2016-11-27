@@ -170,39 +170,52 @@ namespace Swarm2D.Engine.Core
                     }
                 }
 
-                MethodInfo[] methodInfos = type.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                List<MethodInfo> checkedMethods = new List<MethodInfo>();
+                Type typeToCheck = type;
 
-                foreach (MethodInfo methodInfo in methodInfos)
+                while (typeToCheck != typeof(object))
                 {
-                    var entityMessageAttributes = methodInfo.GetCustomAttributes(typeof(EntityMessageHandler), true).ToArray();
+                    MethodInfo[] methodInfos = typeToCheck.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
-                    if (entityMessageAttributes.Length == 1)
+                    foreach (MethodInfo methodInfo in methodInfos)
                     {
-                        EntityMessageHandler entityMessageHandler = entityMessageAttributes[0] as EntityMessageHandler;
+                        if (!checkedMethods.Contains(methodInfo))
+                        {
+                            var entityMessageAttributes = methodInfo.GetCustomAttributes(typeof(EntityMessageHandler), true).ToArray();
 
-                        Debug.Log("Entity Message Handler Found: " + methodInfo.Name);
-                        AddEntityMessage(entityMessageHandler.MessageType, methodInfo);
+                            if (entityMessageAttributes.Length == 1)
+                            {
+                                EntityMessageHandler entityMessageHandler = entityMessageAttributes[0] as EntityMessageHandler;
+
+                                Debug.Log("Entity Message Handler Found: " + methodInfo.Name);
+                                AddEntityMessage(entityMessageHandler.MessageType, methodInfo);
+                            }
+
+                            var domainMessageAttributes = methodInfo.GetCustomAttributes(typeof(DomainMessageHandler), true).ToArray();
+
+                            if (domainMessageAttributes.Length == 1)
+                            {
+                                DomainMessageHandler domainMessageHandler = domainMessageAttributes[0] as DomainMessageHandler;
+                                Debug.Log("Domain Message Handler Found: " + methodInfo.Name);
+
+                                AddDomainMessage(domainMessageHandler.MessageType, methodInfo);
+                            }
+
+                            var globalMessageAttributes = methodInfo.GetCustomAttributes(typeof(GlobalMessageHandler), true).ToArray();
+
+                            if (globalMessageAttributes.Length == 1)
+                            {
+                                GlobalMessageHandler globalMessageHandler = globalMessageAttributes[0] as GlobalMessageHandler;
+                                Debug.Log("Global Message Handler Found: " + methodInfo.Name);
+
+                                AddGlobalMessage(globalMessageHandler.MessageType, methodInfo);
+                            }
+
+                            checkedMethods.Add(methodInfo);
+                        }
                     }
 
-                    var domainMessageAttributes = methodInfo.GetCustomAttributes(typeof(DomainMessageHandler), true).ToArray();
-
-                    if (domainMessageAttributes.Length == 1)
-                    {
-                        DomainMessageHandler domainMessageHandler = domainMessageAttributes[0] as DomainMessageHandler;
-                        Debug.Log("Domain Message Handler Found: " + methodInfo.Name);
-
-                        AddDomainMessage(domainMessageHandler.MessageType, methodInfo);
-                    }
-
-                    var globalMessageAttributes = methodInfo.GetCustomAttributes(typeof(GlobalMessageHandler), true).ToArray();
-
-                    if (globalMessageAttributes.Length == 1)
-                    {
-                        GlobalMessageHandler globalMessageHandler = globalMessageAttributes[0] as GlobalMessageHandler;
-                        Debug.Log("Global Message Handler Found: " + methodInfo.Name);
-
-                        AddGlobalMessage(globalMessageHandler.MessageType, methodInfo);
-                    }
+                    typeToCheck = typeToCheck.BaseType;
                 }
             }
         }
@@ -338,9 +351,22 @@ namespace Swarm2D.Engine.Core
             {
                 componentPropertyInfo.PropertyType = ComponentPropertyType.Enumerator;
             }
+            else if (propertyInfo.PropertyType == typeof(string))
+            {
+                componentPropertyInfo.PropertyType = ComponentPropertyType.String;
+            }
             else if (typeof(ISerializableObject).IsAssignableFrom(propertyInfo.PropertyType))
             {
                 componentPropertyInfo.PropertyType = ComponentPropertyType.Object;
+            }
+
+            var attributes = propertyInfo.GetCustomAttributes(typeof(MemberOfGlobalList), true).ToArray();
+
+            if (attributes.Length == 1)
+            {
+                MemberOfGlobalList memberOfGlobalList = (MemberOfGlobalList) attributes[0];
+                componentPropertyInfo.MemberOfGlobalList = true;
+                componentPropertyInfo.GlobalListName = memberOfGlobalList.ListName;
             }
 
             ComponentPropertyInfos.Add(name, componentPropertyInfo);

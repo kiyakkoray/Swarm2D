@@ -103,6 +103,15 @@ namespace Swarm2D.Engine.View
             SceneRenderer.RemoveRenderer(this);
             _addedToSceneRenderer = false;
         }
+
+        [DomainMessageHandler(MessageType = typeof(SceneRendererCreatedMessage))]
+        private void OnSceneRendererCreatedMessage(Message message)
+        {
+            if (!_addedToSceneRenderer)
+            {
+                AddToSceneRenderer();
+            }
+        }
     }
 
     public interface IRenderer

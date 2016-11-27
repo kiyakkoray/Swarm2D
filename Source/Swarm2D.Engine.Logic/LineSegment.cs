@@ -43,10 +43,10 @@ namespace Swarm2D.Engine.Logic
         public float Length { get; private set; }
         public float InverseLength { get; private set; }
 
-        internal Vector2 P1OnWorld;
-        internal Vector2 P2OnWorld;
-        internal Vector2 EdgeVectorOnWorld;
-        internal Vector2 NormalOnWorld;
+        public Vector2 P1OnWorld { get; set; }
+        public Vector2 P2OnWorld { get; set; }
+        public Vector2 EdgeVectorOnWorld { get; set; }
+        public Vector2 NormalOnWorld { get; set; }
 
         public LineSegment(Vector2 p1, Vector2 p2)
         {

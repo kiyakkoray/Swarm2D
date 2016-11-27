@@ -77,11 +77,9 @@ namespace Swarm2D.Game
         {
             base.OnAdded();
 
-            Entity gameLogicEntity = Entity.CreateChildEntity("GameLogic");
-
-            _gameLogic = gameLogicEntity.AddComponent<GameLogic>();
-            gameLogicEntity.AddComponent<GameRenderer>();
-            _gameUI = gameLogicEntity.AddComponent<GameUI>();
+            _gameLogic =  Engine.CreateGame();
+            _gameLogic.AddComponent<GameRenderer>();
+            _gameUI = _gameLogic.AddComponent<GameUI>();
         }
 
         [DomainMessageHandler(MessageType = typeof(UpdateMessage))]

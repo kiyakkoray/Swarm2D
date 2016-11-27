@@ -66,8 +66,6 @@ namespace Swarm2D.Engine.Logic
 
         public float Area { get; protected set; }
 
-        public abstract IShape Shape { get; }
-
         public abstract void Initialize();
 
         public abstract void PrepareTransformation(ref Matrix4x4 transform);
@@ -88,6 +86,6 @@ namespace Swarm2D.Engine.Logic
 
         public abstract bool IsIntersects(LineSegment lineSegment, out Vector2 normal, out Vector2 intersectionPoint);
 
-        internal abstract bool IsInside(Vector2 worldPosition);
+        public abstract bool IsInside(Vector2 worldPosition);
     }
 }

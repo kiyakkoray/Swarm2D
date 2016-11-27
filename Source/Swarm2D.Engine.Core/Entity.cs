@@ -172,9 +172,29 @@ namespace Swarm2D.Engine.Core
             return null;
         }
 
+        public Component AddComponent(Type type, object parameter)
+        {
+            Component component = AddComponent(type);
+
+            if (component != null)
+            {
+                //component.OnConstruct();
+            }
+
+            return component;
+        }
+
         public T AddComponent<T>() where T : Component
         {
             T component = AddComponentWithInfo(ComponentInfo.GetComponentInfo(typeof(T))) as T;
+
+            return component;
+        }
+
+        public T1 AddComponent<T1, T2>(T2 parameter) where T1 : Component, IConstructableComponent<T2>
+        {
+            T1 component = (T1)AddComponentWithInfo(ComponentInfo.GetComponentInfo(typeof(T1)));
+            component.OnConstruct(parameter);
 
             return component;
         }

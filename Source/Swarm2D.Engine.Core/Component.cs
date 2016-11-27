@@ -198,6 +198,11 @@ namespace Swarm2D.Engine.Core
         }
     }
 
+    public interface IConstructableComponent<T>
+    {
+        void OnConstruct(T parameters);
+    }
+
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public sealed class PoolableComponent : Attribute
     {

@@ -100,6 +100,7 @@ namespace Swarm2D.Engine.Core
             }
 
             InitializePrefabManager();
+            InitializeGlobalVariables();
 
             CreateRootEntity();
 
@@ -309,6 +310,32 @@ namespace Swarm2D.Engine.Core
             Debug.Assert(clonedPrefab.IsInstantiatedFromPrefab, "clonedPrefab.IsInstantiatedFromPrefab");
 
             return clonedPrefab;
+        }
+
+        #endregion
+
+        #region Global Variables
+
+        private Dictionary<string, List<string>> _globalLists;
+
+        private void InitializeGlobalVariables()
+        {
+            _globalLists = new Dictionary<string, List<string>>();
+        }
+
+        public void CreateGlobalList(string name)
+        {
+            _globalLists.Add(name, new List<string>());
+        }
+
+        public void AddGlobalListValue(string name, string value)
+        {
+            _globalLists[name].Add(value);
+        }
+
+        public IEnumerable<string> GetGlobalListValues(string name)
+        {
+            return _globalLists[name];
         }
 
         #endregion

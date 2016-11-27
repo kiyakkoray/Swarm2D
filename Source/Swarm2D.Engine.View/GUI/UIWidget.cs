@@ -287,11 +287,11 @@ namespace Swarm2D.Engine.View.GUI
 
             if (typeOfScale == ScaleType.RootHorizontalScale)
             {
-                result = result * Manager.HorizontalScaleValue() * Mathf.Abs(WidthScale);
+                result = result * Manager.HorizontalScaleValue * Mathf.Abs(WidthScale);
             }
             else if (typeOfScale == ScaleType.RootVerticalScale)
             {
-                result = result * Manager.VerticalScaleValue() * Mathf.Abs(HeightScale);
+                result = result * Manager.VerticalScaleValue * Mathf.Abs(HeightScale);
             }
             else if (typeOfScale == ScaleType.OwnerWidthScale)
             {

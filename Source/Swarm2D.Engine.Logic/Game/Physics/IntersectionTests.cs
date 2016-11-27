@@ -33,31 +33,36 @@ namespace Swarm2D.Engine.Logic
 {
     public static class IntersectionTests
     {
+        private static Dictionary<Type, Dictionary<Type, IIntersectionChecker>> _intersectionCheckers;
+
+        static IntersectionTests()
+        {
+            _intersectionCheckers = new Dictionary<Type, Dictionary<Type, IIntersectionChecker>>();
+
+            AddIntersectionChecker(new PolygonPolygonIntersectionChecker());
+            AddIntersectionChecker(new PolygonCircleIntersectionChecker());
+            AddIntersectionChecker(new CirclePolygonIntersectionChecker());
+            AddIntersectionChecker(new CircleCircleIntersectionChecker());
+        }
+
+        public static void AddIntersectionChecker(IIntersectionChecker intersectionChecker)
+        {
+            Type typeA = intersectionChecker.TypeA;
+            Type typeB = intersectionChecker.TypeB;
+
+            if (!_intersectionCheckers.ContainsKey(typeA))
+            {
+                _intersectionCheckers.Add(typeA, new Dictionary<Type, IIntersectionChecker>());
+            }
+
+            _intersectionCheckers[typeA].Add(typeB, intersectionChecker);
+        }
+
         internal static bool CheckIntersectionAndProduceResult(ShapeInstance shapeA, ShapeInstance shapeB, out Vector2 minimumTranslation, out Vector2 intersectionPoint)
         {
-            minimumTranslation = Vector2.Zero;
-            intersectionPoint = Vector2.Zero;
+            IIntersectionChecker intersectionChecker = _intersectionCheckers[shapeA.GetType()][shapeB.GetType()];
 
-            bool isIntersection = false;
-
-            if (shapeA is PolygonInstance && shapeB is PolygonInstance)
-            {
-                isIntersection = CheckIntersectionAndProduceResult((PolygonInstance)shapeA, (PolygonInstance)shapeB, out minimumTranslation, out intersectionPoint);
-            }
-            else if (shapeA is CircleInstance && shapeB is CircleInstance)
-            {
-                isIntersection = CheckIntersectionAndProduceResult((CircleInstance)shapeA, (CircleInstance)shapeB, out minimumTranslation, out intersectionPoint);
-            }
-            else if (shapeA is PolygonInstance && shapeB is CircleInstance)
-            {
-                isIntersection = CheckIntersectionAndProduceResult((PolygonInstance)shapeA, (CircleInstance)shapeB, out minimumTranslation, out intersectionPoint);
-            }
-            else if (shapeA is CircleInstance && shapeB is PolygonInstance)
-            {
-                isIntersection = CheckIntersectionAndProduceResult((PolygonInstance)shapeB, (CircleInstance)shapeA, out minimumTranslation, out intersectionPoint);
-
-                minimumTranslation *= -1.0f;
-            }
+            bool isIntersection = intersectionChecker.CheckIntersection(shapeA, shapeB, out minimumTranslation, out intersectionPoint);
 
             if (isIntersection)
             {
@@ -81,7 +86,7 @@ namespace Swarm2D.Engine.Logic
             return minY - maxX;
         }
 
-        private static bool CheckIntersectionAndProduceResult(PolygonInstance polygonA, PolygonInstance polygonB, out Vector2 minimumTranslation, out Vector2 intersectionPoint)
+        public static bool CheckIntersectionAndProduceResult(IPolygonInstance polygonA, IPolygonInstance polygonB, out Vector2 minimumTranslation, out Vector2 intersectionPoint)
         {
             minimumTranslation = Vector2.Zero;
             intersectionPoint = Vector2.Zero;
@@ -147,7 +152,7 @@ namespace Swarm2D.Engine.Logic
             return true;
         }
 
-        private static bool CheckIntersectionAndProduceResult(PolygonInstance polygonA, CircleInstance circleB, out Vector2 minimumTranslation, out Vector2 intersectionPoint)
+        public static bool CheckIntersectionAndProduceResult(IPolygonInstance polygonA, CircleInstance circleB, out Vector2 minimumTranslation, out Vector2 intersectionPoint)
         {
             minimumTranslation = Vector2.Zero;
             intersectionPoint = Vector2.Zero;
@@ -202,7 +207,7 @@ namespace Swarm2D.Engine.Logic
             return true;
         }
 
-        private static bool CheckIntersectionAndProduceResult(CircleInstance circleA, CircleInstance circleB, out Vector2 minimumTranslation, out Vector2 intersectionPoint)
+        public static bool CheckIntersectionAndProduceResult(CircleInstance circleA, CircleInstance circleB, out Vector2 minimumTranslation, out Vector2 intersectionPoint)
         {
             minimumTranslation = Vector2.Zero;
             intersectionPoint = Vector2.Zero;
@@ -344,6 +349,77 @@ namespace Swarm2D.Engine.Logic
             float distanceOfCenters = Vector2.Distance(circleA.CurrentCenter, circleB.CurrentCenter);
 
             return sumOfRadiuses >= distanceOfCenters;
+        }
+    }
+
+    public interface IIntersectionChecker
+    {
+        Type TypeA { get; }
+        Type TypeB { get; }
+
+        bool CheckIntersection(ShapeInstance shapeA, ShapeInstance shapeB, out Vector2 minimumTranslation, out Vector2 intersectionPoint);
+    }
+
+    public class PolygonPolygonIntersectionChecker : IIntersectionChecker
+    {
+        Type IIntersectionChecker.TypeA { get { return typeof(PolygonInstance); } }
+        Type IIntersectionChecker.TypeB { get { return typeof(PolygonInstance); } }
+
+        bool IIntersectionChecker.CheckIntersection(ShapeInstance shapeA, ShapeInstance shapeB, out Vector2 minimumTranslation, out Vector2 intersectionPoint)
+        {
+            var polygonA = (IPolygonInstance)shapeA;
+            var polygonB = (IPolygonInstance)shapeB;
+
+            return IntersectionTests.CheckIntersectionAndProduceResult(polygonA, polygonB, out minimumTranslation, out intersectionPoint);
+        }
+    }
+
+    public class PolygonCircleIntersectionChecker : IIntersectionChecker
+    {
+        Type IIntersectionChecker.TypeA { get { return typeof(PolygonInstance); } }
+        Type IIntersectionChecker.TypeB { get { return typeof(CircleInstance); } }
+
+        bool IIntersectionChecker.CheckIntersection(ShapeInstance shapeA, ShapeInstance shapeB, out Vector2 minimumTranslation, out Vector2 intersectionPoint)
+        {
+            var polygon = (IPolygonInstance)shapeA;
+            var circle = (CircleInstance)shapeB;
+
+            return IntersectionTests.CheckIntersectionAndProduceResult(polygon, circle, out minimumTranslation, out intersectionPoint);
+        }
+    }
+
+    public class CirclePolygonIntersectionChecker : IIntersectionChecker
+    {
+        Type IIntersectionChecker.TypeA { get { return typeof(CircleInstance); } }
+        Type IIntersectionChecker.TypeB { get { return typeof(PolygonInstance); } }
+
+        bool IIntersectionChecker.CheckIntersection(ShapeInstance shapeA, ShapeInstance shapeB, out Vector2 minimumTranslation, out Vector2 intersectionPoint)
+        {
+            var circle = (CircleInstance)shapeA;
+            var polygon = (IPolygonInstance)shapeB;
+
+            bool intersection = IntersectionTests.CheckIntersectionAndProduceResult(polygon, circle, out minimumTranslation, out intersectionPoint);
+
+            if (intersection)
+            {
+                minimumTranslation *= -1.0f;
+            }
+
+            return intersection;
+        }
+    }
+
+    public class CircleCircleIntersectionChecker : IIntersectionChecker
+    {
+        Type IIntersectionChecker.TypeA { get { return typeof(CircleInstance); } }
+        Type IIntersectionChecker.TypeB { get { return typeof(CircleInstance); } }
+
+        bool IIntersectionChecker.CheckIntersection(ShapeInstance shapeA, ShapeInstance shapeB, out Vector2 minimumTranslation, out Vector2 intersectionPoint)
+        {
+            var circleA = (CircleInstance)shapeA;
+            var circleB = (CircleInstance)shapeB;
+
+            return IntersectionTests.CheckIntersectionAndProduceResult(circleA, circleB, out minimumTranslation, out intersectionPoint);
         }
     }
 }

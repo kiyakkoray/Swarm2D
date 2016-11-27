@@ -53,18 +53,21 @@ namespace Swarm2D.Engine.Logic
         }
     }
 
-    public class PolygonInstance : ShapeInstance
+    public interface IPolygonInstance
     {
-        internal List<LineSegment> Edges { get; private set; }
+        List<LineSegment> Edges { get; }
+        Vector2 CurrentCenter { get; }
+    }
 
+    public class PolygonInstance : ShapeInstance, IPolygonInstance
+    {
+        List<LineSegment> IPolygonInstance.Edges { get { return Edges; } }
+        Vector2 IPolygonInstance.CurrentCenter { get { return CurrentCenter; } }
+
+        internal List<LineSegment> Edges { get; private set; }
         internal Vector2 CurrentCenter { get; private set; }
 
         private IPolygon _polygon;
-
-        public override IShape Shape
-        {
-            get { return _polygon; }
-        }
 
         public PolygonInstance(IPolygon polygon)
         {
@@ -157,75 +160,6 @@ namespace Swarm2D.Engine.Logic
             BoundingCircleRadius = Mathf.Sqrt(boundingCircleRadiusSquared);
         }
 
-        internal Vector2 CalculateIntersectionPoint(PolygonInstance otherShape)
-        {
-            List<LineSegment> foundSegmentsOnA = new List<LineSegment>();
-            List<LineSegment> foundSegmentsOnB = new List<LineSegment>();
-
-            Vector2 intersectionPoint = Vector2.Zero;
-
-            int intersectionPointCount = 0;
-
-            for (int i = 0; i < Edges.Count; i++)
-            {
-                LineSegment lineSegmentA = Edges[i];
-
-                for (int j = 0; j < otherShape.Edges.Count; j++)
-                {
-                    LineSegment lineSegmentB = otherShape.Edges[j];
-
-                    Vector2 currentIntersectionPoint;
-
-                    if (lineSegmentA.IsIntersects(lineSegmentB, out currentIntersectionPoint))
-                    {
-                        if (!foundSegmentsOnA.Contains(lineSegmentA))
-                        {
-                            foundSegmentsOnA.Add(lineSegmentA);
-                        }
-
-                        if (!foundSegmentsOnB.Contains(lineSegmentB))
-                        {
-                            foundSegmentsOnB.Add(lineSegmentB);
-                        }
-
-                        intersectionPoint += currentIntersectionPoint;
-                        intersectionPointCount++;
-                    }
-                }
-            }
-
-            if (intersectionPointCount > 1)
-            {
-                intersectionPoint = intersectionPoint * (1.0f / (float)intersectionPointCount);
-            }
-
-            return intersectionPoint;
-        }
-
-        internal Vector2 ProjectTo(Vector2 axis)
-        {
-            float min = Edges[0].P1OnWorld.Dot(axis);
-            float max = min;
-
-            for (int i = 1; i < Edges.Count; i++)
-            {
-                Vector2 vertexOnWorld = Edges[i].P1OnWorld;
-
-                float p = vertexOnWorld.Dot(axis);
-
-                if (p < min)
-                {
-                    min = p;
-                }
-                else if (p > max)
-                {
-                    max = p;
-                }
-            }
-
-            return new Vector2(min, max);
-        }
-
         private float CalculateArea()
         {
             float area = 0.0f;
@@ -276,7 +210,7 @@ namespace Swarm2D.Engine.Logic
             return totalInertia;
         }
 
-        internal override bool IsInside(Vector2 worldPosition)
+        public override bool IsInside(Vector2 worldPosition)
         {
             for (int i = 0; i < Edges.Count; i++)
             {
@@ -309,6 +243,78 @@ namespace Swarm2D.Engine.Logic
             intersectionPoint = Vector2.Zero;
 
             return false;
+        }
+    }
+
+    public static class PolygonExtensions
+    {
+        public static Vector2 CalculateIntersectionPoint(this IPolygonInstance shape, IPolygonInstance otherShape)
+        {
+            List<LineSegment> foundSegmentsOnA = new List<LineSegment>();
+            List<LineSegment> foundSegmentsOnB = new List<LineSegment>();
+
+            Vector2 intersectionPoint = Vector2.Zero;
+
+            int intersectionPointCount = 0;
+
+            for (int i = 0; i < shape.Edges.Count; i++)
+            {
+                LineSegment lineSegmentA = shape.Edges[i];
+
+                for (int j = 0; j < otherShape.Edges.Count; j++)
+                {
+                    LineSegment lineSegmentB = otherShape.Edges[j];
+
+                    Vector2 currentIntersectionPoint;
+
+                    if (lineSegmentA.IsIntersects(lineSegmentB, out currentIntersectionPoint))
+                    {
+                        if (!foundSegmentsOnA.Contains(lineSegmentA))
+                        {
+                            foundSegmentsOnA.Add(lineSegmentA);
+                        }
+
+                        if (!foundSegmentsOnB.Contains(lineSegmentB))
+                        {
+                            foundSegmentsOnB.Add(lineSegmentB);
+                        }
+
+                        intersectionPoint += currentIntersectionPoint;
+                        intersectionPointCount++;
+                    }
+                }
+            }
+
+            if (intersectionPointCount > 1)
+            {
+                intersectionPoint = intersectionPoint * (1.0f / (float)intersectionPointCount);
+            }
+
+            return intersectionPoint;
+        }
+
+        public static Vector2 ProjectTo(this IPolygonInstance shape, Vector2 axis)
+        {
+            float min = shape.Edges[0].P1OnWorld.Dot(axis);
+            float max = min;
+
+            for (int i = 1; i < shape.Edges.Count; i++)
+            {
+                Vector2 vertexOnWorld = shape.Edges[i].P1OnWorld;
+
+                float p = vertexOnWorld.Dot(axis);
+
+                if (p < min)
+                {
+                    min = p;
+                }
+                else if (p > max)
+                {
+                    max = p;
+                }
+            }
+
+            return new Vector2(min, max);
         }
     }
 }

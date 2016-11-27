@@ -228,7 +228,7 @@ namespace Swarm2D.Engine.View.GUI
 
         private void HandleKeyDown(KeyCode keyCode)
         {
-            string currentText = Text;
+            string currentText = Text != null ? Text : "";
 
             if (keyCode == KeyCode.KeyLeftArrow)
             {
