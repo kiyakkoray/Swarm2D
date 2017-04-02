@@ -54,7 +54,6 @@ namespace Swarm2D.Unity.Logic
 
         void IDebug.Assert(bool condition, string message)
         {
-
         }
     }
 }

@@ -44,8 +44,11 @@
   <ItemGroup>
     <Compile Include="IUnityBehaviour.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SceneEntityBehaviourListener.cs" />
     <Compile Include="UnityDebug.cs" />
+    <Compile Include="UnityExtensions.cs" />
     <Compile Include="UnityLogicFramework.cs" />
+    <Compile Include="SceneEntityBehaviour.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Swarm2D.Engine.Core\Swarm2D.Engine.Core.csproj">
