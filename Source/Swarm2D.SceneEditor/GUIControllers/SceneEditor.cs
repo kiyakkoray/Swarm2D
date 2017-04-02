@@ -143,19 +143,19 @@ namespace Swarm2D.SceneEditor.GUIControllers
         private SceneData _currentSceneData;
 
         private Dictionary<Type, List<Type>> _sceneEditorPluginTypes;
-        private Dictionary<Component, List<Component>> _sceneEditorPlugins;
+        private Dictionary<Component, List<ComponentEditor>> _sceneEditorPlugins;
 
         protected override void OnAdded()
         {
             base.OnAdded();
 
             _scenePanelButtons = new List<UIButton>();
-            _sceneEditorPlugins = new Dictionary<Component, List<Component>>();
+            _sceneEditorPlugins = new Dictionary<Component, List<ComponentEditor>>();
 
-            CollectSceneControllerPlugins();
+            CollectSceneEditorPlugins();
         }
 
-        private void CollectSceneControllerPlugins()
+        private void CollectSceneEditorPlugins()
         {
             _sceneEditorPluginTypes = new Dictionary<Type, List<Type>>();
 
@@ -171,9 +171,9 @@ namespace Swarm2D.SceneEditor.GUIControllers
 
                     SceneEditorPlugin sceneEditorPlugin = attributes[0] as SceneEditorPlugin;
 
-                    EnsurePluginTypeDictionary(sceneEditorPlugin.SceneControllerType);
+                    EnsurePluginTypeDictionary(sceneEditorPlugin.ComponentType);
 
-                    _sceneEditorPluginTypes[sceneEditorPlugin.SceneControllerType].Add(pluginType);
+                    _sceneEditorPluginTypes[sceneEditorPlugin.ComponentType].Add(pluginType);
                 }
             }
         }
@@ -562,21 +562,25 @@ namespace Swarm2D.SceneEditor.GUIControllers
 
         private void CheckSceneControllerPlugins()
         {
-            //add if not exists
-            foreach (var sceneController in this.Scene.Entity.Components)
+            if (SelectedEntity != null)
             {
-                if (DoesSceneControllerHavePlugin(sceneController.GetType()))
+                //add if not exists
+                foreach (var component in SelectedEntity.Components)
                 {
-                    if (!_sceneEditorPlugins.ContainsKey(sceneController))
+                    if (DoesSceneControllerHavePlugin(component.GetType()))
                     {
-                        _sceneEditorPlugins.Add(sceneController, new List<Component>());
-
-                        foreach (var sceneEditorPluginType in _sceneEditorPluginTypes[sceneController.GetType()])
+                        if (!_sceneEditorPlugins.ContainsKey(component))
                         {
-                            Debug.Log("Creating scene controller plugin:" + sceneEditorPluginType.Name);
+                            _sceneEditorPlugins.Add(component, new List<ComponentEditor>());
 
-                            Component pluginComponent = Entity.AddComponent(sceneEditorPluginType);
-                            _sceneEditorPlugins[sceneController].Add(pluginComponent);
+                            foreach (var sceneEditorPluginType in _sceneEditorPluginTypes[component.GetType()])
+                            {
+                                Debug.Log("Creating scene controller plugin:" + sceneEditorPluginType.Name);
+
+                                ComponentEditor pluginComponent = (ComponentEditor)Entity.AddComponent(sceneEditorPluginType);
+                                pluginComponent.Component = component;
+                                _sceneEditorPlugins[component].Add(pluginComponent);
+                            }
                         }
                     }
                 }
@@ -587,7 +591,7 @@ namespace Swarm2D.SceneEditor.GUIControllers
 
             foreach (var sceneController in _sceneEditorPlugins.Keys)
             {
-                if (sceneController.IsDestroyed)
+                if (sceneController.IsDestroyed || SelectedEntity != sceneController.Entity)
                 {
                     destroyedSceneControllers.Add(sceneController);
                 }
@@ -595,7 +599,7 @@ namespace Swarm2D.SceneEditor.GUIControllers
 
             foreach (var destroyedSceneController in destroyedSceneControllers)
             {
-                List<Component> plugins = _sceneEditorPlugins[destroyedSceneController];
+                List<ComponentEditor> plugins = _sceneEditorPlugins[destroyedSceneController];
 
                 _sceneEditorPlugins.Remove(destroyedSceneController);
 
@@ -1147,7 +1151,12 @@ namespace Swarm2D.SceneEditor.GUIControllers
 
     public class SceneEditorPlugin : Attribute
     {
-        public Type SceneControllerType { get; set; }
+        public Type ComponentType { get; set; }
+    }
+
+    public abstract class ComponentEditor : UIController
+    {
+        public Component Component { get; internal set; }
     }
 
     public class EditorGameScreenMouseDownMessage : EntityMessage

@@ -235,14 +235,17 @@ namespace Swarm2D.Engine.Core
                     {
                         object objectValue = getMethod.Invoke(component, new object[] { });
 
-                        ISerializableObject serializableObject = objectValue as ISerializableObject;
+                        if (objectValue != null)
+                        {
+                            ISerializableObject serializableObject = objectValue as ISerializableObject;
 
-                        DataWriter writer = new DataWriter();
-                        serializableObject.OnSerialize(writer);
+                            DataWriter writer = new DataWriter();
+                            serializableObject.OnSerialize(writer);
 
-                        byte[] dataAsBytes = writer.GetData();
+                            byte[] dataAsBytes = writer.GetData();
 
-                        result = ByteOperations.ConvertToString(dataAsBytes);
+                            result = ByteOperations.ConvertToString(dataAsBytes);
+                        }
                     }
                     break;
                 default:

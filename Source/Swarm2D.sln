@@ -51,6 +51,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Swarm2D.Test", "Swarm2D.Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Swarm2D.Engine.Multiplayer", "Swarm2D.Engine.Multiplayer\Swarm2D.Engine.Multiplayer.csproj", "{C1E17DEB-2BBA-4647-9175-431D5DB319A3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Swarm2D.LogicFramework", "Swarm2D.LogicFramework\Swarm2D.LogicFramework.csproj", "{101FEDE4-B29B-4811-85F6-DC1F94B114FD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -219,6 +221,14 @@ Global
 		{C1E17DEB-2BBA-4647-9175-431D5DB319A3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C1E17DEB-2BBA-4647-9175-431D5DB319A3}.Release|x86.ActiveCfg = Release|Any CPU
 		{C1E17DEB-2BBA-4647-9175-431D5DB319A3}.Release|x86.Build.0 = Release|Any CPU
+		{101FEDE4-B29B-4811-85F6-DC1F94B114FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{101FEDE4-B29B-4811-85F6-DC1F94B114FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{101FEDE4-B29B-4811-85F6-DC1F94B114FD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{101FEDE4-B29B-4811-85F6-DC1F94B114FD}.Debug|x86.Build.0 = Debug|Any CPU
+		{101FEDE4-B29B-4811-85F6-DC1F94B114FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{101FEDE4-B29B-4811-85F6-DC1F94B114FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{101FEDE4-B29B-4811-85F6-DC1F94B114FD}.Release|x86.ActiveCfg = Release|Any CPU
+		{101FEDE4-B29B-4811-85F6-DC1F94B114FD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

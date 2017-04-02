@@ -285,6 +285,11 @@ namespace Swarm2D.Engine.Logic
 
                     ComponentInfo componentInfo = component.GetComponentInfo();
 
+                    if (componentFromPrefab == null)
+                    {
+                        componentData = entityData.AddComponent(componentInfo);
+                    }
+
                     foreach (ComponentPropertyInfo componentPropertyInfo in componentInfo.ComponentPropertyInfos.Values)
                     {
                         string valueFromEntity = componentPropertyInfo.GetValueAsStringFrom(component);

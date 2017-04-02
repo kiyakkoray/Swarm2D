@@ -76,6 +76,10 @@
       <Project>{6c71fc43-48a5-49e5-a551-dd2613c6e6ab}</Project>
       <Name>Swarm2D.Library</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Swarm2D.LogicFramework\Swarm2D.LogicFramework.csproj">
+      <Project>{101fede4-b29b-4811-85f6-dc1f94b114fd}</Project>
+      <Name>Swarm2D.LogicFramework</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Swarm2D.Network.TCPDriver\Swarm2D.Network.TCPDriver.csproj">
       <Project>{6597a877-2990-448c-b055-b445a9063041}</Project>
       <Name>Swarm2D.Network.TCPDriver</Name>

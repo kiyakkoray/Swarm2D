@@ -73,7 +73,7 @@ namespace Swarm2D.Test.FastMovingMultiplayerGameObjectTest
             _testNetworkDriver = new TestNetworkDriver.TestNetworkDriver();
 
             {
-                _serverDomain = new Engine.Core.Engine(false);
+                _serverDomain = new Engine.Core.Engine(this, false);
 
                 Entity rootEntity = _serverDomain.RootEntity;
 
@@ -88,7 +88,7 @@ namespace Swarm2D.Test.FastMovingMultiplayerGameObjectTest
             }
 
             {
-                _clientDomain = new Engine.Core.Engine(false);
+                _clientDomain = new Engine.Core.Engine(this, false);
 
                 Entity rootEntity = _clientDomain.RootEntity;
 

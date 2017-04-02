@@ -29,7 +29,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Xml;
 using Debug = Swarm2D.Library.Debug;
 
@@ -133,6 +135,65 @@ namespace Swarm2D.Test
         public override string GetResourcesNameOf(string fileName)
         {
             return "";
+        }
+
+        #endregion
+
+        #region Platform Helpers
+
+        public override IThread CreateThread(Engine.Core.ThreadStart threadStart)
+        {
+            return new LogicFramework.Thread(threadStart);
+        }
+
+        public override void Sleep(int miliSeconds)
+        {
+            Thread.Sleep(1);
+        }
+
+        public override Assembly[] GetGameAssemblies()
+        {
+            return LogicFramework.PlatformHelper.GetGameAssemblies();
+        }
+
+        public override Type GetBaseType(Type type)
+        {
+            return LogicFramework.PlatformHelper.GetBaseType(type);
+        }
+
+        public override bool IsAbstract(Type type)
+        {
+            return LogicFramework.PlatformHelper.IsAbstract(type);
+        }
+
+        public override bool IsEnum(Type type)
+        {
+            return LogicFramework.PlatformHelper.IsEnum(type);
+        }
+
+        public override bool IsSubclassOf(Type type, Type otherType)
+        {
+            return LogicFramework.PlatformHelper.IsSubclassOf(type, otherType);
+        }
+
+        public override Delegate CreateDelegate(Type delegateType, object target, MethodInfo methodInfo)
+        {
+            return LogicFramework.PlatformHelper.CreateDelegate(delegateType, target, methodInfo);
+        }
+
+        public override MethodInfo GetMethod(Type type, string name, BindingFlags bindingAttr, Type[] types)
+        {
+            return LogicFramework.PlatformHelper.GetMethod(type, name, bindingAttr, types);
+        }
+
+        public override object[] GetCustomAttributes(Type type, Type attributeType, bool inherit)
+        {
+            return LogicFramework.PlatformHelper.GetCustomAttributes(type, attributeType, inherit);
+        }
+
+        public override XmlNode SelectSingleNode(XmlNode node, string xpath)
+        {
+            return LogicFramework.PlatformHelper.SelectSingleNode(node, xpath);
         }
 
         #endregion
