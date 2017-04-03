@@ -87,7 +87,7 @@ namespace Swarm2D.Engine.Multiplayer
 
         private void CheckAndRemoveNetworkIDFromParent()
         {
-            if (_networkId != null)
+            if (_networkId != null && _networkId.Type != NetworkID.IDType.Root)
             {
                 NetworkView oldParentView = NetworkController.FindNetworkView(_networkId.ParentObjectId);
 

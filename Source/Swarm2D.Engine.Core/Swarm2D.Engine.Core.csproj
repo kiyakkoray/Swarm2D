@@ -45,6 +45,7 @@
     <Compile Include="Engine.cs" />
     <Compile Include="EngineComponent.cs" />
     <Compile Include="EngineController.cs" />
+    <Compile Include="EngineData.cs" />
     <Compile Include="EngineEntity.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="EntityDomain.cs" />

@@ -396,6 +396,159 @@ namespace Swarm2D.Engine.Core
                 _freComponentsOfType.Push(component);
             }
         }
+
+        public EngineData Save()
+        {
+            EntityData rootEntityData = SaveEntity(_rootEntity, null);
+            EngineData engineData = new EngineData(rootEntityData);
+
+            return engineData;
+        }
+
+        private EntityData SaveEntity(Entity entity, EntityData parentEntityData)
+        {
+            EntityData entityData = null;
+
+            if (parentEntityData != null)
+            {
+                entityData = parentEntityData.AddEntity(entity.Name);
+            }
+            else
+            {
+                entityData = new EntityData(entity.Name);
+            }
+
+            Entity prefab = null;
+
+            if (entity.IsInstantiatedFromPrefab)
+            {
+                prefab = GetPrefab(entity.PrefabName);
+                entityData.PrefabName = entity.PrefabName;
+            }
+
+            for (int j = 0; j < entity.Components.Count; j++)
+            {
+                Component component = entity.Components[j];
+                Component componentFromPrefab = null;
+
+                ComponentData componentData = null;
+
+                if (prefab != null)
+                {
+                    componentFromPrefab = prefab.GetComponent(component.GetType());
+                }
+
+                ComponentInfo componentInfo = component.GetComponentInfo();
+
+                if (componentFromPrefab == null)
+                {
+                    componentData = entityData.AddComponent(componentInfo);
+                }
+
+                foreach (ComponentPropertyInfo componentPropertyInfo in componentInfo.ComponentPropertyInfos.Values)
+                {
+                    string valueFromEntity = componentPropertyInfo.GetValueAsStringFrom(component);
+
+                    bool appendProperty = true;
+
+                    if (componentFromPrefab != null)
+                    {
+                        string valueFromPrefab = componentPropertyInfo.GetValueAsStringFrom(componentFromPrefab);
+
+                        if (valueFromPrefab == valueFromEntity)
+                        {
+                            appendProperty = false;
+                        }
+                    }
+
+                    if (appendProperty)
+                    {
+                        if (componentData == null)
+                        {
+                            componentData = entityData.AddComponent(componentInfo);
+                        }
+
+                        componentData.SetPropertyValue(componentPropertyInfo.Name, valueFromEntity);
+                    }
+                }
+            }
+
+            foreach (Entity childEntity in entity.Children)
+            {
+                SaveEntity(childEntity, entityData);
+            }
+
+            return entityData;
+        }
+
+        public void StartWithLoading(EngineData engineData)
+        {
+            if (!_started)
+            {
+                _started = true;
+
+                EntityData parentEntityData = engineData.RootEntityData;
+
+                _rootEntity = LoadEntity(null, parentEntityData);
+            }
+        }
+
+        private Entity LoadEntity(Entity parentEntity, EntityData entityData)
+        {
+            string entityName = entityData.Name;
+            bool instantiatedFromPrefab = entityData.IsInstantiatedFromPrefab;
+
+            Entity entity = null;
+
+            if (instantiatedFromPrefab)
+            {
+                string prefab = entityData.PrefabName;
+                entity = InstantiatePrefab(prefab, null); //TODO: 
+            }
+            else if(parentEntity != null)
+            {
+                entity = parentEntity.CreateChildEntity(entityName);
+                entity.Name = entityName;
+            }
+            else
+            {
+                entity = new Entity(this);
+                entity.Name = entityName;
+            }
+
+            foreach (var componentData in entityData.Components)
+            {
+                string componentType = componentData.Type;
+
+                //TODO: multiple instantiation of same component at same time?
+
+                Component component = entity.GetComponent(componentType);
+
+                if (component == null)
+                {
+                    component = entity.AddComponent(componentType);
+                }
+
+                ComponentInfo componentInfo = component.GetComponentInfo();
+
+                foreach (var componentDataProperty in componentData.Properties)
+                {
+                    string propertyName = componentDataProperty.Name;
+                    string propertyValue = componentDataProperty.Value;
+
+                    ComponentPropertyInfo componentPropertyInfo = componentInfo.ComponentPropertyInfos[propertyName];
+
+                    componentPropertyInfo.SetValueTo(component, propertyValue);
+                }
+            }
+
+            foreach (var childEntityData in entityData.Children)
+            {
+                LoadEntity(entity, childEntityData);
+            }
+
+            return entity;
+        }
     }
 
     public class LateUpdateMessage : EntityMessage
