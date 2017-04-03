@@ -23,10 +23,12 @@ SOFTWARE.
 
 ******************************************************************************/
 
+using System;
 using Swarm2D.Library;
 
 namespace Swarm2D.Engine.Core
 {
+    [Serializable]
     public abstract class EngineComponent : Component
     {
         public bool RenderEnabled { get; set; }

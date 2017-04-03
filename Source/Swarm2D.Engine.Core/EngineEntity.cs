@@ -30,6 +30,7 @@ using System.Text;
 
 namespace Swarm2D.Engine.Core
 {
+    [Serializable]
     class EngineEntity : Component
     {
     }

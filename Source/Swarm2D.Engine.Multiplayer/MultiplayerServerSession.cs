@@ -34,8 +34,10 @@ using Swarm2D.Network;
 
 namespace Swarm2D.Engine.Multiplayer
 {
+    [Serializable]
     public class MultiplayerServerSession : MultiplayerSession, IServerSessionHandler, IEntityDomain
     {
+        [NonSerialized]
         private Stopwatch _syncTimer;
         private long _lastSyncTime = 0;
 

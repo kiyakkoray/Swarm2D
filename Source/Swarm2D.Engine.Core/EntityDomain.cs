@@ -31,6 +31,7 @@ using Swarm2D.Library;
 
 namespace Swarm2D.Engine.Core
 {
+    [Serializable]
     public class EntityDomain
     {
         private List<Component> _nonInitializedComponents;

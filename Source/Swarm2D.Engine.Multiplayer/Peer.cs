@@ -33,6 +33,7 @@ using Swarm2D.Network;
 
 namespace Swarm2D.Engine.Multiplayer
 {
+    [Serializable]
     public class Peer : Component, IMultiplayerNode
     {
         private MultiplayerNode _multiplayerNode;

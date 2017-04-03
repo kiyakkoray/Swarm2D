@@ -31,6 +31,7 @@ using Swarm2D.Engine.Core;
 
 namespace Swarm2D.Engine.Multiplayer
 {
+    [Serializable]
     public class PeerComponent : Component
     {
         public Peer Peer { get; private set; }

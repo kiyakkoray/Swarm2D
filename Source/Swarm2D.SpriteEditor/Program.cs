@@ -52,7 +52,7 @@ namespace Swarm2D.SpriteSheetGenerator
 
             WindowsLogicFramework windowsLogicFramework = new WindowsLogicFramework();
 
-            Engine.Core.Engine engine = new Engine.Core.Engine(windowsLogicFramework, false);
+            Engine.Core.Engine engine = new Engine.Core.Engine(false);
             Entity rootEntity = engine.RootEntity;
 
             rootEntity.AddComponent<SpriteEditorDomain>();

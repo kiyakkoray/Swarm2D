@@ -65,7 +65,7 @@ namespace Swarm2D.Starter
             WindowsLogicFramework windowsLogicFramework = new WindowsLogicFramework();
             WindowsViewFramework windowsViewFramework = new WindowsViewFramework();
 
-            Engine.Core.Engine engine = new Engine.Core.Engine(windowsLogicFramework, false);
+            Engine.Core.Engine engine = new Engine.Core.Engine(false);
 
             string name = "";
 

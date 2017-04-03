@@ -32,6 +32,7 @@ using Swarm2D.Network;
 
 namespace Swarm2D.Engine.Multiplayer
 {
+    [Serializable]
     internal class MultiplayerNode
     {
         internal MultiplayerNode()

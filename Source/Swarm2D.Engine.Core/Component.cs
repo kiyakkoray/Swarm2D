@@ -27,18 +27,27 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Text;
 using Swarm2D.Library;
 
 namespace Swarm2D.Engine.Core
 {
+    [Serializable]
     public abstract class Component
     {
         internal Dictionary<int, List<MessageHandlerDelegate>> GlobalMessageHandlers { get; private set; }
         internal Dictionary<int, List<MessageHandlerDelegate>> DomainMessageHandlers { get; private set; }
         internal Dictionary<int, List<MessageHandlerDelegate>> EntityMessageHandlers { get; private set; }
 
-        internal LinkedListNode<Component> NodeOnAllComponentList { get; set; }
+        [NonSerialized]
+        private LinkedListNode<Component> _nodeOnAllComponentList;
+
+        internal LinkedListNode<Component> NodeOnAllComponentList
+        {
+            get { return _nodeOnAllComponentList; }
+            set { _nodeOnAllComponentList = value; }
+        }
 
         public Engine Engine
         {
@@ -186,6 +195,11 @@ namespace Swarm2D.Engine.Core
         public Entity CreateChildEntity(string name)
         {
             return Entity.CreateChildEntity(name);
+        }
+
+        internal void RefreshNodes()
+        {
+            _nodeOnAllComponentList = Engine.GetComponentNode(this);
         }
     }
 

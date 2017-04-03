@@ -31,6 +31,7 @@ using Swarm2D.Library;
 
 namespace Swarm2D.Engine.Multiplayer
 {
+    [Serializable]
     public class NetworkID
     {
         private short _chunk1;

@@ -26,12 +26,15 @@ SOFTWARE.
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using Debug = Swarm2D.Library.Debug;
 
 namespace Swarm2D.Engine.Core
 {
+    [Serializable]
     public sealed class Engine : FrameworkDomain
     {
         public bool PooledMode { get; private set; }
@@ -56,7 +59,23 @@ namespace Swarm2D.Engine.Core
         private long _lastCountedElapsedTicksForLastUpdatePerSecond;
 
         private int _countedUpdateLastSecond;
+
+        [NonSerialized]
         private Stopwatch _timer;
+
+        private Stopwatch Timer
+        {
+            get
+            {
+                if (_timer == null)
+                {
+                    _timer = new Stopwatch();
+                    _timer.Start();
+                }
+
+                return _timer;
+            }
+        }
 
         public Entity RootEntity
         {
@@ -79,8 +98,7 @@ namespace Swarm2D.Engine.Core
         private Stack<Entity> _freeEntities;
         private Dictionary<Type, Stack<Component>> _freeComponents;
 
-        public Engine(Framework framework, bool pooledMode)
-            : base(framework)
+        public Engine(bool pooledMode)
         {
             PooledMode = pooledMode;
 
@@ -128,19 +146,19 @@ namespace Swarm2D.Engine.Core
                 _currentFrameHadJob = true;
             }
 
-            long elapsedTickBeforeUpdate = _timer.ElapsedTicks;
+            long elapsedTickBeforeUpdate = Timer.ElapsedTicks;
 
             SendMessage(new UpdateMessage());
 
-            long elapsedTickBeforeLateUpdate = _timer.ElapsedTicks;
+            long elapsedTickBeforeLateUpdate = Timer.ElapsedTicks;
 
             _rootEntity.SendMessage(new LateUpdateMessage());
 
-            long elapsedTickAfterLateUpdate = _timer.ElapsedTicks;
+            long elapsedTickAfterLateUpdate = Timer.ElapsedTicks;
 
             _rootEntity.SendMessage(new LastUpdateMessage());
 
-            long elapsedTickAfterLastUpdate = _timer.ElapsedTicks;
+            long elapsedTickAfterLastUpdate = Timer.ElapsedTicks;
 
             _lastCountedElapsedTicksForUpdatePerSecond += elapsedTickBeforeLateUpdate - elapsedTickBeforeUpdate;
             _lastCountedElapsedTicksForLateUpdatePerSecond += elapsedTickAfterLateUpdate - elapsedTickBeforeLateUpdate;
@@ -154,10 +172,10 @@ namespace Swarm2D.Engine.Core
             _countedUpdateLastSecond++;
             CurrentFrame++;
 
-            if (_timer.ElapsedMilliseconds >= 1000)
+            if (Timer.ElapsedMilliseconds >= 1000)
             {
-                _timer.Reset();
-                _timer.Start();
+                Timer.Reset();
+                Timer.Start();
 
                 UpdatePerSecond = _countedUpdateLastSecond;
                 _countedUpdateLastSecond = 0;
@@ -397,157 +415,39 @@ namespace Swarm2D.Engine.Core
             }
         }
 
-        public EngineData Save()
+        internal LinkedListNode<Component> GetComponentNode(Component component)
         {
-            EntityData rootEntityData = SaveEntity(_rootEntity, null);
-            EngineData engineData = new EngineData(rootEntityData);
+            LinkedList<Component> components = _components[component.GetType()];
 
-            return engineData;
+            LinkedListNode<Component> node = components.First;
+
+            while (node != null)
+            {
+                if (node.Value == component)
+                {
+                    return node;
+                }
+
+                node = node.Next;
+            }
+
+            return null;
         }
 
-        private EntityData SaveEntity(Entity entity, EntityData parentEntityData)
+        public static Engine LoadFrom(byte[] data)
         {
-            EntityData entityData = null;
+            Engine engine = null;
 
-            if (parentEntityData != null)
+            using (var stream = new MemoryStream(data))
             {
-                entityData = parentEntityData.AddEntity(entity.Name);
-            }
-            else
-            {
-                entityData = new EntityData(entity.Name);
+                var formatter = new BinaryFormatter();
+                stream.Seek(0, SeekOrigin.Begin);
+                engine = (Engine)formatter.Deserialize(stream);
             }
 
-            Entity prefab = null;
+            engine._rootEntity.RefreshNodes();
 
-            if (entity.IsInstantiatedFromPrefab)
-            {
-                prefab = GetPrefab(entity.PrefabName);
-                entityData.PrefabName = entity.PrefabName;
-            }
-
-            for (int j = 0; j < entity.Components.Count; j++)
-            {
-                Component component = entity.Components[j];
-                Component componentFromPrefab = null;
-
-                ComponentData componentData = null;
-
-                if (prefab != null)
-                {
-                    componentFromPrefab = prefab.GetComponent(component.GetType());
-                }
-
-                ComponentInfo componentInfo = component.GetComponentInfo();
-
-                if (componentFromPrefab == null)
-                {
-                    componentData = entityData.AddComponent(componentInfo);
-                }
-
-                foreach (ComponentPropertyInfo componentPropertyInfo in componentInfo.ComponentPropertyInfos.Values)
-                {
-                    string valueFromEntity = componentPropertyInfo.GetValueAsStringFrom(component);
-
-                    bool appendProperty = true;
-
-                    if (componentFromPrefab != null)
-                    {
-                        string valueFromPrefab = componentPropertyInfo.GetValueAsStringFrom(componentFromPrefab);
-
-                        if (valueFromPrefab == valueFromEntity)
-                        {
-                            appendProperty = false;
-                        }
-                    }
-
-                    if (appendProperty)
-                    {
-                        if (componentData == null)
-                        {
-                            componentData = entityData.AddComponent(componentInfo);
-                        }
-
-                        componentData.SetPropertyValue(componentPropertyInfo.Name, valueFromEntity);
-                    }
-                }
-            }
-
-            foreach (Entity childEntity in entity.Children)
-            {
-                SaveEntity(childEntity, entityData);
-            }
-
-            return entityData;
-        }
-
-        public void StartWithLoading(EngineData engineData)
-        {
-            if (!_started)
-            {
-                _started = true;
-
-                EntityData parentEntityData = engineData.RootEntityData;
-
-                _rootEntity = LoadEntity(null, parentEntityData);
-            }
-        }
-
-        private Entity LoadEntity(Entity parentEntity, EntityData entityData)
-        {
-            string entityName = entityData.Name;
-            bool instantiatedFromPrefab = entityData.IsInstantiatedFromPrefab;
-
-            Entity entity = null;
-
-            if (instantiatedFromPrefab)
-            {
-                string prefab = entityData.PrefabName;
-                entity = InstantiatePrefab(prefab, null); //TODO: 
-            }
-            else if(parentEntity != null)
-            {
-                entity = parentEntity.CreateChildEntity(entityName);
-                entity.Name = entityName;
-            }
-            else
-            {
-                entity = new Entity(this);
-                entity.Name = entityName;
-            }
-
-            foreach (var componentData in entityData.Components)
-            {
-                string componentType = componentData.Type;
-
-                //TODO: multiple instantiation of same component at same time?
-
-                Component component = entity.GetComponent(componentType);
-
-                if (component == null)
-                {
-                    component = entity.AddComponent(componentType);
-                }
-
-                ComponentInfo componentInfo = component.GetComponentInfo();
-
-                foreach (var componentDataProperty in componentData.Properties)
-                {
-                    string propertyName = componentDataProperty.Name;
-                    string propertyValue = componentDataProperty.Value;
-
-                    ComponentPropertyInfo componentPropertyInfo = componentInfo.ComponentPropertyInfos[propertyName];
-
-                    componentPropertyInfo.SetValueTo(component, propertyValue);
-                }
-            }
-
-            foreach (var childEntityData in entityData.Children)
-            {
-                LoadEntity(entity, childEntityData);
-            }
-
-            return entity;
+            return engine;
         }
     }
 

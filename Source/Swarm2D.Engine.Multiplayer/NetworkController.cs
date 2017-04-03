@@ -34,13 +34,29 @@ using Swarm2D.Network.TCPDriver;
 
 namespace Swarm2D.Engine.Multiplayer
 {
+    [Serializable]
     public class NetworkController : EngineComponent
     {
         public NetworkUpdateCheckType SessionUpdateCheckType { get; set; }
-        
         public int SessionUpdatePeriod { get; set; } 
 
+        [NonSerialized]
         private Stopwatch _timer;
+
+        private Stopwatch Timer
+        {
+            get
+            {
+                if (_timer == null)
+                {
+                    _timer = new Stopwatch();
+                    _timer.Start();
+                }
+
+                return _timer;
+            }
+        }
+
         private long _lastNetworkUpdate = 0;
         private bool _sessionsNeedsUpdateOnThisFrame = false;
 
@@ -109,7 +125,7 @@ namespace Swarm2D.Engine.Multiplayer
         {
             if (SessionUpdateCheckType == NetworkUpdateCheckType.Time)
             {
-                long elapsedMiliseconds = _timer.ElapsedMilliseconds;
+                long elapsedMiliseconds = Timer.ElapsedMilliseconds;
 
                 if (elapsedMiliseconds - _lastNetworkUpdate >= SessionUpdatePeriod)
                 {

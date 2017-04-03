@@ -27,11 +27,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Text;
 using Swarm2D.Library;
 
 namespace Swarm2D.Engine.Core
 {
+    [Serializable]
     public sealed class Entity
     {
         public string Name { get; set; }
@@ -72,7 +74,15 @@ namespace Swarm2D.Engine.Core
         }
 
         public LinkedList<Entity> Children { get; private set; }
-        internal LinkedListNode<Entity> NodeOnEntitiesList { get; set; }
+
+        [NonSerialized]
+        private LinkedListNode<Entity> _nodeOnEntitiesList;
+
+        internal LinkedListNode<Entity> NodeOnEntitiesList
+        {
+            get { return _nodeOnEntitiesList; }
+            set { _nodeOnEntitiesList = value; }
+        }
 
         internal Dictionary<int, List<MessageHandlerDelegate>> EntityMessageHandlers { get; private set; }
 
@@ -404,6 +414,35 @@ namespace Swarm2D.Engine.Core
         public IEntityDomain ChildDomain { get; set; }
 
         public bool IsDestroyed { get; private set; }
+
+        internal void RefreshNodes()
+        {
+            if (_parent != null)
+            {
+                LinkedListNode<Entity> node = _parent.Children.First;
+
+                while (node != null)
+                {
+                    if (node.Value == this)
+                    {
+                        _nodeOnEntitiesList = node;
+                        break;
+                    }
+
+                    node = node.Next;
+                }
+            }
+
+            foreach (var component in Components)
+            {
+                component.RefreshNodes();
+            }
+
+            foreach (var entity in Children)
+            {
+                entity.RefreshNodes();
+            }
+        }
     }
 
     public delegate void EntityComponentMessage(Component component);

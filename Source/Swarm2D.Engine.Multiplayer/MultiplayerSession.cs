@@ -41,6 +41,7 @@ namespace Swarm2D.Engine.Multiplayer
         NetworkEntityMessageResponse
     }
 
+    [Serializable]
     public abstract class MultiplayerSession : EngineComponent
     {
         internal abstract INetworkSession Session

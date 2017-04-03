@@ -33,6 +33,7 @@ using Swarm2D.Library;
 
 namespace Swarm2D.Engine.Multiplayer
 {
+    [Serializable]
     public class NetworkView : Component
     {
         private NetworkID _networkId;
